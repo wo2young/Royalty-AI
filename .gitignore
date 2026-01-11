@@ -1,0 +1,20 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Node.js (Frontend)
+node_modules/
+build/
+dist/
+.npm
+
+# AI Data (데이터는 깃에 올리지 마세요! 용량 터집니다)
+ai_model/data/
+*.npy
+*.h5
