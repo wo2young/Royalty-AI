@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: royalty-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres      # 기본 아이디
+      POSTGRES_PASSWORD: password  # 기본 비밀번호
+      POSTGRES_DB: royalty         # 우리가 쓸 DB 이름 (자동 생성됨)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # 나중에 초기 데이터 넣을 때 쓸 폴더 연결 (없어도 에러 안 남)
+      - ./backend/init_sql:/docker-entrypoint-initdb.d
+
+volumes:
+  postgres_data:
