@@ -1,4 +1,3 @@
-// src/routes/index.tsx
 import { createBrowserRouter } from "react-router-dom"
 import { AppLayout } from "@/shared/components/layout/AppLayout"
 import { LandingPage } from "@/features/landing"
@@ -15,7 +14,7 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <ErrorPage />, // 에러 발생 시 보여줄 페이지
     children: [
-      { index: true, element: <LandingPage /> }, // 랜딩 페이지
+      { index: true, element: <LandingPage /> },
       { path: "analysis", element: <AnalysisPage /> },
       { path: "recommend", element: <RecommendationPage /> },
       { path: "trademarks", element: <TrademarkListPage /> },
