@@ -47,7 +47,7 @@ export default function LandingPage() {
         <div className="container px-4 md:px-6 mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              왜 TM-ANALYZE인가요?
+              왜 Royalty-AI인가요?
             </h2>
             <p className="text-muted-foreground text-lg">
               성공적인 비즈니스를 위한 스마트한 상표 관리 솔루션
