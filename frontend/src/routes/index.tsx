@@ -5,7 +5,7 @@ import { AnalysisPage } from "@/features/analysis"
 import { LoginPage, SignUpPage } from "@/features/auth"
 import { RecommendationPage } from "@/features/recommendation"
 import { TrademarkListPage } from "@/features/trademark"
-import { UserPage } from "@/features/user"
+import { MyPage } from "@/features/mypage"
 import ErrorPage from "@/shared/page/ErrorPage"
 
 export const router = createBrowserRouter([
@@ -18,7 +18,7 @@ export const router = createBrowserRouter([
       { path: "analysis", element: <AnalysisPage /> },
       { path: "recommend", element: <RecommendationPage /> },
       { path: "trademarks", element: <TrademarkListPage /> },
-      { path: "user", element: <UserPage /> },
+      { path: "mypage", element: <MyPage /> },
     ],
   },
   {
