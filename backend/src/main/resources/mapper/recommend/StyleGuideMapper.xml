@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.recommend.mapper.StyleGuideMapper">
+
+    <insert id="insertStyleGuide"
+            parameterType="com.royalty.backend.recommend.domain.StyleGuideVO"
+            useGeneratedKeys="true"
+            keyProperty="styleId"
+            keyColumn="style_id">
+
+        INSERT INTO brand_style_guide
+        (
+            brand_id,
+            main_color_1,
+            main_color_2,
+            sub_color_1
+        )
+        VALUES
+        (
+            #{brandId},
+            #{mainColor1},
+            #{mainColor2},
+            #{subColor1}
+        )
+    </insert>
+
+</mapper>
