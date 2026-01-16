@@ -1,0 +1,9 @@
+torch
+torchvision
+pillow
+numpy
+psycopg2-binary
+requests
+fastapi
+uvicorn
+pydantic
