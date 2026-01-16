@@ -43,3 +43,4 @@ ai_model/models/
 # Database Dumps (Shared via Google Drive)
 *.sql
 *.tar
+/.metadata/

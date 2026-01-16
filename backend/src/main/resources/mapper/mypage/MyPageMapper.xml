@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.mypage.mapper.MyPageMapper">
+    <select id="selectMyBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkResponseDTO">
+        SELECT 
+            p.patent_id AS patentId,
+            p.trademark_name AS trademarkName,
+            p.image_url AS imageUrl,
+            b.created_at AS createdAt
+        FROM bookmark b
+        INNER JOIN patent p ON b.patent_id = p.patent_id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+    </select>
+</mapper>
