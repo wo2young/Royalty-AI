@@ -1,0 +1,61 @@
+# dependencies
+node_modules
+package-lock.json
+
+# production
+dist
+dist-ssr
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# testing
+coverage
+
+# ===== python =====
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# ===== AI / ML =====
+ai_model/
+models/
+weights/
+runs/
+*.pt
+*.pth
+*.onnx
+*.h5
+
+# ===== data =====
+data/
+dataset/
+datasets/
+temp/
+outputs/
+
+# eclipse
+.metadata/
+.project
+.classpath
+.settings/
