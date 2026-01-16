@@ -34,3 +34,12 @@ ai_model/models/
 venv/
 __pycache__/
 .ipynb_checkpoints/
+
+# AI models & Large files
+ai_model/models/
+*.pth
+*.bin
+
+# Database Dumps (Shared via Google Drive)
+*.sql
+*.tar
