@@ -1,8 +1,8 @@
 package com.royalty.backend.recommend.controller;
 
-import lombok.RequiredArgsConstructor;
 import com.royalty.backend.recommend.dto.StyleGuideDTO;
 import com.royalty.backend.recommend.service.StyleGuideService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,8 +13,9 @@ public class StyleGuideController {
     private final StyleGuideService styleGuideService;
 
     @PostMapping
-    public StyleGuideDTO create(@RequestBody StyleGuideDTO dto) {
-        return styleGuideService.createStyleGuide(dto);
+    public StyleGuideDTO generate(
+            @RequestBody StyleGuideDTO request
+    ) {
+        return styleGuideService.generateStyleGuide(request);
     }
 }
-

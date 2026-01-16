@@ -1,38 +1,53 @@
 package com.royalty.backend.recommend.dto;
 
-import com.royalty.backend.recommend.domain.StyleGuideVO;
 import lombok.*;
+import java.util.List;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class StyleGuideDTO {
 
-    private Long styleGuideId;
-    private Long brandId;
+    /* ======================
+       Request 영역
+       ====================== */
 
-    private String mainColor1;
-    private String mainColor2;
-    private String subColor1;
+    /**
+     * 로고 이미지 (URL 또는 Base64)
+     */
+    private String logoImage;
 
-    public StyleGuideVO toVO() {
-        return StyleGuideVO.builder()
-                .styleId(styleGuideId)
-                .brandId(brandId)
-                .mainColor1(mainColor1)
-                .mainColor2(mainColor2)
-                .subColor1(subColor1)
-                .build();
+
+    /* ======================
+       Response 영역
+       ====================== */
+
+    private List<Color> mainColors;
+    private List<Color> subColors;
+    private String description;
+
+
+    /* ======================
+       내부 서브 DTO
+       ====================== */
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Color {
+        private String hex;
+        private Rgb rgb;
     }
 
-    public static StyleGuideDTO of(StyleGuideVO vo) {
-        return StyleGuideDTO.builder()
-                .styleGuideId(vo.getStyleId())
-                .brandId(vo.getBrandId())
-                .mainColor1(vo.getMainColor1())
-                .mainColor2(vo.getMainColor2())
-                .subColor1(vo.getSubColor1())
-                .build();
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Rgb {
+        private int r;
+        private int g;
+        private int b;
     }
 }
