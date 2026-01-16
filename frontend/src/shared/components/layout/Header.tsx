@@ -41,7 +41,7 @@ export function Header() {
             >
               상표리스트
             </Link>
-            <Link to="/user" className="transition-colors hover:text-primary">
+            <Link to="/mypage" className="transition-colors hover:text-primary">
               마이페이지
             </Link>
           </nav>

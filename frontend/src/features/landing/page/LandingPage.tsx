@@ -8,7 +8,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col items-center">
       {/* 1. Hero Section: 서비스의 핵심 가치를 한눈에 */}
-      <section className="w-full py-20 lg:py-32 bg-linear-to-b from-background to-muted/50">
+      <section className="w-full py-20 lg:py-32">
         <div className="container px-4 md:px-6 mx-auto text-center">
           <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium mb-6 bg-background shadow-sm">
             <span className="text-primary mr-2">New</span>
