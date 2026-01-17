@@ -13,4 +13,72 @@
         WHERE b.user_id = #{userId}
         ORDER BY b.created_at DESC
     </select>
+    
+    <select id="selectBrandListByUserId" resultType="com.royalty.backend.mypage.dto.BrandListDTO">
+	    SELECT 
+	        b.brand_id,
+	        b.brand_name,
+	        b.created_at,
+	        (SELECT image_path 
+	         FROM brand_logo 
+	         WHERE brand_id = b.brand_id 
+	         ORDER BY created_at DESC 
+	         LIMIT 1) as image_path
+	    FROM brand b
+	    WHERE b.user_id = #{userId}
+	    ORDER BY b.created_at DESC
+	</select>
+	
+	<update id="updateBrandName">
+	    UPDATE brand SET brand_name = #{brandName} WHERE brand_id = #{brandId}
+	</update>
+	
+	<update id="updateBrandLogoPath">
+	    UPDATE brand_logo SET image_path = #{imagePath} WHERE brand_id = #{brandId}
+	</update>
+	
+	<insert id="insertBrandHistory">
+	    INSERT INTO brand_logo_history (brand_id, image_path, created_at)
+	    VALUES (#{brandId}, #{imagePath}, CURRENT_TIMESTAMP)
+	</insert>
+	
+	<select id="selectBrandDetailById" resultType="com.royalty.backend.mypage.dto.BrandListDTO">
+	    SELECT 
+	        b.brand_id,
+	        b.brand_name,
+	        b.created_at,
+	        (SELECT image_path 
+	         FROM brand_logo 
+	         WHERE brand_id = b.brand_id 
+	         ORDER BY created_at DESC 
+	         LIMIT 1) as image_path
+	    FROM brand b
+	    WHERE b.brand_id = #{brandId}
+	</select>
+	
+	<select id="selectBrandDetail" resultType="com.royalty.backend.mypage.dto.BrandDetailDTO">
+	    SELECT 
+	        b.brand_id,
+	        b.brand_name,
+	        b.created_at,
+	        l.image_path AS currentImagePath,
+	        a.risk_level,
+	        a.similarity_score
+	    FROM brand b
+	    LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
+	    LEFT JOIN brand_analysis a ON b.brand_id = a.brand_id
+	    WHERE b.brand_id = #{brandId}
+	    ORDER BY l.created_at DESC, a.created_at DESC
+	    LIMIT 1
+	</select>
+	
+	<select id="selectBrandHistoryList" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+	    SELECT 
+	        version,
+	        image_path,
+	        created_at
+	    FROM brand_logo_history
+	    WHERE brand_id = #{brandId}
+	    ORDER BY created_at DESC
+	</select>
 </mapper>
