@@ -1,15 +1,31 @@
 package com.royalty.backend.mypage.mapper;
 
-import com.royalty.backend.mypage.dto.BookmarkResponseDTO;
-import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
-@Mapper // 이 어노테이션이 있어야 MyBatis가 인식합니다.
-public interface MyPageMapper {
+import org.apache.ibatis.annotations.Mapper;
 
-    /**
-     * 특정 사용자의 북마크 목록을 가져오는 메서드
-     * 이 메서드 이름(selectMyBookmarks)은 XML의 id와 반드시 일치해야 합니다!
-     */
+import com.royalty.backend.mypage.dto.BookmarkResponseDTO;
+import com.royalty.backend.mypage.dto.BrandDetailDTO;
+import com.royalty.backend.mypage.dto.BrandHistoryDTO;
+import com.royalty.backend.mypage.dto.BrandListDTO;
+
+@Mapper
+public interface MyPageMapper {
+    // [조회] 북마크 및 브랜드 목록
     List<BookmarkResponseDTO> selectMyBookmarks(Long userId);
+    List<BrandListDTO> selectBrandListByUserId(Long userId);
+    BrandListDTO selectBrandDetailById(Long brandId);
+    // 1. 브랜드 상세 정보 (기본정보 + 리스크) 조회
+    BrandDetailDTO selectBrandDetail(Long brandId);
+
+    // 2. 해당 브랜드의 모든 히스토리 목록 조회
+    List<BrandHistoryDTO> selectBrandHistoryList(Long brandId);
+    // [수정/삽입] 
+    // 반환 타입은 void 또는 int(영향받은 행 수)로 설정합니다.
+    // XML에서 사용할 데이터를 전달하기 위해 BrandListDTO를 파라미터로 받습니다.
+    void updateBrandName(BrandListDTO brandDTO);
+    
+    void updateBrandLogoPath(BrandListDTO brandDTO);
+    
+    void insertBrandHistory(BrandListDTO brandDTO);
 }
