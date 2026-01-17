@@ -38,6 +38,9 @@
 ### ① 사전 준비 (**Prerequisites**)
 * **Docker Desktop** 설치 확인
 * **KST 시간대 설정**: `Dockerfile` 내 `TZ=Asia/Seoul` 설정을 통해 한국 시간 동기화 완료.
+2. **모델 파일(Heavy Data) 다운로드**: 
+   - [(https://drive.google.com/open?id=1v57YvD03yyo_OzhZgfrf2h3MHd2AdlcV&usp=drive_fs)] 에서 `models/` 폴더를 다운로드합니다.
+   - 다운로드한 폴더를 `ai_model/models/` 경로에 배치합니다.
 
 ### ② 이미지 빌드 및 컨테이너 실행
 터미널에서 `ai_model` 폴더로 이동 후 아래 명령어를 입력하세요.
