@@ -42,4 +42,35 @@ ai_model/models/
 
 # Database Dumps (Shared via Google Drive)
 *.sql
+<<<<<<< Updated upstream
 *.tar
+=======
+*.tar
+/.metadata/
+
+# ==========================================
+# Java / Maven (Backend)
+# ==========================================
+**/target/
+**/*.class
+**/.settings/
+**/.classpath
+**/.project
+**/.factorypath
+
+# ==========================================
+# IDE (STS4, IntelliJ, VS Code)
+# ==========================================
+.metadata/
+.recommenders/
+**/bin/
+**/*.iml
+.idea/
+.vscode/
+
+# ==========================================
+# System Files
+# ==========================================
+.DS_Store
+Thumbs.db
+>>>>>>> Stashed changes
