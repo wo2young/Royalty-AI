@@ -10,16 +10,23 @@ import { useBookmarks } from "../api/bookmark.queries"
 export function BookmarksPage() {
   const { data, isLoading, isError } = useBookmarks()
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("ALL")
 
   const filteredBrands = useMemo(() => {
     if (!data?.bookmarks) return []
 
-    return data.bookmarks.filter(
-      (brand) =>
+    return data.bookmarks.filter((brand) => {
+      const matchesSearch =
         brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        brand.code.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }, [data, searchQuery])
+        brand.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        brand.category.toLowerCase().includes(searchQuery.toLowerCase())
+
+      const matchesCategory =
+        selectedCategory === "ALL" || brand.category === selectedCategory
+
+      return matchesSearch && matchesCategory
+    })
+  }, [data, searchQuery, selectedCategory])
 
   if (isLoading) {
     return (
@@ -74,6 +81,8 @@ export function BookmarksPage() {
         <BookmarkSearch
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          category={selectedCategory}
+          onCategoryChange={setSelectedCategory}
         />
 
         {/* 리스트 부분 */}
