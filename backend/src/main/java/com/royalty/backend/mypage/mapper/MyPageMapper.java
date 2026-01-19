@@ -1,31 +1,31 @@
 package com.royalty.backend.mypage.mapper;
 
 import java.util.List;
-
+import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
-
-import com.royalty.backend.mypage.dto.BookmarkResponseDTO;
-import com.royalty.backend.mypage.dto.BrandDetailDTO;
-import com.royalty.backend.mypage.dto.BrandHistoryDTO;
-import com.royalty.backend.mypage.dto.BrandListDTO;
+import org.apache.ibatis.annotations.Param;
+import com.royalty.backend.mypage.dto.*;
 
 @Mapper
 public interface MyPageMapper {
-    // [조회] 북마크 및 브랜드 목록
+    // Bookmark & Notification & Report
     List<BookmarkResponseDTO> selectMyBookmarks(Long userId);
-    List<BrandListDTO> selectBrandListByUserId(Long userId);
-    BrandListDTO selectBrandDetailById(Long brandId);
-    // 1. 브랜드 상세 정보 (기본정보 + 리스크) 조회
-    BrandDetailDTO selectBrandDetail(Long brandId);
+    List<NotificationDTO> selectNotifications(Long userId); // type 제거된 DTO 반환
+    int updateNotificationReadStatus(@Param("notificationId") Long notificationId);
+    List<ReportDTO> selectReportList(Long userId);
+    String selectReportFilePath(Long reportId);
 
-    // 2. 해당 브랜드의 모든 히스토리 목록 조회
-    List<BrandHistoryDTO> selectBrandHistoryList(Long brandId);
-    // [수정/삽입] 
-    // 반환 타입은 void 또는 int(영향받은 행 수)로 설정합니다.
-    // XML에서 사용할 데이터를 전달하기 위해 BrandListDTO를 파라미터로 받습니다.
-    void updateBrandName(BrandListDTO brandDTO);
+    // Brand Management
+    List<BrandDetailDTO> selectBrandListByUserId(Long userId);
+    BrandDetailDTO selectBrandDetail(Long brandId); 
+    BrandDetailDTO selectBrandDetailById(Long brandId);
     
-    void updateBrandLogoPath(BrandListDTO brandDTO);
+    // History & Analysis (차트 데이터)
+    List<BrandHistoryDTO> selectBrandHistoryList(Long brandId); // imageScore, textScore 포함
     
-    void insertBrandHistory(BrandListDTO brandDTO);
+    // CUD
+    int updateBrandName(BrandDetailDTO brandDTO);
+    int updateBrandLogoPath(BrandDetailDTO brandDTO);
+    int insertBrandHistory(BrandDetailDTO brandDTO); // v1, v2 자동 생성 로직 포함
+    int insertBrandAnalysis(Map<String, Object> analysisData); // 재분석 결과 저장
 }

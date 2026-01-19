@@ -2,73 +2,98 @@ package com.royalty.backend.mypage.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.royalty.backend.mypage.dto.BookmarkResponseDTO;
-import com.royalty.backend.mypage.dto.BrandDetailDTO;
-import com.royalty.backend.mypage.dto.BrandListDTO;
+import com.royalty.backend.mypage.dto.*;
 import com.royalty.backend.mypage.service.MyPageService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * [Controller] 마이페이지 기능 통합 컨트롤러
+ * 북마크, 내 브랜드 관리, 히스토리(버전/차트), 알림, 리포트 기능을 담당합니다.
+ */
 @RestController
 @RequestMapping("/mypage")
 @RequiredArgsConstructor
+@Slf4j // 로그 기록을 위해 추가
 public class MyPageController {
-
     private final MyPageService myPageService;
 
-    /**
-     * 내가 북마크한 상표 목록 조회
-     */
-    @GetMapping("/bookmark")
-    public ResponseEntity<List<BookmarkResponseDTO>> getBookmarks(@RequestParam Long userId) {
-        // 실제 운영 시에는 userId를 파라미터가 아닌 세션/토큰에서 추출해야 합니다.
-        List<BookmarkResponseDTO> bookmarks = myPageService.getBookmarkList(userId);
-        return ResponseEntity.ok(bookmarks);
+    // =========================================================================
+    // [1] 북마크 & 알림 & 리포트
+    // =========================================================================
+    @GetMapping("/bookmark") 
+    public ResponseEntity<List<BookmarkResponseDTO>> getBookmarks(@RequestParam Long userId) { 
+        return ResponseEntity.ok(myPageService.getBookmarkList(userId)); 
+    }
+
+    @GetMapping("/notification") 
+    public ResponseEntity<List<NotificationDTO>> getNotifications(@RequestParam Long userId) { 
+        return ResponseEntity.ok(myPageService.getNotifications(userId)); 
+    }
+
+    @PostMapping("/notification/read") 
+    public ResponseEntity<Void> readNoti(@RequestParam Long notificationId) { 
+        myPageService.markNotificationAsRead(notificationId); 
+        return ResponseEntity.ok().build(); 
+    }
+
+    @GetMapping("/report") 
+    public ResponseEntity<List<ReportDTO>> getReports(@RequestParam Long userId) { 
+        return ResponseEntity.ok(myPageService.getReportList(userId)); 
+    }
+
+    @GetMapping("/report/{id}") 
+    public ResponseEntity<String> getReportPath(@PathVariable Long id) { 
+        return ResponseEntity.ok(myPageService.getReportFilePath(id)); 
+    }
+
+    // =========================================================================
+    // [2] 브랜드 관리 & 히스토리/차트
+    // =========================================================================
+    @GetMapping("/brand") 
+    public ResponseEntity<List<BrandDetailDTO>> getBrands(@RequestParam Long userId) { 
+        return ResponseEntity.ok(myPageService.getBrandList(userId)); 
+    }
+
+    @GetMapping("/brand/{id}") 
+    public ResponseEntity<BrandDetailDTO> getDetail(@PathVariable Long id) { 
+        return ResponseEntity.ok(myPageService.getBrandDetail(id)); 
+    }
+
+    @PostMapping("/brand/update") 
+    public ResponseEntity<String> update(@RequestBody BrandDetailDTO dto) { 
+        myPageService.updateBrandInfo(dto); 
+        return ResponseEntity.ok("수정 완료"); 
+    }
+
+    @GetMapping("/brand/{id}/history") 
+    public ResponseEntity<List<BrandHistoryDTO>> getHistory(@PathVariable Long id) { 
+        return ResponseEntity.ok(myPageService.getBrandHistoryList(id)); 
+    }
+
+    @GetMapping("/brand/{id}/history/chart") 
+    public ResponseEntity<List<BrandHistoryDTO>> getChart(@PathVariable Long id) { 
+        return ResponseEntity.ok(myPageService.getBrandHistoryList(id)); 
     }
 
     /**
-     * 내 브랜드 목록 조회
+     * [POST] 브랜드 재분석 실행
+     * 명세서: POST /mypage/brand/{id}/analysis
      */
-    @GetMapping("/brand")
-    public ResponseEntity<List<BrandListDTO>> getBrands(@RequestParam Long userId) {
-        List<BrandListDTO> brands = myPageService.getBrandList(userId);
-        return ResponseEntity.ok(brands);
-    }
-
-    /**
-     * 브랜드 정보 수정 (이름 및 로고)
-     * 실제 변경사항이 있을 때만 버전(v1, v2...)이 업데이트됨
-     */
-    @PostMapping("/brand/update")
-    public ResponseEntity<String> updateBrand(@RequestBody BrandListDTO brandDTO) {
+    @PostMapping("/brand/{id}/analysis")
+    public ResponseEntity<String> reAnalyze(@PathVariable Long id) {
+        log.info("[Controller] Re-analysis request for brand: {}", id);
         try {
-            myPageService.updateBrandInfo(brandDTO);
-            return ResponseEntity.ok("브랜드 정보 수정이 완료되었습니다.");
+            myPageService.reAnalyzeBrand(id);
+            return ResponseEntity.ok("재분석이 완료되었습니다.");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("수정 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("[Controller] Analysis failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("분석 중 오류 발생");
         }
-    }
-    
-    /**
-     * 내 브랜드 상세 조회 (기본정보 + 리스크 + 히스토리)
-     */
-    @GetMapping("/brand/{id}")
-    public ResponseEntity<BrandDetailDTO> getBrandDetail(@PathVariable("id") Long brandId) {
-        BrandDetailDTO detail = myPageService.getBrandDetail(brandId);
-        
-        if (detail == null) {
-            return ResponseEntity.notFound().build(); // 해당 브랜드가 없으면 404 반환
-        }
-        
-        return ResponseEntity.ok(detail);
     }
 }

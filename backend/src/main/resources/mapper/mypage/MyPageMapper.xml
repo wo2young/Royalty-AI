@@ -2,83 +2,130 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.royalty.backend.mypage.mapper.MyPageMapper">
+
     <select id="selectMyBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkResponseDTO">
         SELECT 
-            p.patent_id AS patentId,
-            p.trademark_name AS trademarkName,
-            p.image_url AS imageUrl,
-            b.created_at AS createdAt
-        FROM bookmark b
+            b.bookmark_id    AS bookmarkId, 
+            p.patent_id      AS patentId, 
+            p.trademark_name AS trademarkName, 
+            p.image_url      AS imageUrl, 
+            b.created_at     AS createdAt
+        FROM bookmark b 
         INNER JOIN patent p ON b.patent_id = p.patent_id
-        WHERE b.user_id = #{userId}
+        WHERE b.user_id = #{userId} 
         ORDER BY b.created_at DESC
     </select>
-    
-    <select id="selectBrandListByUserId" resultType="com.royalty.backend.mypage.dto.BrandListDTO">
-	    SELECT 
-	        b.brand_id,
-	        b.brand_name,
-	        b.created_at,
-	        (SELECT image_path 
-	         FROM brand_logo 
-	         WHERE brand_id = b.brand_id 
-	         ORDER BY created_at DESC 
-	         LIMIT 1) as image_path
-	    FROM brand b
-	    WHERE b.user_id = #{userId}
-	    ORDER BY b.created_at DESC
-	</select>
-	
-	<update id="updateBrandName">
-	    UPDATE brand SET brand_name = #{brandName} WHERE brand_id = #{brandId}
-	</update>
-	
-	<update id="updateBrandLogoPath">
-	    UPDATE brand_logo SET image_path = #{imagePath} WHERE brand_id = #{brandId}
-	</update>
-	
-	<insert id="insertBrandHistory">
-	    INSERT INTO brand_logo_history (brand_id, image_path, created_at)
-	    VALUES (#{brandId}, #{imagePath}, CURRENT_TIMESTAMP)
-	</insert>
-	
-	<select id="selectBrandDetailById" resultType="com.royalty.backend.mypage.dto.BrandListDTO">
-	    SELECT 
-	        b.brand_id,
-	        b.brand_name,
-	        b.created_at,
-	        (SELECT image_path 
-	         FROM brand_logo 
-	         WHERE brand_id = b.brand_id 
-	         ORDER BY created_at DESC 
-	         LIMIT 1) as image_path
-	    FROM brand b
-	    WHERE b.brand_id = #{brandId}
-	</select>
-	
-	<select id="selectBrandDetail" resultType="com.royalty.backend.mypage.dto.BrandDetailDTO">
-	    SELECT 
-	        b.brand_id,
-	        b.brand_name,
-	        b.created_at,
-	        l.image_path AS currentImagePath,
-	        a.risk_level,
-	        a.similarity_score
-	    FROM brand b
-	    LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
-	    LEFT JOIN brand_analysis a ON b.brand_id = a.brand_id
-	    WHERE b.brand_id = #{brandId}
-	    ORDER BY l.created_at DESC, a.created_at DESC
-	    LIMIT 1
-	</select>
-	
-	<select id="selectBrandHistoryList" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
-	    SELECT 
-	        version,
-	        image_path,
-	        created_at
-	    FROM brand_logo_history
-	    WHERE brand_id = #{brandId}
-	    ORDER BY created_at DESC
-	</select>
+
+    <select id="selectBrandListByUserId" resultType="com.royalty.backend.mypage.dto.BrandDetailDTO">
+        SELECT 
+            b.brand_id     AS brandId, 
+            b.brand_name   AS brandName, 
+            b.created_at   AS createdAt,
+            l.image_path   AS currentImagePath, 
+            a.risk_level   AS riskLevel
+        FROM brand b 
+        LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
+        LEFT JOIN (
+            SELECT DISTINCT ON (brand_id) brand_id, risk_level 
+            FROM brand_analysis 
+            ORDER BY brand_id, created_at DESC
+        ) a ON b.brand_id = a.brand_id
+        WHERE b.user_id = #{userId} 
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="selectBrandDetail" resultType="com.royalty.backend.mypage.dto.BrandDetailDTO">
+        SELECT 
+            b.brand_id       AS brandId, 
+            b.brand_name     AS brandName, 
+            b.created_at     AS createdAt,
+            l.image_path     AS currentImagePath, 
+            a.risk_level     AS riskLevel,
+            a.image_score    AS similarityScore 
+        FROM brand b 
+        LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
+        LEFT JOIN (
+            SELECT DISTINCT ON (brand_id) brand_id, risk_level, image_score 
+            FROM brand_analysis 
+            ORDER BY brand_id, created_at DESC
+        ) a ON b.brand_id = a.brand_id
+        WHERE b.brand_id = #{brandId}
+    </select>
+
+    <select id="selectBrandDetailById" resultType="com.royalty.backend.mypage.dto.BrandDetailDTO">
+        SELECT b.brand_id AS brandId, b.brand_name AS brandName, b.created_at AS createdAt,
+               l.image_path AS currentImagePath
+        FROM brand b LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
+        WHERE b.brand_id = #{brandId}
+    </select>
+
+    <select id="selectNotifications" resultType="com.royalty.backend.mypage.dto.NotificationDTO">
+        SELECT 
+            notification_id  AS notificationId, 
+            user_id          AS userId, 
+            message, 
+            is_read          AS isRead, 
+            brand_id         AS relatedBrandId, 
+            created_at       AS createdAt
+        FROM notification 
+        WHERE user_id = #{userId} 
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectReportList" resultType="com.royalty.backend.mypage.dto.ReportDTO">
+        SELECT r.report_id AS reportId, r.brand_id AS brandId, b.brand_name AS brandName, 
+               r.file_path AS filePath, r.created_at AS createdAt
+        FROM report r INNER JOIN brand b ON r.brand_id = b.brand_id
+        WHERE b.user_id = #{userId} ORDER BY r.created_at DESC
+    </select>
+
+    <select id="selectReportFilePath" resultType="string">
+        SELECT file_path FROM report WHERE report_id = #{reportId}
+    </select>
+
+    <select id="selectBrandHistoryList" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+        SELECT 
+            h.version, 
+            h.image_path AS imagePath, 
+            h.created_at AS createdAt, 
+            (SELECT image_score FROM brand_analysis a 
+             WHERE a.brand_id = h.brand_id AND a.created_at >= h.created_at 
+             ORDER BY a.created_at ASC LIMIT 1) AS imageScore,
+            (SELECT text_score FROM brand_analysis a 
+             WHERE a.brand_id = h.brand_id AND a.created_at >= h.created_at 
+             ORDER BY a.created_at ASC LIMIT 1) AS textScore
+        FROM brand_logo_history h 
+        WHERE h.brand_id = #{brandId} 
+        ORDER BY CAST(SUBSTRING(h.version, 2) AS INTEGER) DESC
+    </select>
+
+
+    <update id="updateBrandName">
+        UPDATE brand SET brand_name = #{brandName} WHERE brand_id = #{brandId}
+    </update>
+
+    <update id="updateBrandLogoPath">
+        UPDATE brand_logo SET image_path = #{currentImagePath} WHERE brand_id = #{brandId}
+    </update>
+
+    <insert id="insertBrandHistory">
+        INSERT INTO brand_logo_history (brand_id, image_path, version, created_at)
+        VALUES (
+            #{brandId}, 
+            #{currentImagePath}, 
+            'v' || (SELECT COALESCE(MAX(CAST(SUBSTRING(version, 2) AS INTEGER)), 0) + 1 
+                    FROM brand_logo_history WHERE brand_id = #{brandId}),
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateNotificationReadStatus">
+        UPDATE notification SET is_read = true WHERE notification_id = #{notificationId}
+    </update>
+
+    <insert id="insertBrandAnalysis">
+        INSERT INTO brand_analysis (brand_id, risk_level, image_score, text_score, created_at)
+        VALUES (#{brandId}, #{riskLevel}, #{imageScore}, #{textScore}, CURRENT_TIMESTAMP)
+    </insert>
+
 </mapper>

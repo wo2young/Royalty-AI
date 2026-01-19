@@ -1,24 +1,29 @@
 package com.royalty.backend.mypage.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+/**
+ * [DTO] 내 브랜드 정보 응답 객체 (목록 및 상세 공용)
+ * 관련 테이블: brand, brand_logo, brand_analysis
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BrandDetailDTO {
-    // 1. 브랜드 기본 정보
     private Long brandId;
     private String brandName;
-    private String currentImagePath;
+    private String currentImagePath; // 현재 서비스 중인 최신 로고
+    private String riskLevel;        // 최신 분석 등급
+    private Double similarityScore;  // 최신 유사도 점수
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
 
-    // 2. 현재 분석 결과 (리스크 등)
-    private String riskLevel;
-    private Double similarityScore; // 유사도 점수 등 필요 시 추가
-
-    // 3. 버전 히스토리 목록 (v1, v2, v3...)
-    private List<BrandHistoryDTO> historyList;
+    @Builder.Default 
+    private List<BrandHistoryDTO> historyList = new ArrayList<>(); // 버전 관리 및 차트 통합 데이터
 }
-
