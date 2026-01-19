@@ -47,21 +47,16 @@ class BrandAnalyzer:
 
         final_candidates = []
         
-        # [🔥 도배 방지] 이미 본 이름은 건너뛰기
-        seen_names = set()
+        # [변경] 중복 제거 로직(seen_names) 삭제 
+        # -> 백엔드에서 카테고리별로 처리할 수 있도록 모든 데이터 허용
 
         for item in db_results:
             db_name = item.get('trademark_name', '').strip()
 
-            if len(db_name) < 2 or db_name.lower() in ['n', 'null', 'none']:
+            if len(db_name) < 1 or db_name.lower() in ['n', 'null', 'none']:
                 continue
 
-            # 이름 정규화 (공백제거 + 소문자) -> 삼성, 삼 성, Samsung 모두 같은 걸로 취급
-            normalized_name = db_name.replace(" ", "").lower()
-            if normalized_name in seen_names:
-                continue 
-            seen_names.add(normalized_name)
-
+            # 유사도 계산 로직
             v_sim = float(item.get('visual_sim', 0.0))
             raw_t_sim = float(item.get('text_sim', 0.0))
             t_sim = raw_t_sim ** 2
@@ -77,12 +72,22 @@ class BrandAnalyzer:
             score = (v_sim * W_IMG) + (t_sim * W_SBERT) + (spell_sim * W_SPELL)
             if safe_query_text and spell_sim == 1.0: score += 0.2
 
+            # [핵심] 결과 구성: 이미지 URL과 카테고리 정보를 함께 리턴
             final_candidates.append({
-                "id": item['id'],
-                "score": round(score, 4),
+                "id": item.get('id'),
                 "name": db_name,
-                "details": {"v": round(v_sim, 3), "t": round(t_sim, 3), "s": round(spell_sim, 3)}
+                "image_url": item.get('image_url', ''), # 텍스트 검색 시에도 이미지 URL 포함
+                "category": item.get('category', ''), # 백엔드 필터링용
+                "score": round(score, 4),
+                "details": {
+                    "v": round(v_sim, 3), 
+                    "t": round(t_sim, 3), 
+                    "s": round(spell_sim, 3)
+                }
             })
 
+        # 점수 높은 순으로 정렬
         final_candidates.sort(key=lambda x: x['score'], reverse=True)
-        return final_candidates[:10]
+
+        # [변경] 상위 30개 리턴
+        return final_candidates[:30]

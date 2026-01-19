@@ -33,21 +33,20 @@ async def search_hybrid(
                 shutil.copyfileobj(file.file, buffer)
             img_vec = analyzer.get_image_vector(temp_path)
 
+        # 1. DB에서 후보군 150개(텍스트50 + 이미지50 + 키워드50) 추출
         candidates = automation.get_candidates_from_db(text_vec, img_vec, query_text=query_text)
 
         if not candidates:
             return {"status": "success", "results": [], "message": "No candidates found"}
 
-        final_top10 = analyzer.calculate_hybrid_score(query_text, candidates, img_vec)
+        # 2. 하이브리드 재정렬 수행 (이제 30개를 반환하며, 이미지 URL과 카테고리 코드가 포함됨)
+        final_results = analyzer.calculate_hybrid_score(query_text, candidates, img_vec)
 
-        return {"status": "success", "results": final_top10}
+        return {"status": "success", "results": final_results}
 
     except Exception as e:
-        print(f"🔥 검색 에러: {e}")
+        print(f" 검색 에러: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

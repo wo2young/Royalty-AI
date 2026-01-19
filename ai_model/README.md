@@ -13,21 +13,21 @@
 본 엔진은 단순 벡터 검색을 넘어, 다음 3단계 프로세스를 거쳐 결과를 도출합니다.
 
 1.  **Candidate Retrieval (후보군 추출)**
-    * **Vector Search**: `Ko-SBERT`(의미)와 `ResNet50`(시각) 벡터로 상위 50개 후보 추출
-    * **Keyword Search (Fallback)**: 벡터가 놓칠 수 있는 정확한 키워드 매칭을 위해 `ILIKE` 검색으로 보완 (예: "나이키" vs "NIKE")
-2.  **Smart Deduplication (지능형 중복 제거)**
-    * 대기업(삼성, 카카오, 쿠팡 등)의 문어발식 상표 등록으로 인한 **검색 결과 도배 현상을 원천 차단**합니다.
-    * 가장 유사도가 높은 대표 상표 1건만 노출하고 나머지는 필터링하여 사용자에게 다양한 결과를 제공합니다.
-3.  **Hybrid Re-Ranking (정밀 재정렬)**
+    * **Vector Search**: `Ko-SBERT`(의미)와 `ResNet50`(시각) 벡터로 상위 100개 이상의 후보를 1차 추출합니다.
+    * **Keyword Search (Fallback)**: 벡터가 놓칠 수 있는 정확한 키워드 매칭을 위해 `ILIKE` 검색으로 보완합니다. (예: "나이키" vs "NIKE")
+2.  **Hybrid Re-Ranking (정밀 재정렬)**
     * **Text (20~30%)**: `jhgan/ko-sroberta-multitask` (의미적 유사성, 예: 우유 ↔ Milk)
     * **Image (40~100%)**: `ResNet50` (로고의 형태, 색감, 기하학적 구조 유사성)
     * **Spelling (30~80%)**: `Levenshtein Distance` (오타 및 철자 유사성, 예: 무신사 ↔ 무신사인)
+3.  **Category-Aware Result Expansion (백엔드 필터링 지원)**
+    * 특정 상표(예: 삼성)의 독점을 막기 위해 AI 단에서 강제 중복 제거를 하지 않습니다.
+    * **상위 30개 결과**를 `Category` 정보와 함께 반환하여, 백엔드에서 카테고리별 필터링이나 그룹화를 자유롭게 수행할 수 있도록 지원합니다.
 
 ---
 
 ## 🛠 2. 백엔드 연동 가이드 (API Usage)
 
-**기존의 MyBatis 직접 조회 방식이 아닌, AI 서버의 하이브리드 API를 호출해야 "중복 제거" 및 "복합 점수" 로직이 적용됩니다.**
+**AI 서버는 검색어와 이미지에 대해 가장 유사한 상표 30개를 반환합니다.**
 
 ### 🔍 통합 검색 API (Hybrid Search)
 * **Endpoint**: `POST /api/v1/search/hybrid`
@@ -39,30 +39,38 @@
 | `file` | File | Optional | 상표 로고 이미지 파일 |
 
 #### **Response Example (JSON)**
+`image_url`과 `category` 필드가 포함되어 있어 프론트엔드에서 즉시 활용 가능합니다.
+
 ```json
 {
   "status": "success",
   "results": [
     {
       "id": 1838589,
-      "score": 1.08,  // 1.0 이상은 '완벽 일치'를 의미
+      "score": 1.08,   // 1.0 이상은 '완벽 일치' 혹은 '매우 위험'
       "name": "무신사",
+      "image_url": "[http://kipris.or.kr/.../image.jpg](http://kipris.or.kr/.../image.jpg)",
+      "category": "25", // 상품 분류 코드 (백엔드 필터링용)
+      "application_number": "4020230001234",
       "details": {
-        "v": 0.0,     // Visual (이미지 점수)
-        "t": 1.0,     // Text (의미 점수)
-        "s": 1.1      // Spell (철자 점수 + 보너스)
+        "v": 0.0,      // Visual (이미지 점수)
+        "t": 1.0,      // Text (의미 점수)
+        "s": 1.1       // Spell (철자 점수 + 보너스)
       }
     },
     {
       "id": 1931029,
       "score": 0.84,
       "name": "무신사인",
+      "image_url": "[http://kipris.or.kr/.../image2.jpg](http://kipris.or.kr/.../image2.jpg)",
+      "category": "35",
+      "application_number": "4020230005678",
       "details": { "..." }
     }
+    // ... 총 30개 반환
   ]
 }
 ```
-
 ---
 
 ## ⚙️ 3. 데이터베이스 설정 (pgvector & HNSW)
@@ -82,31 +90,39 @@ CREATE INDEX idx_patent_image_vector
 ON patent USING hnsw (image_vector vector_l2_ops) 
 WITH (m = 16, ef_construction = 64);
 ```
-> **Performance Note**: `m=16`, `ef=64` 설정은 **i3/8GB** 환경에서 메모리 오버헤드를 줄이면서도 검색 정확도를 유지하는 최적값입니다.
+> **Performance Note**: m=16, ef=64 설정은 i3/8GB 환경에서 메모리 오버헤드를 줄이면서도 검색 정확도를 유지하는 최적값입니다.
 
 ---
 
-## 🐳 4. AI 서버 실행 방법 (Docker)
+## 🐳 4. AI 서버 실행 및 데이터 복구 가이드
 
-### ① 사전 준비 (**Prerequisites**)
-* **Docker Desktop** 설치 확인
-* **KST 시간대 설정**: `Dockerfile` 내 `TZ=Asia/Seoul` 설정을 통해 한국 시간 동기화 완료.
-* **모델 파일**: 하단에 제공된 링크에서 `models/` 폴더를 다운로드하여 `ai_model/models/` 경로에 배치 (약 1~2GB)
-* **구글 드라이브 주소**: [(https://drive.google.com/open?id=1v57YvD03yyo_OzhZgfrf2h3MHd2AdlcV&usp=drive_fs)]
-### ② 실행 명령어
+### ① 파일 다운로드 (필수)
+아래 링크에서 모델 파일과 정제된 DB 덤프 파일을 다운로드하여 프로젝트 폴더에 위치시켜야 합니다.
+
+* **[📂 AI 모델 파일 (models.zip) 다운로드](https://drive.google.com/open?id=1v57YvD03yyo_OzhZgfrf2h3MHd2AdlcV&usp=drive_fs)**
+    * `ai_model/models/` 경로에 압축 해제 (약 1~2GB)
+* **[💾 정제된 DB 데이터 (clean_patent_data.sql.zip) 다운로드](https://drive.google.com/file/d/1C3y_q9DE68GGJDk0Y81viiTiC_UFQ3bx/view?usp=sharing)**
+    * 프로젝트 루트 경로에 위치
+
+### ② 서버 실행 (Docker)
 터미널에서 `ai_model` 폴더로 이동 후 실행하세요.
 
-#### **1. 도커 이미지 빌드**
 ```bash
+# 1. 도커 이미지 빌드
 docker build -t royalty-ai-api .
-```
 
-#### **2. 컨테이너 실행**
-```bash
-# -d: 백그라운드 실행, -p: 포트 연결
+# 2. 컨테이너 실행 (포트 8000)
 docker run -d --name royalty-ai-container -p 8000:8000 royalty-ai-api
+
+# 3. DB 데이터 복구 (Restore)
+# 주의: PostgreSQL 컨테이너가 실행 중인 상태에서 진행해야 합니다. 15GB 데이터를 복구하므로 10~20분 정도 소요됩니다.
+
+# Windows (CMD/PowerShell)
+type clean_patent_data.sql | docker exec -i royalty-ai-container psql -U postgres -d royalty
+
+# Mac/Linux
+cat clean_patent_data.sql | docker exec -i royalty-ai-container psql -U postgres -d royalty
 ```
-> **⚠️ 초기 구동 주의**: `ResNet50` 및 `Ko-SBERT` 모델을 로드하는 데 약 30초~1분이 소요될 수 있습니다.
 
 ---
 
@@ -126,3 +142,4 @@ docker run -d --name royalty-ai-container -p 8000:8000 royalty-ai-api
 ## 📖 6. 테스트 (Swagger UI)
 서버 실행 후 브라우저에서 아래 주소로 접속하여 테스트할 수 있습니다.
 * **URL**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
