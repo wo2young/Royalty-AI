@@ -109,15 +109,14 @@
     </update>
 
     <insert id="insertBrandHistory">
-        INSERT INTO brand_logo_history (brand_id, image_path, version, created_at)
-        VALUES (
-            #{brandId}, 
-            #{currentImagePath}, 
-            'v' || (SELECT COALESCE(MAX(CAST(SUBSTRING(version, 2) AS INTEGER)), 0) + 1 
-                    FROM brand_logo_history WHERE brand_id = #{brandId}),
-            CURRENT_TIMESTAMP
-        )
-    </insert>
+	    INSERT INTO brand_logo_history (brand_id, image_path, version, created_at)
+	    VALUES (
+	        #{brandId}, 
+	        #{currentImagePath},  'v' || (SELECT COALESCE(MAX(CAST(SUBSTRING(version, 2) AS INTEGER)), 0) + 1 
+	                FROM brand_logo_history WHERE brand_id = #{brandId}),
+	        CURRENT_TIMESTAMP
+	    )
+	</insert>
 
     <update id="updateNotificationReadStatus">
         UPDATE notification SET is_read = true WHERE notification_id = #{notificationId}
