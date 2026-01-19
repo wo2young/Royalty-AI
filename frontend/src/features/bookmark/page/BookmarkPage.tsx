@@ -1,106 +1,43 @@
 "use client"
 
 import { ArrowLeft, Bookmark } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { BookmarkSearch } from "../components/BookmarkSearch"
 import { BookmarkCard } from "../components/BookmarkCard"
-
-const bookmarkedBrands = [
-  {
-    id: 1,
-    name: "브랜드명 1",
-    code: "특허번호 #0001",
-    category: "기업 로고",
-    date: "2026.01.15",
-  },
-  {
-    id: 2,
-    name: "브랜드명 2",
-    code: "특허번호 #0002",
-    category: "상표권",
-    date: "2026.01.14",
-  },
-  {
-    id: 3,
-    name: "브랜드명 3",
-    code: "특허번호 #0003",
-    category: "스타트업 상호",
-    date: "2026.01.13",
-  },
-  {
-    id: 4,
-    name: "브랜드명 4",
-    code: "특허번호 #0004",
-    category: "기업 로고",
-    date: "2026.01.12",
-  },
-  {
-    id: 5,
-    name: "브랜드명 5",
-    code: "특허번호 #0005",
-    category: "상표권",
-    date: "2026.01.11",
-  },
-  {
-    id: 6,
-    name: "브랜드명 6",
-    code: "특허번호 #0006",
-    category: "기업 로고",
-    date: "2026.01.10",
-  },
-  {
-    id: 7,
-    name: "브랜드명 7",
-    code: "특허번호 #0007",
-    category: "스타트업 상호",
-    date: "2026.01.09",
-  },
-  {
-    id: 8,
-    name: "브랜드명 8",
-    code: "특허번호 #0008",
-    category: "상표권",
-    date: "2026.01.08",
-  },
-  {
-    id: 9,
-    name: "브랜드명 9",
-    code: "특허번호 #0009",
-    category: "기업 로고",
-    date: "2026.01.07",
-  },
-  {
-    id: 10,
-    name: "브랜드명 10",
-    code: "특허번호 #0010",
-    category: "상표권",
-    date: "2026.01.06",
-  },
-  {
-    id: 11,
-    name: "브랜드명 11",
-    code: "특허번호 #0011",
-    category: "스타트업 상호",
-    date: "2026.01.05",
-  },
-  {
-    id: 12,
-    name: "브랜드명 12",
-    code: "특허번호 #0012",
-    category: "기업 로고",
-    date: "2026.01.04",
-  },
-]
+import { useBookmarks } from "../api/bookmark.queries"
 
 export function BookmarksPage() {
+  const { data, isLoading, isError } = useBookmarks()
   const [searchQuery, setSearchQuery] = useState("")
 
-  const filteredBrands = bookmarkedBrands.filter(
-    (brand) =>
-      brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      brand.code.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredBrands = useMemo(() => {
+    if (!data?.bookmarks) return []
+
+    return data.bookmarks.filter(
+      (brand) =>
+        brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        brand.code.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [data, searchQuery])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-red-500">
+          데이터를 불러오는 중 오류가 발생했습니다.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -142,7 +79,7 @@ export function BookmarksPage() {
         {/* 리스트 부분 */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredBrands.map((brand) => (
-            <BookmarkCard key={brand.id} brand={brand} />
+            <BookmarkCard key={brand.patentId} brand={brand} />
           ))}
         </div>
 
