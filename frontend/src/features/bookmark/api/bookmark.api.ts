@@ -122,6 +122,24 @@ const MOCK_DATA: BookmarkedTrademark[] = [
     date: "2026.01.04",
     isBookmarked: true,
   },
+  {
+    patentId: "13",
+    name: "브랜드명 13",
+    code: "특허번호 #0013",
+    category: "FOOD",
+    date: "2026.01.04",
+    image:
+      "https://cdn.pixabay.com/photo/2019/03/04/14/35/sydney-4034244_1280.jpg",
+    isBookmarked: false,
+  },
+  {
+    patentId: "14",
+    name: "브랜드명 14",
+    code: "특허번호 #0014",
+    category: "IT",
+    date: "2026.01.04",
+    isBookmarked: true,
+  },
 ]
 
 export const bookmarkApi = {
