@@ -11,13 +11,15 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm; -- 텍스트 유사도 검색용
 -- ==========================================
 -- 1. 사용자 (Users)
 -- ==========================================
-CREATE TABLE IF NOT EXISTS users (
-    user_id      BIGSERIAL PRIMARY KEY,
-    username     VARCHAR(50) NOT NULL UNIQUE,
-    password     VARCHAR(200) NOT NULL,
-    email        VARCHAR(100),
-    role         VARCHAR(20) DEFAULT 'ROLE_USER',
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE users (
+    user_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    email VARCHAR(100),
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
+    provider VARCHAR(20),
+    provider_id VARCHAR(100),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -73,20 +75,16 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
     application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
-    
     trademark_name      TEXT NOT NULL, -- 상표명
-    image_url           TEXT,          -- 이미지 URL
-    
+    image_url           TEXT,          -- 이미지 URL 
     applicant           TEXT,          -- 출원인
     application_date    DATE,          -- 출원일
     registered_date     DATE,          -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
-    
     -- [AI 벡터 데이터]
     image_vector        vector(1000),  -- ResNet50 (1000차원)
     text_vector         vector(768),   -- SBERT (768차원)
-    
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -147,12 +145,14 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
--- 11. 상표 소멸 관리 (Trademark Expiration)
+-- 11. 토큰 관리 (refresh_token)
 -- ==========================================
-CREATE TABLE IF NOT EXISTS trademark_expiration (
-    expiration_id    BIGSERIAL PRIMARY KEY,
-    patent_id        BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
-    days_left        INT,
-    status           VARCHAR(20), 
-    last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE refresh_token (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    refresh_token VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
 );
