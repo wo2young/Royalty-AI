@@ -97,6 +97,9 @@ CREATE INDEX IF NOT EXISTS idx_patent_status ON patent(status);
 CREATE INDEX IF NOT EXISTS idx_patent_image_vec ON patent USING hnsw (image_vector vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS idx_patent_text_vec ON patent USING hnsw (text_vector vector_cosine_ops);
 
+-- 3. 리스트 검색용 인덱스
+CREATE INDEX IF NOT EXISTS idx_patent_registered_date ON patent(registered_date); 
+
 -- ==========================================
 -- 7. 감지 이벤트 (Detection Event)
 -- ==========================================
