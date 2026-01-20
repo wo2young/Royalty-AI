@@ -6,7 +6,7 @@ import { Link } from "react-router-dom"
 import { BookmarkSearch } from "../components/BookmarkSearch"
 import { BookmarkCard } from "../components/BookmarkCard"
 import { useBookmarks } from "../api/bookmark.queries"
-import { Pagination } from "@/shared/components/pagination/pagination"
+import { Pagination } from "@/shared/components/pagination/Pagination"
 
 export function BookmarksPage() {
   const { data, isLoading, isError } = useBookmarks()
