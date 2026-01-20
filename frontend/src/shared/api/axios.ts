@@ -9,13 +9,31 @@ const axiosInstance = axios.create({
   },
 })
 
+// 🔹 JWT 제외 경로
+const AUTH_EXCLUDE_PATHS = [
+  "/auth/login",
+  "/auth/signup",
+  "/auth/refresh",
+  "/auth/kakao",
+]
+
+// =========================
 // 요청 인터셉터
+// =========================
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("accessToken")
-    if (token && config.headers) {
+    const url = config.url ?? ""
+
+    // ✅ auth 관련 요청에는 토큰 붙이지 않음
+    const isAuthExcluded = AUTH_EXCLUDE_PATHS.some((path) =>
+      url.startsWith(path)
+    )
+
+    if (!isAuthExcluded && token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
     return config
   },
   (error: AxiosError) => {
@@ -23,11 +41,11 @@ axiosInstance.interceptors.request.use(
   }
 )
 
+// =========================
 // 응답 인터셉터
+// =========================
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response
-  },
+  (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("accessToken")

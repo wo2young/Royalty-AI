@@ -18,3 +18,4 @@ dist/
 ai_model/data/
 *.npy
 *.h5
+/.metadata/
