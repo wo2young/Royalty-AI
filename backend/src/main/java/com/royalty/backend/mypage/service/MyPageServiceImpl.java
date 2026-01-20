@@ -39,15 +39,21 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Override @Transactional
     public void updateBrandInfo(BrandDetailDTO brandDTO) {
+        // 1. 현재 DB에 있는 '수정 전' 정보를 가져옵니다.
         BrandDetailDTO current = myPageMapper.selectBrandDetailById(brandDTO.getBrandId());
         if (current == null) throw new IllegalArgumentException("존재하지 않는 브랜드입니다.");
 
+        // [변경포인트] 이름을 먼저 바꿉니다.
         if (!current.getBrandName().equals(brandDTO.getBrandName())) {
             myPageMapper.updateBrandName(brandDTO);
         }
+
+        // [변경포인트] 히스토리를 먼저 '이전 경로'로 쌓고, 그 다음 '새 경로'로 업데이트합니다.
         if (brandDTO.getCurrentImagePath() != null && !brandDTO.getCurrentImagePath().equals(current.getCurrentImagePath())) {
+            // (A) 이전 정보(current)를 히스토리에 먼저 기록!
+            myPageMapper.insertBrandHistory(current); 
+            // (B) 그 다음 DB의 현재 로고 경로를 새 경로(brandDTO)로 업데이트!
             myPageMapper.updateBrandLogoPath(brandDTO);
-            myPageMapper.insertBrandHistory(brandDTO);
         }
     }
 
