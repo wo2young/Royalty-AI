@@ -24,7 +24,7 @@ const MOCK_DATA: BookmarkedTrademark[] = [
     date: "2026.01.14",
     image:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    isBookmarked: false,
+    isBookmarked: true,
   },
   {
     patentId: "3",
@@ -52,7 +52,7 @@ const MOCK_DATA: BookmarkedTrademark[] = [
     date: "2026.01.11",
     image:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    isBookmarked: false,
+    isBookmarked: true,
   },
   {
     patentId: "6",
@@ -62,7 +62,7 @@ const MOCK_DATA: BookmarkedTrademark[] = [
     date: "2026.01.10",
     image:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    isBookmarked: false,
+    isBookmarked: true,
   },
   {
     patentId: "7",
@@ -82,7 +82,7 @@ const MOCK_DATA: BookmarkedTrademark[] = [
     date: "2026.01.08",
     image:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    isBookmarked: false,
+    isBookmarked: true,
   },
   {
     patentId: "9",
@@ -130,7 +130,7 @@ const MOCK_DATA: BookmarkedTrademark[] = [
     date: "2026.01.04",
     image:
       "https://cdn.pixabay.com/photo/2019/03/04/14/35/sydney-4034244_1280.jpg",
-    isBookmarked: false,
+    isBookmarked: true,
   },
   {
     patentId: "14",
