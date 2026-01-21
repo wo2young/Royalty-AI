@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import type { Brand } from "../types"
 import { BrandItem } from "./BrandItem"
 
@@ -6,6 +7,12 @@ interface BrandListProps {
 }
 
 export function BrandList({ brands }: BrandListProps) {
+  const navigate = useNavigate()
+
+  const handleView = (id: number) => {
+    navigate(`/mypage/brand/${id}`)
+  }
+
   if (brands.length === 0) {
     return (
       <div className="flex py-20 h-130 justify-center items-center border rounded-xl bg-muted/10">
@@ -17,7 +24,7 @@ export function BrandList({ brands }: BrandListProps) {
   return (
     <div className="flex flex-col gap-4">
       {brands.map((brand) => (
-        <BrandItem key={brand.id} brand={brand} />
+        <BrandItem key={brand.id} brand={brand} onView={handleView} />
       ))}
     </div>
   )

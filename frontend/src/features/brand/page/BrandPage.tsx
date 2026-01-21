@@ -11,10 +11,12 @@ const myBrands = [
   {
     id: 1,
     name: "테크솔루션 주식회사",
+    category: "IT",
     image_path:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    category: "IT",
-    created_at: "2026.01.10",
+    description:
+      "혁신적인 IT 솔루션을 제공하는 기업으로, 클라우드 서비스 및 AI 기반 소프트웨어 개발을 전문으로 합니다. 글로벌 시장 진출을 목표로 지속적인 기술 혁신을 이어가고 있습니다.",
+    created_at: "2020.01.15",
   },
   {
     id: 2,
