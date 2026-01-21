@@ -18,8 +18,8 @@ public interface TrademarkMapper {
     // ==========================================
     // 2. 소멸 예정(만료 임박) 상표 조회
     // ==========================================
-    List<TrademarkDto> selectExpiringTrademarks(TrademarkSearchReq params);
-    int countExpiringTrademarks(TrademarkSearchReq params);
+//    List<TrademarkDto> selectExpiringTrademarks(TrademarkSearchReq params);
+//    int countExpiringTrademarks(TrademarkSearchReq params);
 
     // ==========================================
     // 3. 상세 조회

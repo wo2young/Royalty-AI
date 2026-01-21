@@ -12,7 +12,6 @@
             image_url          AS imageUrl,
             applicant          AS applicant,
             category           AS category,
-            status             AS status,
             application_date   AS applicationDate,
             registered_date    AS registeredDate
         FROM patent
@@ -37,7 +36,7 @@
         </if>
     </select>
 
-    <select id="selectExpiringTrademarks" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
+<!--    <select id="selectExpiringTrademarks" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
         SELECT 
             patent_id          AS patentId,
             application_number AS applicationNumber,
@@ -45,40 +44,34 @@
             image_url          AS imageUrl,
             applicant          AS applicant,
             category           AS category,
-            status             AS status,
             application_date   AS applicationDate,
             registered_date    AS registeredDate,
             
-            -- [만료일 계산: 10년, 20년, 30년... 주기 자동 계산]
-            -- 공식: 등록일 + ((현재까지 지난 연수 / 10) + 1) * 10년
-            (registered_date + (
-                (EXTRACT(YEAR FROM AGE(CURRENT_DATE, registered_date))::int / 10 + 1) * INTERVAL '10 years'
-            ))::date AS expirationDate,
+            (COALESCE(registered_date, application_date) + 
+                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+            )::date AS expirationDate,
             
-            -- [D-Day 계산] 계산된 만료일 - 오늘
             EXTRACT(DAY FROM (
-                (registered_date + (
-                    (EXTRACT(YEAR FROM AGE(CURRENT_DATE, registered_date))::int / 10 + 1) * INTERVAL '10 years'
-                )) - CURRENT_DATE
+                (COALESCE(registered_date, application_date) + 
+                    (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+                ) - CURRENT_DATE
             )) AS daysLeft
             
         FROM patent
-        WHERE status = '등록' 
-          AND registered_date IS NOT NULL
-          -- 만료일이 과거가 아닌 것만 (오늘 이후 만료)
-          AND (registered_date + (
-                (EXTRACT(YEAR FROM AGE(CURRENT_DATE, registered_date))::int / 10 + 1) * INTERVAL '10 years'
-            )) > CURRENT_DATE
-        ORDER BY expirationDate ASC
+        WHERE COALESCE(registered_date, application_date) IS NOT NULL
+          AND (COALESCE(registered_date, application_date) + 
+                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+            ) &gt; CURRENT_DATE  ORDER BY daysLeft ASC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <select id="countExpiringTrademarks" resultType="int">
+	<select id="countExpiringTrademarks" resultType="int">
         SELECT count(*) FROM patent
-        WHERE status = '등록' 
-          AND registered_date IS NOT NULL
-          AND (registered_date + INTERVAL '10 years') > CURRENT_DATE
-    </select>
+        WHERE COALESCE(registered_date, application_date) IS NOT NULL
+          AND (COALESCE(registered_date, application_date) + 
+                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+            ) &gt; CURRENT_DATE 
+    </select>-->
 
     <select id="selectTrademarkById" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
         SELECT 
@@ -88,7 +81,6 @@
             image_url          AS imageUrl,
             applicant          AS applicant,
             category           AS category,
-            status             AS status,
             application_date   AS applicationDate,
             registered_date    AS registeredDate
         FROM patent

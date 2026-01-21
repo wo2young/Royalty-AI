@@ -8,9 +8,9 @@ public class TrademarkSearchReq {
     private String keyword;   // 검색어
     private String sort;      // 정렬 기준 (latest, old 등)
     
-    // 페이징 (기본값 설정: 1페이지, 20개씩)
+    // 페이징 (기본값 설정: 1페이지, 10개씩)
     private int page = 1;
-    private int size = 20;
+    private int size = 10;
     
     // MyBatis에서 사용할 Offset 계산 메서드
     public int getOffset() {

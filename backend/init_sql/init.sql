@@ -28,8 +28,9 @@ CREATE TABLE users (
 CREATE TABLE IF NOT EXISTS brand (
     brand_id     BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    brand_name   VARCHAR(100) NOT NULL,
+    brand_name   VARCHAR(100),
     description  TEXT,
+    category     VARCHAR(50), -- [추가] 업종/카테고리 (예: '25', '의류', 'IT' 등)
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -80,7 +81,6 @@ CREATE TABLE IF NOT EXISTS patent (
     applicant           TEXT,          -- 출원인
     application_date    DATE,          -- 출원일
     registered_date     DATE,          -- 등록일
-    status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
     -- [AI 벡터 데이터]
     image_vector        vector(1000),  -- ResNet50 (1000차원)
@@ -91,7 +91,6 @@ CREATE TABLE IF NOT EXISTS patent (
 -- [인덱스 최적화]
 -- 1. 날짜 조회용 B-Tree 인덱스
 CREATE INDEX IF NOT EXISTS idx_patent_app_date ON patent(application_date);
-CREATE INDEX IF NOT EXISTS idx_patent_status ON patent(status);
 
 -- 2. 벡터 검색용 HNSW 인덱스 (검색 속도 100배 향상)
 CREATE INDEX IF NOT EXISTS idx_patent_image_vec ON patent USING hnsw (image_vector vector_cosine_ops);
@@ -134,7 +133,8 @@ CREATE TABLE IF NOT EXISTS bookmark (
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     patent_id    BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, patent_id) -- 중복 북마크 방지
+    
+    CONSTRAINT uk_bookmark_user_patent UNIQUE (user_id, patent_id)
 );
 
 -- ==========================================

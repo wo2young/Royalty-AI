@@ -32,13 +32,13 @@ public class TrademarkService {
     }
 
     // 1-2. 소멸 예정 상표 리스트 조회 (선점 기회 + 페이징)
-    public Map<String, Object> getExpiringTrademarks(TrademarkSearchReq request) {
-        return getPagedResult(
-            trademarkMapper.selectExpiringTrademarks(request),
-            trademarkMapper.countExpiringTrademarks(request),
-            request
-        );
-    }
+//    public Map<String, Object> getExpiringTrademarks(TrademarkSearchReq request) {
+//        return getPagedResult(
+//            trademarkMapper.selectExpiringTrademarks(request),
+//            trademarkMapper.countExpiringTrademarks(request),
+//            request
+//        );
+//    }
 
     // 1-3. 상세 조회 (북마크 여부 포함)
     public TrademarkDto getTrademarkDetail(Long patentId, Long userId) {

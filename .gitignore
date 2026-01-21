@@ -14,7 +14,30 @@ build/
 dist/
 .npm
 
-# AI Data (데이터는 깃에 올리지 마세요! 용량 터집니다)
-ai_model/data/
-*.npy
+# AI Models (용량이 커서 Git에서 제외)
+ai_model/models/
 *.h5
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Eclipse / STS workspace settings (절대 올리면 안됨)
+.metadata/
+.recommenders/
+Server/
+
+# IDE project files (보통 팀 프로젝트에선 뺍니다)
+.classpath
+.project
+.settings/
+.springBeans
+bin/
+
+# Build results
+build/
+out/
+target/
+
+# 대용량 SQL 데이터 파일 무시
+ai_model/clean_patent_data.sql

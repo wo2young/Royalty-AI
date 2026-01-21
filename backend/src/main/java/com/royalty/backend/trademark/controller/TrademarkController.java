@@ -30,11 +30,11 @@ public class TrademarkController {
 
     // 1-2. 소멸 예정 상표 조회 (선점 기회)
     // GET /trademark/expiring
-    @GetMapping("/expiring")
-    public ResponseEntity<?> getExpiringList(@ModelAttribute TrademarkSearchReq request) {
-        Map<String, Object> result = trademarkService.getExpiringTrademarks(request);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/expiring")
+//    public ResponseEntity<?> getExpiringList(@ModelAttribute TrademarkSearchReq request) {
+//        Map<String, Object> result = trademarkService.getExpiringTrademarks(request);
+//        return ResponseEntity.ok(result);
+//    }
 
     // 1-3. 상표 상세 조회
     // GET /trademark/{id}
