@@ -1,31 +1,54 @@
 package com.royalty.backend.mypage.mapper;
 
-import java.util.List;
-import java.util.Map;
+import com.royalty.backend.mypage.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import com.royalty.backend.mypage.dto.*;
+
+import java.util.List;
 
 @Mapper
 public interface MyPageMapper {
-    // Bookmark & Notification & Report
-    List<BookmarkResponseDTO> selectMyBookmarks(Long userId);
-    List<NotificationDTO> selectNotifications(Long userId); // type 제거된 DTO 반환
-    int updateNotificationReadStatus(@Param("notificationId") Long notificationId);
-    List<ReportDTO> selectReportList(Long userId);
-    String selectReportFilePath(Long reportId);
 
-    // Brand Management
-    List<BrandDetailDTO> selectBrandListByUserId(Long userId);
-    BrandDetailDTO selectBrandDetail(Long brandId); 
-    BrandDetailDTO selectBrandDetailById(Long brandId);
-    
-    // History & Analysis (차트 데이터)
-    List<BrandHistoryDTO> selectBrandHistoryList(Long brandId); // imageScore, textScore 포함
-    
-    // CUD
-    int updateBrandName(BrandDetailDTO brandDTO);
-    int updateBrandLogoPath(BrandDetailDTO brandDTO);
-    int insertBrandHistory(BrandDetailDTO brandDTO); // v1, v2 자동 생성 로직 포함
-    int insertBrandAnalysis(Map<String, Object> analysisData); // 재분석 결과 저장
+    // ==========================================
+    // 1. 내 브랜드 관리 (Brand)
+    // ==========================================
+
+    // 내 브랜드 목록 조회
+    List<BrandDTO> selectMyBrands(Long userId);
+
+    // 브랜드 상세 기본 정보 조회
+    BrandDetailDTO selectBrandDetail(@Param("userId") Long userId, @Param("brandId") Long brandId);
+
+    // 브랜드 등록 (insert 후, 생성된 ID가 brandDTO.brandId에 담김)
+    void insertBrand(BrandDTO brandDTO);
+
+    // 브랜드 로고 이미지 경로 저장
+    void insertBrandLogo(@Param("brandId") Long brandId, @Param("imagePath") String imagePath);
+
+    // 알림 설정 변경 (ON/OFF)
+    void updateNotificationStatus(@Param("userId") Long userId, 
+                                  @Param("brandId") Long brandId, 
+                                  @Param("isEnabled") boolean isEnabled);
+
+    // 브랜드 삭제
+    void deleteBrand(@Param("userId") Long userId, @Param("brandId") Long brandId);
+
+
+    // ==========================================
+    // 2. 상세 화면 서브 데이터 (History & Report)
+    // ==========================================
+
+    // 로고 변경 이력 조회
+    List<BrandHistoryDTO> selectBrandHistory(Long brandId);
+
+    // 분석 리포트 목록 조회
+    List<ReportDTO> selectBrandReports(Long brandId);
+
+
+    // ==========================================
+    // 3. 북마크 (Bookmark)
+    // ==========================================
+
+    // 북마크 목록 조회 (페이징 없이 전체)
+    List<BookmarkDTO> selectBookmarks(Long userId);
 }
