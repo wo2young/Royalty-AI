@@ -4,4 +4,5 @@ export interface Brand {
   image_path?: string
   category: string
   created_at: string
+  description?: string
 }
