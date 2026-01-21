@@ -69,7 +69,7 @@ const myBrands = [
   },
 ]
 
-export function BrandsPage() {
+export default function BrandsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("ALL")
   const [currentPage, setCurrentPage] = useState(1)
@@ -117,10 +117,9 @@ export function BrandsPage() {
 
     return (
       <Badge
-        variant="outline" // 테두리가 있는 스타일이 더 정돈되어 보입니다
+        variant="outline"
         className={`${config.className} px-2 py-0.5 font-medium shadow-sm transition-none`}
       >
-        {/* 작은 점(Dot)을 추가하면 시각적 인지가 더 빠릅니다 */}
         <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
         {config.label}
       </Badge>
@@ -207,41 +206,38 @@ export function BrandsPage() {
         />
 
         {/* 나의 브랜드 리스트 */}
-        <Card className="shadow-sm">
-          <CardContent className="p-6 space-y-3">
-            {paginatedBrands.map((brand) => (
-              <div
-                key={brand.id}
-                className="flex items-center gap-4 p-5 rounded-xl border hover:border-primary/50 hover:bg-secondary/40 hover:shadow-md transition-all cursor-pointer group"
-              >
-                <div className="w-14 h-14 rounded-xl bg-secondary border flex items-center justify-center shrink-0 group-hover:border-primary/50 group-hover:bg-background transition-all">
-                  <Building2 className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <div className="flex-1 min-w-0 space-y-1.5">
-                  <h3 className="font-semibold text-foreground">
-                    {brand.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {brand.category}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    등록일: {brand.date} · {getStatusBadge(brand.status)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    수정
-                  </Button>
-                </div>
+
+        <div className="flex flex-col gap-4">
+          {paginatedBrands.map((brand) => (
+            <div
+              key={brand.id}
+              className="flex items-center gap-4 p-5 rounded-xl border hover:border-primary/50 hover:bg-secondary/40 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div className="w-14 h-14 rounded-xl bg-secondary border flex items-center justify-center shrink-0 group-hover:border-primary/50 group-hover:bg-background transition-all">
+                <Building2 className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
-            ))}
-          </CardContent>
-        </Card>
+              <div className="flex-1 min-w-0 space-y-1.5">
+                <h3 className="font-semibold text-foreground">{brand.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {brand.category}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  등록일: {brand.date} · {getStatusBadge(brand.status)}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  수정
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* 페이지네이션 */}
         {filteredBrands.length > 0 && (
