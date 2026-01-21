@@ -100,13 +100,18 @@ public class AuthServiceImpl implements AuthService {
        카카오 로그인
        ========================= */
     @Override
-    public AuthResponseDTO kakaoLogin(String kakaoAccessToken) {
+    public AuthResponseDTO kakaoLogin(String code) {
 
-        KakaoUserInfo kakaoUser = kakaoOAuthService.getUserInfo(kakaoAccessToken);
+        // 1️⃣ 인가 코드 → 카카오 access token 교환
+        String accessToken = kakaoOAuthService.getAccessToken(code);
+
+        // 2️⃣ access token → 사용자 정보 조회
+        KakaoUserInfo kakaoUser =
+            kakaoOAuthService.getUserInfo(accessToken);
 
         User user = userMapper
-                .findByProviderId("KAKAO", String.valueOf(kakaoUser.getId()))
-                .orElseGet(() -> registerKakaoUser(kakaoUser));
+            .findByProviderId("KAKAO", String.valueOf(kakaoUser.getId()))
+            .orElseGet(() -> registerKakaoUser(kakaoUser));
 
         return issueTokens(user);
     }

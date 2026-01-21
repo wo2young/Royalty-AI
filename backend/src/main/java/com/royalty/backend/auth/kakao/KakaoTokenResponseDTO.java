@@ -1,9 +1,12 @@
 package com.royalty.backend.auth.kakao;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class KakaoTokenResponseDTO {
+
     private String access_token;
     private String token_type;
     private String refresh_token;

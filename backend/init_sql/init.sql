@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
     password     VARCHAR(200) NOT NULL,
     email        VARCHAR(100),
     role         VARCHAR(20) DEFAULT 'ROLE_USER',
+    provider VARCHAR(20),
+    provider_id VARCHAR(100)
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 

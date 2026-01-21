@@ -8,6 +8,7 @@ import { TrademarkListPage } from "@/features/trademark"
 import { MyPage } from "@/features/mypage"
 import ErrorPage from "@/shared/page/ErrorPage"
 import { BookmarksPage } from "@/features/bookmark/page/BookmarkPage"
+import { KakaoCallbackPage } from "@/features/auth"
 
 export const router = createBrowserRouter([
   {
@@ -24,7 +25,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 🔥 핵심: /login 접근 방어
+  // 🔥 /login 리다이렉트
   {
     path: "/login",
     element: <Navigate to="/auth/login" replace />,
@@ -37,4 +38,11 @@ export const router = createBrowserRouter([
       { path: "signup", element: <SignUpPage /> },
     ],
   },
+
+  // ✅ 카카오 로그인 콜백 (이거 추가)
+  {
+    path: "/oauth/kakao/callback",
+    element: <KakaoCallbackPage />,
+  },
 ])
+

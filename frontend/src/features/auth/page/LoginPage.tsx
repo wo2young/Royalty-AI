@@ -67,16 +67,21 @@ export default function LoginPage() {
 }
 
 
-  /* =========================
-     🟡 카카오 로그인 (mock 유지)
-     ========================= */
-  const handleKakaoLogin = () => {
-    login("mock-token", {
-      username: "카카오사용자",
-      provider: "KAKAO",
-    })
-    window.location.href = "/"
-  }
+/* =========================
+   🟡 카카오 로그인 (OAuth 시작)
+   ========================= */
+const handleKakaoLogin = () => {
+  const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID
+  const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI
+
+  const kakaoAuthUrl =
+    "https://kauth.kakao.com/oauth/authorize" +
+    `?response_type=code` +
+    `&client_id=${clientId}` +
+    `&redirect_uri=${redirectUri}`
+
+  window.location.href = kakaoAuthUrl
+}
 
   /* =========================
      ✅ 회원가입

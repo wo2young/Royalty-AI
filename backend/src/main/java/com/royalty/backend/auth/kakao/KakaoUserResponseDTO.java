@@ -1,21 +1,25 @@
 package com.royalty.backend.auth.kakao;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class KakaoUserResponseDTO {
 
     private Long id;
-    private KakaoAccount kakao_account;
+    private KakaoAccount kakaoAccount;
+    private Properties properties;
 
     @Getter
+    @NoArgsConstructor
     public static class KakaoAccount {
         private String email;
-        private Profile profile;
     }
 
     @Getter
-    public static class Profile {
+    @NoArgsConstructor
+    public static class Properties {
         private String nickname;
     }
 }

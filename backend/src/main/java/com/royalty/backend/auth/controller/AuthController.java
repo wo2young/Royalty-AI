@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth") // 🔥 여기 핵심 수정
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -61,15 +61,13 @@ public class AuthController {
     }
 
     /* =========================
-       카카오 로그인
+       ✅ 카카오 로그인 (인가 코드 방식)
        ========================= */
-    @PostMapping("/kakao")
+    @PostMapping("/kakao/login")
     public ResponseEntity<AuthResponseDTO> kakaoLogin(
-            @RequestHeader("Authorization") String kakaoAccessToken
+            @RequestParam("code") String code
     ) {
-        // Authorization: Bearer {kakaoAccessToken}
-        String token = removeBearerPrefix(kakaoAccessToken);
-        return ResponseEntity.ok(authService.kakaoLogin(token));
+        return ResponseEntity.ok(authService.kakaoLogin(code));
     }
 
     /* =========================
@@ -86,5 +84,4 @@ public class AuthController {
         }
         return bearerToken.substring(7);
     }
-    
 }
