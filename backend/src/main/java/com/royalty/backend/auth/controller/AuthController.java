@@ -9,7 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.royalty.backend.auth.kakao.KakaoLoginRequestDTO;
+import com.royalty.backend.auth.dto.FindUsernameRequestDTO;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
@@ -65,10 +66,46 @@ public class AuthController {
        ========================= */
     @PostMapping("/kakao/login")
     public ResponseEntity<AuthResponseDTO> kakaoLogin(
-            @RequestParam("code") String code
+            @RequestBody KakaoLoginRequestDTO request
     ) {
-        return ResponseEntity.ok(authService.kakaoLogin(code));
+        return ResponseEntity.ok(authService.kakaoLogin(request.getCode()));
     }
+    
+    
+    /* =========================
+    아이디 찾기
+    ========================= */
+	 @PostMapping("/find-username")
+	 public ResponseEntity<Void> findUsername(
+	         @RequestBody FindUsernameRequestDTO request
+	 ) {
+	     authService.findUsernameByEmail(request.getEmail());
+	     return ResponseEntity.ok().build();
+	 }
+	 
+	 /* =========================
+	   비밀번호 재설정 요청 (메일 발송)
+	   ========================= */
+	@PostMapping("/password/reset-request")
+	public ResponseEntity<Void> requestPasswordReset(
+	        @RequestParam String email
+	) {
+	    authService.requestPasswordReset(email);
+	    return ResponseEntity.ok().build();
+	}
+	
+	/* =========================
+	   비밀번호 재설정 (JWT)
+	   ========================= */
+	@PostMapping("/password/reset")
+	public ResponseEntity<Void> resetPassword(
+	        @RequestParam String token,
+	        @RequestParam String newPassword
+	) {
+	    authService.resetPassword(token, newPassword);
+	    return ResponseEntity.ok().build();
+	}
+
 
     /* =========================
        Bearer 토큰 공통 처리

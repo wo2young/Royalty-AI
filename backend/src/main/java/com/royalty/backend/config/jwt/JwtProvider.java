@@ -57,6 +57,60 @@ public class JwtProvider {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+    // =========================
+    		// 🔐 비밀번호 재설정 전용 JWT
+    		// =========================
+    public String createPasswordResetToken(User user) {
+        return Jwts.builder()
+                // JWT subject → 사용자 식별자
+                .setSubject(String.valueOf(user.getId()))
+
+                // 이 토큰의 목적을 명확히 구분
+                .claim("type", "RESET_PASSWORD")
+
+                .setIssuedAt(new Date())
+
+                // ⏰ 15분 후 만료
+                .setExpiration(
+                    new Date(System.currentTimeMillis() + 1000L * 60 * 15)
+                )
+
+                // 기존 Access/Refresh와 동일한 서명 키 사용
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+
+                .compact();
+    }
+
+    /* =========================
+    🔐 비밀번호 재설정 JWT 검증
+    ========================= */
+ public Long validatePasswordResetToken(String token) {
+
+     try {
+         Claims claims = Jwts.parserBuilder()
+                 .setSigningKey(getSigningKey())
+                 .build()
+                 .parseClaimsJws(token)
+                 .getBody();
+
+         // 1️⃣ 토큰 목적 확인
+         String type = claims.get("type", String.class);
+         if (!"RESET_PASSWORD".equals(type)) {
+             throw new JwtException("비밀번호 재설정용 토큰이 아닙니다.");
+         }
+
+         // 2️⃣ userId 반환
+         return Long.parseLong(claims.getSubject());
+
+     } catch (ExpiredJwtException e) {
+         throw new JwtException("비밀번호 재설정 토큰이 만료되었습니다.");
+     } catch (JwtException e) {
+         throw e;
+     } catch (Exception e) {
+         throw new JwtException("유효하지 않은 토큰입니다.");
+     }
+ }
+
 
     /* =========================
        토큰 유효성 검증

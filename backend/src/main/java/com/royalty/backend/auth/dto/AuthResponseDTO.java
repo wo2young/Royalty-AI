@@ -10,9 +10,8 @@ public class AuthResponseDTO {
     private final String accessToken;
     private final String refreshToken;
 
-    // 👤 사용자 정보
-    private final Long userId;
-    private final String role;
+    // 👤 사용자 정보 (프론트 호환용)
+    private final UserResponse user;
 
     /* =========================
        ✅ AuthServiceImpl에서 사용하는 생성자
@@ -25,12 +24,17 @@ public class AuthResponseDTO {
     ) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.userId = userId;
-        this.role = role;
+        this.user = new UserResponse(
+                userId,
+                null,
+                null,
+                role,
+                null
+        );
     }
 
     /* =========================
-       (선택) User 객체 기반 생성자
+       ✅ User 객체 기반 생성자
        ========================= */
     public AuthResponseDTO(
             String accessToken,
@@ -39,7 +43,38 @@ public class AuthResponseDTO {
     ) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.userId = user.getId();
-        this.role = user.getRole().name();
+        this.user = new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.getProvider()
+        );
+    }
+
+    /* =========================
+       👤 내부 User DTO (프론트 계약)
+       ========================= */
+    @Getter
+    public static class UserResponse {
+        private final Long id;
+        private final String username;
+        private final String email;
+        private final String role;
+        private final String provider;
+
+        public UserResponse(
+                Long id,
+                String username,
+                String email,
+                String role,
+                String provider
+        ) {
+            this.id = id;
+            this.username = username;
+            this.email = email;
+            this.role = role;
+            this.provider = provider;
+        }
     }
 }

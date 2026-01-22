@@ -47,12 +47,25 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    const url = error.config?.url ?? ""
+
+    const isAuthRequest = AUTH_EXCLUDE_PATHS.some((path) =>
+      url.includes(path)
+    )
+
+    // ✅ 로그인/회원가입 실패는 여기서 끝
+    if (status === 401 && isAuthRequest) {
+      return Promise.reject(error)
+    }
+
+    // 🔴 진짜 인증 만료만 강제 로그아웃
+    if (status === 401) {
       localStorage.removeItem("accessToken")
       window.location.href = "/login"
     }
+
     return Promise.reject(error)
   }
 )
-
 export default axiosInstance

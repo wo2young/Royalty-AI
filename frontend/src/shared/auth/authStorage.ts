@@ -6,7 +6,12 @@ const USER_KEY = "loginUser"
 export const authStorage = {
   set(token: string, user: any) {
     localStorage.setItem(TOKEN_KEY, token)
-    localStorage.setItem(USER_KEY, JSON.stringify(user))
+
+    if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+    } else {
+      localStorage.removeItem(USER_KEY)
+    }
   },
 
   getToken() {
@@ -15,7 +20,13 @@ export const authStorage = {
 
   getUser() {
     const user = localStorage.getItem(USER_KEY)
-    return user ? JSON.parse(user) : null
+    if (!user || user === "undefined") return null
+
+    try {
+      return JSON.parse(user)
+    } catch {
+      return null
+    }
   },
 
   clear() {

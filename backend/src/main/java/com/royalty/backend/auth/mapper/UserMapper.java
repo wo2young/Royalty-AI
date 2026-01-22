@@ -4,6 +4,7 @@ import com.royalty.backend.auth.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mapper
@@ -25,4 +26,13 @@ public interface UserMapper {
     void save(User user);
 
     void deleteById(@Param("id") Long id);
+    Optional<User> findByEmail(String email);
+    List<User> findAllByEmail(String email);
+    int existsByEmail(String email);
+    
+    void updatePassword(User user);
+    
+
+    
+    
 }

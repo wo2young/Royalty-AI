@@ -16,4 +16,9 @@ public interface AuthService {
     void logout(String refreshToken);
 
     AuthResponseDTO kakaoLogin(String kakaoAccessToken);
+    
+    void findUsernameByEmail(String email);
+    
+    void requestPasswordReset(String email);
+    void resetPassword(String token, String newPassword);
 }
