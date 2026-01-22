@@ -51,4 +51,6 @@ public interface MyPageMapper {
 
     // 북마크 목록 조회 (페이징 없이 전체)
     List<BookmarkDTO> selectBookmarks(Long userId);
+    
+
 }
