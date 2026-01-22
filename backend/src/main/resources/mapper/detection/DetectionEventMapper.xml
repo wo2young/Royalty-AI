@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.detection.mapper.DetectionEventMapper">
+
+    <insert id="insertDetectionEvent"
+            parameterType="com.royalty.backend.detection.domain.DetectionEventVO">
+        INSERT INTO detection_event
+        (
+            brand_id,
+            patent_id,
+            image_similarity,
+            text_similarity,
+            risk_level
+        )
+        VALUES
+        (
+            #{brandId},
+            #{patentId},
+            #{imageSimilarity},
+            #{textSimilarity},
+            #{riskLevel}
+        )
+    </insert>
+
+    <!-- 브랜드-특허 이미지 벡터 유사도 -->
+    <select id="findImageSimilarity" resultType="java.lang.Double">
+        <![CDATA[
+        SELECT
+            1 - (bl.image_vector <-> p.image_vector) AS similarity
+        FROM brand_logo bl
+        JOIN patent p ON p.patent_id = #{patentId}
+        WHERE bl.brand_id = #{brandId}
+        ORDER BY bl.created_at DESC
+        LIMIT 1
+        ]]>
+    </select>
+    
+    <select id="existsDetectionEvent" resultType="int">
+    	SELECT COUNT(*)
+    	FROM detection_event
+    	WHERE brand_id = #{brandId}
+      		AND patent_id = #{patentId}
+	</select>
+
+
+</mapper>
