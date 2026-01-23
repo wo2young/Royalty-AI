@@ -11,6 +11,11 @@ export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("login")
   const [panelMoving, setPanelMoving] = useState(false)
   const navigate = useNavigate()
+
+  /* =========================
+   UI 메시지 (alert 대체)
+   ========================= */
+const [uiMessage, setUiMessage] = useState<string | null>(null)
   /* =========================
      로그인 입력값
      ========================= */
@@ -31,6 +36,12 @@ export default function LoginPage() {
 
   const { login } = useAuth()
 
+  /* =========================
+   이메일 인증
+   ========================= */
+const [emailAuthCode, setEmailAuthCode] = useState("")
+const [emailCodeSent, setEmailCodeSent] = useState(false)
+
   // 🔴 입력값 초기화
   const resetInputs = () => {
     setUsername("")
@@ -49,17 +60,18 @@ export default function LoginPage() {
     setPanelMoving(true)
     setTimeout(() => {
       resetInputs()
+      setUiMessage(null)
       setMode(next)
       setPanelMoving(false)
     }, 400)
   }
 
   /* =========================
-     ✅ 일반 로그인
-     ========================= */
-  const handleLogin = async () => {
+   ✅ 일반 로그인
+   ========================= */
+const handleLogin = async () => {
   if (!username || !password) {
-    alert("아이디와 비밀번호를 입력하세요.")
+    setUiMessage("아이디와 비밀번호를 입력하세요.")
     return
   }
 
@@ -79,7 +91,7 @@ export default function LoginPage() {
     navigate("/")
   } catch {
     setPassword("") // ❗ 비밀번호만 초기화
-    alert("로그인 실패 (아이디/비밀번호 확인)")
+    setUiMessage("아이디 또는 비밀번호가 올바르지 않습니다.")
   }
 }
 
@@ -88,9 +100,6 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     handleLogin()
   }
 }
-
-
-
 
 
   /* =========================
@@ -110,21 +119,21 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
      ✅ 회원가입
      ========================= */
 const handleSignup = async () => {
-  // 🔴 아이디 길이 체크
+  // 아이디 길이 체크
   if (signupUsername.length < 6 || signupUsername.length > 12) {
-    alert("아이디는 6자 이상 12자 이하로 입력해주세요.")
+    setUiMessage("아이디는 6자 이상 12자 이하로 입력해주세요.")
     return
   }
 
-  // 🔴 비밀번호 길이 체크
+  // 비밀번호 길이 체크
   if (signupPassword.length < 8 || signupPassword.length > 16) {
-    alert("비밀번호는 8자 이상 16자 이하로 입력해주세요.")
+    setUiMessage("비밀번호는 8자 이상 16자 이하로 입력해주세요.")
     return
   }
 
-  // 🔴 비밀번호 확인 체크
+  // 비밀번호 확인
   if (signupPassword !== signupPasswordConfirm) {
-    alert("비밀번호가 일치하지 않습니다.")
+    setUiMessage("비밀번호가 일치하지 않습니다.")
     return
   }
 
@@ -133,22 +142,41 @@ const handleSignup = async () => {
       username: signupUsername,
       password: signupPassword,
       email: signupEmail,
+      emailAuthCode,
     })
 
-    alert("회원가입 완료! 로그인해주세요.")
+    setUiMessage("회원가입이 완료되었습니다. 로그인해주세요.")
     switchMode("login")
-
   } catch (err: any) {
     const message = err?.response?.data?.message
-
-    if (!message) {
-      alert("회원가입 실패 (서버 오류)")
-      return
-    }
-
-    alert(message)
+    setUiMessage(message || "회원가입에 실패했습니다.")
   }
 }
+
+
+/* =========================
+   이메일 인증번호 발송
+   ========================= */
+const handleSendEmailAuthCode = async () => {
+  if (!signupEmail) {
+    setUiMessage("이메일을 입력하세요.")
+    return
+  }
+
+  try {
+    await axiosInstance.post("/api/auth/email/send", {
+      email: signupEmail,
+    })
+    setUiMessage("인증번호를 이메일로 전송했습니다.")
+    setEmailCodeSent(true)
+  } catch (err: any) {
+    setUiMessage(
+      err?.response?.data?.message || "인증번호 발송 실패"
+    )
+  }
+}
+
+
 
    
 
@@ -167,39 +195,40 @@ const handleSignup = async () => {
       email: findEmail,
     })
 
-    alert("입력하신 이메일로 아이디를 전송했습니다.")
+    setUiMessage("입력하신 이메일로 아이디를 전송했습니다.")
     switchMode("login")
   } catch {
-    alert("해당 이메일로 등록된 계정이 없습니다.")
+  setUiMessage("해당 이메일로 등록된 계정이 없습니다.")
   }
 }
 /* =========================
    비밀번호 재설정 메일 요청
    ========================= */
 const handleFindPassword = async () => {
-  if (!findEmail) {
-    alert("이메일을 입력하세요.")
+  if (!findEmail || !findUsername) {
+    setUiMessage("아이디와 이메일을 입력하세요.")
     return
   }
 
   try {
-   await axiosInstance.post(
-  "/api/auth/password/reset-request",
-  null,
-  {
-    params: {
-      email: findEmail,
-    },
-  }
-)
+    await axiosInstance.post(
+      "/api/auth/password/reset-request",
+      {
+        username: findUsername,
+        email: findEmail,
+      }
+    )
 
+    setUiMessage("비밀번호 재설정 메일을 전송했습니다. 5초 후 로그인 화면으로 이동합니다.")
 
-    alert("비밀번호 재설정 메일을 전송했습니다.")
-    switchMode("login")
+    // ✅ 10초 후 로그인 화면으로 이동
+    setTimeout(() => {
+      switchMode("login")
+    }, 6000)
 
   } catch (err: any) {
     const message = err?.response?.data?.message
-    alert(message || "비밀번호 재설정 요청 실패")
+    setUiMessage(message || "비밀번호 재설정 요청 실패")
   }
 }
 
@@ -257,17 +286,24 @@ const handleFindPassword = async () => {
                         placeholder="비밀번호"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                         onKeyDown={handleKeyDown}
+                        onKeyDown={handleKeyDown}
                       />
 
-                      <Button
-                          type="button"
-                          size="lg"
-                          className="w-full"
-                          onClick={handleLogin}
-                        >
-                          로그인
-                        </Button>
+                  {uiMessage && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {uiMessage}
+                    </p>
+                  )}
+
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleLogin}
+                  >
+                    로그인
+                  </Button>
+
                     <Button
                       type="button"
                       size="lg"
@@ -324,12 +360,34 @@ const handleFindPassword = async () => {
                         value={signupUsername}
                         onChange={(e) => setSignupUsername(e.target.value)}
                       />
-                      <input
-                        className="w-full rounded-md border px-3 py-2 text-sm"
-                        placeholder="이메일"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                      />
+                    {/* 이메일 + 인증번호 받기 자리 잡기 */}
+<div className="flex items-center gap-2">
+  <input
+    className="flex-1 rounded-md border px-3 py-2 text-sm"
+    placeholder="이메일"
+    value={signupEmail}
+    onChange={(e) => setSignupEmail(e.target.value)}
+  />
+
+  <Button
+    type="button"
+    size="sm"
+    className="px-3 text-xs whitespace-nowrap"
+    onClick={handleSendEmailAuthCode}
+  >
+    인증번호 받기
+  </Button>
+</div>
+
+
+                      {emailCodeSent && (
+                        <input
+                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          placeholder="이메일 인증번호"
+                          value={emailAuthCode}
+                          onChange={(e) => setEmailAuthCode(e.target.value)}
+                        />
+)}
                       <input
                         type="password"
                         className="w-full rounded-md border px-3 py-2 text-sm"
@@ -346,6 +404,11 @@ const handleFindPassword = async () => {
                           setSignupPasswordConfirm(e.target.value)
                         }
                       />
+                      {uiMessage && (
+  <p className="text-sm text-red-500 mt-1">
+    {uiMessage}
+  </p>
+)}
 
                       <Button size="lg" className="w-full" onClick={handleSignup}>
                         회원가입
@@ -375,6 +438,11 @@ const handleFindPassword = async () => {
                       value={findEmail}
                       onChange={(e) => setFindEmail(e.target.value)}
                     />
+                     {uiMessage && (
+      <p className="text-sm text-red-500 mb-3">
+        {uiMessage}
+      </p>
+    )}
 
                       <Button
                         size="lg"
@@ -412,20 +480,28 @@ const handleFindPassword = async () => {
                       value={findEmail}
                       onChange={(e) => setFindEmail(e.target.value)}
                     />
+                     {uiMessage && (
+      <p className="text-sm text-red-500 mb-3">
+        {uiMessage}
+      </p>
+    )}
 
                   <Button
-  size="lg"
-  className="w-full"
-  onClick={handleFindPassword}
->
-  비밀번호 재설정
-</Button>
+                    size="lg"
+                    className="w-full"
+                    onClick={handleFindPassword}
+                  >
+                    비밀번호 재설정
+                  </Button>
 
-                    <p className="mt-6 text-center text-sm">
-                      <button onClick={() => switchMode("login")}>
-                        로그인으로 돌아가기
-                      </button>
-                    </p>
+                   <p className="mt-6 text-center text-sm text-muted-foreground">
+  <button
+    onClick={() => switchMode("login")}
+    className="transition-colors hover:text-[#1f2a44] hover:underline"
+  >
+    로그인으로 돌아가기
+  </button>
+</p>
                   </div>
                 )}
 

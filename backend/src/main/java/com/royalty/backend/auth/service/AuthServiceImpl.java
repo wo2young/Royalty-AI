@@ -52,39 +52,51 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /* =========================
-       회원가입
-       ========================= */
-    @Override
-    public AuthResponseDTO signup(SignupRequestDTO request) {
+    회원가입
+    ========================= */
+ @Override
+ public AuthResponseDTO signup(SignupRequestDTO request) {
 
-        // 1️⃣ 아이디 중복 체크 (아이디는 암호화 ❌)
-        if (userMapper.existsByUsername(request.getUsername()) > 0) {
-            throw new AuthException("이미 사용 중인 아이디입니다.");
-        }
+     // 1️⃣ 아이디 중복 체크 (아이디는 암호화 ❌)
+     if (userMapper.existsByUsername(request.getUsername()) > 0) {
+         throw new AuthException("이미 사용 중인 아이디입니다.");
+     }
 
-        // 2️⃣ 이메일 암호화
-        String encryptedEmail = Aes256Util.encrypt(request.getEmail());
+     // 2️⃣ 이메일 암호화
+     String encryptedEmail = Aes256Util.encrypt(request.getEmail());
 
-        // 3️⃣ 이메일 중복 체크 (암호화 기준)
-        if (userMapper.existsByEmail(encryptedEmail) > 0) {
-            throw new AuthException("이미 가입된 이메일입니다.");
-        }
+     // 3️⃣ 이메일 중복 체크 (암호화 기준)
+     if (userMapper.existsByEmail(encryptedEmail) > 0) {
+         throw new AuthException("이미 가입된 이메일입니다.");
+     }
 
-        // 4️⃣ 사용자 생성
-        User user = User.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .email(encryptedEmail) // 🔐 암호화된 이메일 저장
-                .role(Role.ROLE_USER)
-                .provider("LOCAL")
-                .build();
+     // 4️⃣ 이메일 인증번호 검증 (10분 유효)
+     boolean verified =
+             mailService.verifySignupAuthCode(
+                     request.getEmail(),
+                     request.getEmailAuthCode()
+             );
 
-        // 5️⃣ 저장
-        userMapper.save(user);
+     if (!verified) {
+         throw new AuthException("이메일 인증번호가 올바르지 않거나 만료되었습니다.");
+     }
 
-        // 6️⃣ 토큰 발급
-        return issueTokens(user);
-    }
+     // 5️⃣ 사용자 생성
+     User user = User.builder()
+             .username(request.getUsername())
+             .password(passwordEncoder.encode(request.getPassword()))
+             .email(encryptedEmail) // 🔐 암호화된 이메일 저장
+             .role(Role.ROLE_USER)
+             .provider("LOCAL")
+             .build();
+
+     // 6️⃣ 저장
+     userMapper.save(user);
+
+     // 7️⃣ 토큰 발급
+     return issueTokens(user);
+ }
+
 
     /* =========================
        아이디 찾기
@@ -113,26 +125,34 @@ public class AuthServiceImpl implements AuthService {
     /* =========================
     비밀번호 찾기 요청 (JWT)
     ========================= */
- @Override
- public void requestPasswordReset(String email) {
+    @Override
+    public void requestPasswordReset(SignupRequestDTO request) {
 
-     // 1️⃣ 이메일 암호화 (signup과 동일)
-     String encryptedEmail = Aes256Util.encrypt(email);
+        String username = request.getUsername();
+        String email = request.getEmail();
 
-     User user = userMapper.findByEmail(encryptedEmail)
-             .orElseThrow(() -> new AuthException("등록된 이메일이 없습니다."));
+        // 1️⃣ 아이디 기준 사용자 조회
+        User user = userMapper.findByUsername(username)
+                .orElseThrow(() -> new AuthException("등록된 아이디가 없습니다."));
 
-     // 2️⃣ 비밀번호 재설정 전용 JWT 생성
-     String resetToken =
-             jwtProvider.createPasswordResetToken(user);
+        // 2️⃣ 이메일 비교 (암호화해서 비교)
+        String encryptedEmail = Aes256Util.encrypt(email);
 
-     // 3️⃣ 프론트 비밀번호 재설정 페이지 링크
-     String resetLink =
-             "http://localhost:5173/reset-password?token=" + resetToken;
+        if (!encryptedEmail.equals(user.getEmail())) {
+            throw new AuthException("등록된 이메일이 다릅니다.");
+        }
 
-     // 4️⃣ 메일 전송 (평문 이메일)
-     mailService.sendPasswordResetMail(email, resetLink);
- }
+        // 3️⃣ 비밀번호 재설정 전용 JWT 생성
+        String resetToken = jwtProvider.createPasswordResetToken(user);
+
+        // 4️⃣ 프론트 비밀번호 재설정 링크
+        String resetLink =
+                "http://localhost:5173/reset-password?token=" + resetToken;
+
+        // 5️⃣ 메일 전송 (평문 이메일)
+        mailService.sendPasswordResetMail(email, resetLink);
+    }
+
 
  /* =========================
  비밀번호 재설정 (JWT)

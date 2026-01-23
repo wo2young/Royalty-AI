@@ -4,19 +4,29 @@ import com.royalty.backend.auth.dto.AuthResponseDTO;
 import com.royalty.backend.auth.dto.LoginRequestDTO;
 import com.royalty.backend.auth.dto.SignupRequestDTO;
 import com.royalty.backend.auth.dto.TokenResponseDTO;
+import com.royalty.backend.auth.exception.AuthException;
 import com.royalty.backend.auth.service.AuthService;
+import com.royalty.backend.config.Aes256Util;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.royalty.backend.auth.kakao.KakaoLoginRequestDTO;
 import com.royalty.backend.auth.dto.FindUsernameRequestDTO;
+import com.royalty.backend.auth.mail.MailService;
+import com.royalty.backend.auth.mapper.UserMapper;
+
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
+    private final MailService mailService;
+    private final UserMapper userMapper;
+
 
     /* =========================
        일반 로그인
@@ -37,6 +47,30 @@ public class AuthController {
     ) {
         return ResponseEntity.ok(authService.signup(request));
     }
+    
+    /* =========================
+    회원가입 이메일 인증번호 발송
+    ========================= */
+    @PostMapping("/email/send")
+    public ResponseEntity<Void> sendSignupAuthCode(
+            @RequestBody SignupRequestDTO request
+    ) {
+        String email = request.getEmail();
+
+        // 🔐 이메일 암호화 (signup과 동일)
+        String encryptedEmail = Aes256Util.encrypt(email);
+
+        // ❌ 이미 가입된 이메일이면 차단
+        if (userMapper.existsByEmail(encryptedEmail) > 0) {
+            throw new AuthException("이미 가입된 이메일입니다.");
+        }
+
+        // ✅ 신규 이메일만 인증번호 발송
+        mailService.sendSignupAuthCode(email);
+        return ResponseEntity.ok().build();
+    }
+
+
 
     /* =========================
        토큰 재발급
@@ -86,13 +120,17 @@ public class AuthController {
 	 /* =========================
 	   비밀번호 재설정 요청 (메일 발송)
 	   ========================= */
-	@PostMapping("/password/reset-request")
-	public ResponseEntity<Void> requestPasswordReset(
-	        @RequestParam String email
-	) {
-	    authService.requestPasswordReset(email);
-	    return ResponseEntity.ok().build();
-	}
+	 /* =========================
+	   비밀번호 재설정 요청 (메일 발송)
+	   ========================= */
+	 @PostMapping("/password/reset-request")
+	 public ResponseEntity<Void> requestPasswordReset(
+	         @RequestBody SignupRequestDTO request
+	 ) {
+	     authService.requestPasswordReset(request);
+	     return ResponseEntity.ok().build();
+	 }
+
 	
 	/* =========================
 	   비밀번호 재설정 (JWT)

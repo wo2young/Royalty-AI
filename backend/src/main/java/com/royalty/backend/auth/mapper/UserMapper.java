@@ -32,6 +32,8 @@ public interface UserMapper {
     
     void updatePassword(User user);
     
+    
+    
 
     
     

@@ -19,6 +19,10 @@ public interface AuthService {
     
     void findUsernameByEmail(String email);
     
-    void requestPasswordReset(String email);
+    void requestPasswordReset(SignupRequestDTO request);
     void resetPassword(String token, String newPassword);
+    
+    
+    
+    
 }
