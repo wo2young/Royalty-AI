@@ -1,21 +1,13 @@
-import {
-  ArrowLeft,
-  ImageIcon,
-  TrendingDown,
-  Info,
-  ShieldCheck,
-} from "lucide-react"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/shared/components/ui/card"
+import { ArrowLeft, BarChart3, Brain, Fingerprint } from "lucide-react"
+import { Card } from "@/shared/components/ui/card"
 import { Link, useParams } from "react-router-dom"
-import { BrandHistoryChart } from "../components/BrandHistoryChart"
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
+import { BrandDetailTabs } from "@/features/brand/components/brand-detail/BrandDetailTabs"
+import { AnimatePresence, motion } from "framer-motion"
+import { useState } from "react"
+import { TabEmptyState } from "../components/brand-detail/TabEmptyState"
+import { BrandHistoryChart } from "../components/brand-detail/BrandHistoryChart"
 
 const myBrands = [
   {
@@ -85,16 +77,21 @@ const myBrands = [
 ]
 
 const historyData = [
-  { date: "2020.01", logoSimilarity: 100, nameSimilarity: 100 },
-  { date: "2022.01", logoSimilarity: 85, nameSimilarity: 92 },
-  { date: "2024.01", logoSimilarity: 72, nameSimilarity: 85 },
-  { date: "2026.01", logoSimilarity: 65, nameSimilarity: 78 },
+  { date: "2020.01", imageSimilarity: 100, textSimilarity: 100 },
+  { date: "2022.01", imageSimilarity: 85, textSimilarity: 92 },
+  { date: "2024.01", imageSimilarity: 72, textSimilarity: 85 },
+  { date: "2026.01", imageSimilarity: 65, textSimilarity: 78 },
 ]
 
 export default function BrandDetailPage() {
   const { id } = useParams<{ id: string }>()
-
+  const [activeTab, setActiveTab] = useState("history")
   const brandData = myBrands.find((b) => b.id === Number(id))
+
+  // 데이터 존재 여부 확인 (실제 API 연동 시 이 부분을 데이터 유무로 체크하세요)
+  const hasHistory = historyData && historyData.length > 0
+  const hasAI = false // 현재 데이터가 없으므로 false 예시
+  const hasBI = false // 현재 데이터가 없으므로 false 예시
 
   if (!brandData) {
     return <div className="p-20 text-center">브랜드를 찾을 수 없습니다.</div>
@@ -102,7 +99,6 @@ export default function BrandDetailPage() {
 
   return (
     <div className="min-h-screen pb-20 bg-background">
-      {/* 상단 네비게이션 & 헤더 배경 */}
       <div className="bg-white border-b border-slate-200/60">
         <div className="mx-auto max-w-6xl px-4 py-6">
           <Link
@@ -151,84 +147,86 @@ export default function BrandDetailPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 py-10 bg-background">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* 통계 및 요약 */}
-          <div className="space-y-6 lg:col-span-1">
-            <Card className="border-none shadow-sm bg-linear-to-br from-slate-900 to-slate-800 text-white">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium opacity-80 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4" /> 브랜드 보호 지수
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">Safe</div>
-                <p className="mt-1 text-xs opacity-60">
-                  현재 브랜드 유사도 위협이 낮은 상태입니다.
-                </p>
-                <div className="mt-4 h-1.5 w-full rounded-full bg-white/20">
-                  <div className="h-full w-[85%] rounded-full bg-white" />
-                </div>
-              </CardContent>
-            </Card>
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <div className="space-y-8">
+          <BrandDetailTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            <Card className="border shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  최근 변화 요약
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">로고 유사도</span>
-                  <span className="flex items-center gap-1 font-semibold text-orange-500">
-                    <TrendingDown className="h-4 w-4" /> 65%
-                  </span>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {/*  종합 분석 */}
+              {activeTab === "summary" && (
+                <div className="flex flex-col gap-8">
+                  {/* 데이터가 하나라도 있는 경우 카드 리스트 노출 */}
+                  {hasAI || hasHistory || hasBI ? (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-900 ml-1">
+                        종합 분석 리포트
+                      </h2>
+                      {hasAI && (
+                        <Card className="p-6">AI 분석 요약 내용...</Card>
+                      )}
+                      {hasHistory && <BrandHistoryChart data={historyData} />}
+                      {hasBI && (
+                        <Card className="p-6">BI 분석 요약 내용...</Card>
+                      )}
+                    </>
+                  ) : (
+                    /* 모든 데이터가 없을 때만 종합 Empty 화면 노출 */
+                    <TabEmptyState
+                      icon={BarChart3}
+                      title="생성된 리포트가 없습니다"
+                      description="개별 탭에서 분석을 진행하면 종합 리포트가 구성됩니다."
+                    />
+                  )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">명칭 독창성</span>
-                  <span className="font-semibold text-emerald-500">높음</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
 
-          {/* 메인 차트 영역 */}
-          <div className="lg:col-span-2">
-            <Card className="border shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <ImageIcon className="h-5 w-5 text-primary" />
-                    상표 변천사 분석
-                  </CardTitle>
-                  <CardDescription>
-                    시간 경과에 따른 시장 내 유사 상표 추이를 분석합니다
-                  </CardDescription>
-                </div>
-                <Button variant="ghost" size="icon">
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="h-87.5 w-full rounded-xl bg-slate-50/50 p-4">
-                  {/* 실제 차트 컴포넌트 */}
+              {/* 개별 탭 */}
+              {activeTab === "history" &&
+                (hasHistory ? (
                   <BrandHistoryChart data={historyData} />
-                </div>
+                ) : (
+                  <TabEmptyState
+                    icon={BarChart3}
+                    title="변천사 데이터가 없습니다"
+                    description="나의 브랜드 분석을 시작해보세요!"
+                    actionLabel="분석 하러 가기"
+                    onAction={() => alert("")} //TODO: 분석 페이지로 이동
+                  />
+                ))}
 
-                <div className="mt-6 grid grid-cols-2 gap-4 rounded-lg border border-slate-100 p-4">
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">최초 유사도</p>
-                    <p className="text-lg font-bold">100%</p>
-                  </div>
-                  <div className="text-center border-l">
-                    <p className="text-xs text-muted-foreground">현재 유사도</p>
-                    <p className="text-lg font-bold text-primary">65%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              {activeTab === "ai" &&
+                (hasAI ? (
+                  <Card>AI 결과</Card>
+                ) : (
+                  <TabEmptyState
+                    icon={Brain}
+                    title="AI 분석이 필요합니다"
+                    description="잠재적 리스크를 진단해 보세요."
+                    actionLabel="AI 분석하러가기"
+                    onAction={() => alert("")} //TODO: 분석 페이지로 이동
+                  />
+                ))}
+
+              {activeTab === "bi" &&
+                (hasBI ? (
+                  <Card>BI 결과</Card>
+                ) : (
+                  <TabEmptyState
+                    icon={Fingerprint}
+                    title="BI 분석 정보가 없습니다"
+                    description="브랜드 정체성을 분석하세요."
+                    actionLabel="BI 분석"
+                    onAction={() => alert("")} //TODO: BI 분석기능 만들기
+                  />
+                ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>
