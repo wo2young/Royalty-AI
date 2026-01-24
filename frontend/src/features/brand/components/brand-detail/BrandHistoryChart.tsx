@@ -30,7 +30,7 @@ export function BrandHistoryChart({ data }: BrandHistoryChartProps) {
   }
 
   return (
-    <Card className="border-none shadow-sm p-6 bg-white">
+    <Card className="border shadow-sm p-6 bg-white">
       <div className="flex items-center justify-between mb-4">
         <h3 className="flex items-center gap-2 text-primary font-bold">
           <BarChart3 className="h-5 w-5" /> 상표 변천사 추이
