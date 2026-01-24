@@ -8,90 +8,107 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useState } from "react"
 import { TabEmptyState } from "../components/brand-detail/TabEmptyState"
 import { BrandHistoryChart } from "../components/brand-detail/BrandHistoryChart"
+import { BrandAIReportCard } from "../components/brand-detail/BrandAIReportCard"
 
 const myBrands = [
   {
-    id: 1,
-    name: "테크솔루션 주식회사",
-    category: "IT",
-    image_path:
+    brandId: 1,
+    brandName: "테크솔루션 주식회사",
+    category: "IT/서비스",
+    description: "혁신적인 AI 기반 클라우드 보안 솔루션을 제공합니다.",
+    currentLogoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    description:
-      "혁신적인 IT 솔루션을 제공하는 기업으로, 클라우드 서비스 및 AI 기반 소프트웨어 개발을 전문으로 합니다. 글로벌 시장 진출을 목표로 지속적인 기술 혁신을 이어가고 있습니다.",
-    created_at: "2020.01.15",
+    createdAt: "2026.01.15",
+    historyList: [
+      {
+        historyId: 10,
+        version: "v2",
+        imageSimilarity: 12.5,
+        textSimilarity: 5.0,
+        createdAt: "2026-01-22T14:30:00",
+      },
+      {
+        historyId: 5,
+        version: "v1",
+        imageSimilarity: 45.8,
+        textSimilarity: 10.2,
+        createdAt: "2026-01-10T10:00:00",
+      },
+    ],
+    reportList: [
+      {
+        reportId: 101,
+        title: "상표권 침해 가능성 및 로고 유사성 분석",
+        summary:
+          "현재 로고는 기존 IT 서비스 군의 상표들과 낮은 유사도를 보이고 있어 안정적입니다.",
+        riskScore: 24,
+        suggestions: ["메인 컬러 채도 조절", "폰트 독창성 확보"],
+        createdAt: "2026-01-22T14:30:00",
+      },
+    ],
   },
   {
-    id: 2,
-    name: "이노베이션랩",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 2,
+    brandName: "이노베이션 메디컬",
     category: "MEDICAL",
-    created_at: "2026.01.08",
+    description:
+      "차세대 원격 진료 및 스마트 헬스케어 시스템을 개발하는 의료 전문 기업입니다.",
+    currentLogoPath:
+      "https://images.unsplash.com/photo-1505751172107-5739a00723a5?auto=format&fit=crop&q=80&w=200",
+    createdAt: "2026.01.08",
+    historyList: [], // 데이터 없는 상태 테스트용 (Empty State)
+    reportList: [], // 데이터 없는 상태 테스트용 (Empty State)
   },
   {
-    id: 3,
-    name: "퓨처테크",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 3,
+    brandName: "퓨처푸드 랩",
     category: "FOOD",
-    created_at: "2025.12.20",
+    description:
+      "지속 가능한 미래 식량을 연구하고 친환경 대체육 솔루션을 제안합니다.",
+    currentLogoPath:
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200",
+    createdAt: "2025.12.20",
+    historyList: [
+      {
+        historyId: 11,
+        version: "v1",
+        imageSimilarity: 88.2,
+        textSimilarity: 95.0,
+        createdAt: "2025-12-20T09:00:00",
+      },
+    ],
+    reportList: [
+      {
+        reportId: 102,
+        title: "신규 로고 시장 적합성 분석",
+        summary:
+          "식품 업계의 전형적인 그린 컬러를 사용하여 신뢰감을 주지만, 경쟁사와 로고 형태가 매우 유사하여 리스크가 높습니다.",
+        riskScore: 78, // 리스크가 높은 케이스 테스트
+        suggestions: ["로고 심볼의 차별화 필요", "보조 색상 도입 권장"],
+        createdAt: "2025-12-25T11:00:00",
+      },
+    ],
   },
-  {
-    id: 4,
-    name: "스마트솔루션",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    category: "COMMERCE",
-    created_at: "2025.12.15",
-  },
-  {
-    id: 5,
-    name: "디지털웍스",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    category: "CONTENT",
-    created_at: "2025.12.10",
-  },
-  {
-    id: 6,
-    name: "클라우드허브",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    category: "PET",
-    created_at: "2025.12.05",
-  },
-  {
-    id: 7,
-    name: "데이터플로우",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    category: "FINANCE",
-    created_at: "2025.11.28",
-  },
-  {
-    id: 8,
-    name: "넥스트젠AI",
-    category: "MANUFACTURING",
-    created_at: "2025.11.20",
-  },
-]
-
-const historyData = [
-  { date: "2020.01", imageSimilarity: 100, textSimilarity: 100 },
-  { date: "2022.01", imageSimilarity: 85, textSimilarity: 92 },
-  { date: "2024.01", imageSimilarity: 72, textSimilarity: 85 },
-  { date: "2026.01", imageSimilarity: 65, textSimilarity: 78 },
 ]
 
 export default function BrandDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState("history")
-  const brandData = myBrands.find((b) => b.id === Number(id))
+  const brandData = myBrands.find((b) => b.brandId === Number(id))
+
+  const formattedHistory =
+    brandData?.historyList
+      ?.map((item) => ({
+        date: item.createdAt.split("T")[0].replace(/-/g, "."), // "2026-01-22" -> "2026.01.22"
+        imageSimilarity: item.imageSimilarity,
+        textSimilarity: item.textSimilarity,
+      }))
+      .reverse() || []
 
   // 데이터 존재 여부 확인 (실제 API 연동 시 이 부분을 데이터 유무로 체크하세요)
-  const hasHistory = historyData && historyData.length > 0
-  const hasAI = false // 현재 데이터가 없으므로 false 예시
-  const hasBI = false // 현재 데이터가 없으므로 false 예시
+  const hasHistory = formattedHistory.length > 0
+  const hasAI = (brandData?.reportList?.length ?? 0) > 0
+  const hasBI = false // 현재 데이터가 없으므로 false
 
   if (!brandData) {
     return <div className="p-20 text-center">브랜드를 찾을 수 없습니다.</div>
@@ -113,8 +130,8 @@ export default function BrandDetailPage() {
             <div className="flex items-start gap-5">
               <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl border bg-white shadow-xl shadow-slate-200/50">
                 <img
-                  src={brandData.image_path || "/placeholder.svg"}
-                  alt={brandData.name}
+                  src={brandData.currentLogoPath || "/placeholder.svg"}
+                  alt={brandData.brandName}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -125,11 +142,11 @@ export default function BrandDetailPage() {
                     {brandData.category}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    등록일: {brandData.created_at}
+                    등록일: {brandData.createdAt}
                   </span>
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                  {brandData.name}
+                  {brandData.brandName}
                 </h1>
                 <p className="max-w-xl text-balance text-sm leading-relaxed text-muted-foreground">
                   {brandData.description}
@@ -168,9 +185,11 @@ export default function BrandDetailPage() {
                         종합 분석 리포트
                       </h2>
                       {hasAI && (
-                        <Card className="p-6">AI 분석 요약 내용...</Card>
+                        <BrandAIReportCard report={brandData.reportList[0]} />
                       )}
-                      {hasHistory && <BrandHistoryChart data={historyData} />}
+                      {hasHistory && (
+                        <BrandHistoryChart data={formattedHistory} />
+                      )}
                       {hasBI && (
                         <Card className="p-6">BI 분석 요약 내용...</Card>
                       )}
@@ -189,7 +208,7 @@ export default function BrandDetailPage() {
               {/* 개별 탭 */}
               {activeTab === "history" &&
                 (hasHistory ? (
-                  <BrandHistoryChart data={historyData} />
+                  <BrandHistoryChart data={formattedHistory} />
                 ) : (
                   <TabEmptyState
                     icon={BarChart3}
@@ -201,15 +220,15 @@ export default function BrandDetailPage() {
                 ))}
 
               {activeTab === "ai" &&
-                (hasAI ? (
-                  <Card>AI 결과</Card>
+                (brandData.reportList.length > 0 ? (
+                  <BrandAIReportCard report={brandData.reportList[0]} /> // 첫 번째 리포트 노출
                 ) : (
                   <TabEmptyState
                     icon={Brain}
-                    title="AI 분석이 필요합니다"
-                    description="잠재적 리스크를 진단해 보세요."
-                    actionLabel="AI 분석하러가기"
-                    onAction={() => alert("")} //TODO: 분석 페이지로 이동
+                    title="AI 분석 리포트가 없습니다"
+                    description="브랜드 로고와 네이밍을 AI가 정밀 분석하여 리스크를 예방해 드립니다."
+                    actionLabel="지금 분석 시작하기"
+                    onAction={() => console.log("분석 시작")}
                   />
                 ))}
 
