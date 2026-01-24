@@ -44,7 +44,7 @@ export function BrandHistoryChart({ data }: BrandHistoryProps) {
             />
 
             <XAxis
-              dataKey="date"
+              dataKey="createdAt"
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 12, fill: colors.text, fontWeight: 500 }}
