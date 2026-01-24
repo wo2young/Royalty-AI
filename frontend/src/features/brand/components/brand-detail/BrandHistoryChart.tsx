@@ -10,15 +10,10 @@ import {
   AreaChart,
   Area,
 } from "recharts"
-
-interface HistoryDataPoint {
-  date: string
-  imageSimilarity: number
-  textSimilarity: number
-}
+import type { ChartData } from "../../types"
 
 interface BrandHistoryChartProps {
-  data: HistoryDataPoint[]
+  data: ChartData[]
 }
 
 export function BrandHistoryChart({ data }: BrandHistoryChartProps) {

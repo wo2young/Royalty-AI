@@ -1,15 +1,9 @@
 import { Brain, AlertCircle, CheckCircle2, Lightbulb } from "lucide-react"
 import { Card } from "@/shared/components/ui/card"
+import type { BrandReport } from "../../types"
 
 interface AIReportProps {
-  report: {
-    reportId: number
-    title: string
-    summary: string
-    riskScore: number // 0 ~ 100
-    suggestions: string[]
-    createdAt: string
-  }
+  report: BrandReport
 }
 
 export function BrandAIReportCard({ report }: AIReportProps) {

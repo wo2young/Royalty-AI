@@ -1,14 +1,13 @@
-import { ArrowLeft, BarChart3, Brain, Fingerprint } from "lucide-react"
-import { Card } from "@/shared/components/ui/card"
-import { Link, useParams } from "react-router-dom"
-import { Badge } from "@/shared/components/ui/badge"
-import { Button } from "@/shared/components/ui/button"
+import { Fingerprint } from "lucide-react"
+import { useParams } from "react-router-dom"
 import { BrandDetailTabs } from "@/features/brand/components/brand-detail/BrandDetailTabs"
 import { AnimatePresence, motion } from "framer-motion"
 import { useState } from "react"
 import { TabEmptyState } from "../components/brand-detail/TabEmptyState"
-import { BrandHistoryChart } from "../components/brand-detail/BrandHistoryChart"
-import { BrandAIReportCard } from "../components/brand-detail/BrandAIReportCard"
+import { BrandDetailHeader } from "../components/brand-detail/BrandDetailHeader"
+import { BrandHistoryTab } from "../components/brand-detail/BrandHistoryTab"
+import { BrandAITab } from "../components/brand-detail/BrandAITab"
+import { BrandSummaryTab } from "../components/brand-detail/BrandSummaryTab"
 
 const myBrands = [
   {
@@ -116,53 +115,7 @@ export default function BrandDetailPage() {
 
   return (
     <div className="min-h-screen pb-20 bg-background">
-      <div className="bg-white border-b border-slate-200/60">
-        <div className="mx-auto max-w-6xl px-4 py-6">
-          <Link
-            to="/mypage/brand"
-            className="group mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            나의 브랜드 목록으로
-          </Link>
-
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="flex items-start gap-5">
-              <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl border bg-white shadow-xl shadow-slate-200/50">
-                <img
-                  src={brandData.currentLogoPath || "/placeholder.svg"}
-                  alt={brandData.brandName}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-2.5">
-                    {brandData.category}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    등록일: {brandData.createdAt}
-                  </span>
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                  {brandData.brandName}
-                </h1>
-                <p className="max-w-xl text-balance text-sm leading-relaxed text-muted-foreground">
-                  {brandData.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                정보 수정
-              </Button>
-              <Button size="sm">리포트 다운로드</Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <BrandDetailHeader brand={brandData} />
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="space-y-8">
@@ -175,75 +128,36 @@ export default function BrandDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              {/*  종합 분석 */}
               {activeTab === "summary" && (
-                <div className="flex flex-col gap-8">
-                  {/* 데이터가 하나라도 있는 경우 카드 리스트 노출 */}
-                  {hasAI || hasHistory || hasBI ? (
-                    <>
-                      <h2 className="text-xl font-bold text-slate-900 ml-1">
-                        종합 분석 리포트
-                      </h2>
-                      {hasAI && (
-                        <BrandAIReportCard report={brandData.reportList[0]} />
-                      )}
-                      {hasHistory && (
-                        <BrandHistoryChart data={formattedHistory} />
-                      )}
-                      {hasBI && (
-                        <Card className="p-6">BI 분석 요약 내용...</Card>
-                      )}
-                    </>
-                  ) : (
-                    /* 모든 데이터가 없을 때만 종합 Empty 화면 노출 */
-                    <TabEmptyState
-                      icon={BarChart3}
-                      title="생성된 리포트가 없습니다"
-                      description="개별 탭에서 분석을 진행하면 종합 리포트가 구성됩니다."
-                    />
-                  )}
-                </div>
+                <BrandSummaryTab
+                  report={brandData.reportList[0]}
+                  historyData={formattedHistory}
+                  hasAI={hasAI}
+                  hasHistory={hasHistory}
+                  hasBI={hasBI}
+                />
               )}
 
-              {/* 개별 탭 */}
-              {activeTab === "history" &&
-                (hasHistory ? (
-                  <BrandHistoryChart data={formattedHistory} />
-                ) : (
-                  <TabEmptyState
-                    icon={BarChart3}
-                    title="변천사 데이터가 없습니다"
-                    description="나의 브랜드 분석을 시작해보세요!"
-                    actionLabel="분석 하러 가기"
-                    onAction={() => alert("")} //TODO: 분석 페이지로 이동
-                  />
-                ))}
+              {activeTab === "history" && (
+                <BrandHistoryTab
+                  historyData={formattedHistory}
+                  hasHistory={hasHistory}
+                />
+              )}
 
-              {activeTab === "ai" &&
-                (brandData.reportList.length > 0 ? (
-                  <BrandAIReportCard report={brandData.reportList[0]} /> // 첫 번째 리포트 노출
-                ) : (
-                  <TabEmptyState
-                    icon={Brain}
-                    title="AI 분석 리포트가 없습니다"
-                    description="브랜드 로고와 네이밍을 AI가 정밀 분석하여 리스크를 예방해 드립니다."
-                    actionLabel="지금 분석 시작하기"
-                    onAction={() => console.log("분석 시작")}
-                  />
-                ))}
+              {activeTab === "ai" && (
+                <BrandAITab reportList={brandData.reportList} />
+              )}
 
-              {activeTab === "bi" &&
-                (hasBI ? (
-                  <Card>BI 결과</Card>
-                ) : (
-                  <TabEmptyState
-                    icon={Fingerprint}
-                    title="BI 분석 정보가 없습니다"
-                    description="브랜드 정체성을 분석하세요."
-                    actionLabel="BI 분석"
-                    onAction={() => alert("")} //TODO: BI 분석기능 만들기
-                  />
-                ))}
+              {activeTab === "bi" && (
+                <TabEmptyState
+                  icon={Fingerprint}
+                  title="BI 분석 정보가 없습니다"
+                  description="브랜드 정체성을 분석하세요."
+                  actionLabel="BI 분석 시작"
+                  onAction={() => {}}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
