@@ -98,7 +98,9 @@ export default function BrandDetailPage() {
   const formattedHistory =
     brandData?.historyList
       ?.map((item) => ({
-        date: item.createdAt.split("T")[0].replace(/-/g, "."), // "2026-01-22" -> "2026.01.22"
+        historyId: item.historyId,
+        version: item.version,
+        createdAt: item.createdAt.split("T")[0].replace(/-/g, "."), // "2026-01-22" -> "2026.01.22"
         imageSimilarity: item.imageSimilarity,
         textSimilarity: item.textSimilarity,
       }))

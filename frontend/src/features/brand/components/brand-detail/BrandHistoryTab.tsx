@@ -1,10 +1,10 @@
 import { BarChart3 } from "lucide-react"
 import { BrandHistoryChart } from "./BrandHistoryChart"
 import { TabEmptyState } from "./TabEmptyState"
-import type { ChartData } from "../../types"
+import type { HistoryData } from "../../types"
 
 interface BrandHistoryTabProps {
-  historyData: ChartData[]
+  historyData: HistoryData[]
   hasHistory: boolean
 }
 

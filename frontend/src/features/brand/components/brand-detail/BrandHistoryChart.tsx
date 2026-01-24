@@ -10,13 +10,13 @@ import {
   AreaChart,
   Area,
 } from "recharts"
-import type { ChartData } from "../../types"
+import type { HistoryData } from "../../types"
 
-interface BrandHistoryChartProps {
-  data: ChartData[]
+interface BrandHistoryProps {
+  data: HistoryData[]
 }
 
-export function BrandHistoryChart({ data }: BrandHistoryChartProps) {
+export function BrandHistoryChart({ data }: BrandHistoryProps) {
   const colors = {
     primary: "#162556",
     secondary: "#6366f1",

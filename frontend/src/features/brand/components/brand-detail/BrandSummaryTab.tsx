@@ -4,11 +4,11 @@ import { BrandHistoryChart } from "./BrandHistoryChart"
 import { TabEmptyState } from "./TabEmptyState"
 import { Card } from "@/shared/components/ui/card"
 import type { BrandReport } from "../../types"
-import type { ChartData } from "../../types"
+import type { HistoryData } from "../../types"
 
 interface BrandSummaryTabProps {
   report: BrandReport
-  historyData: ChartData[]
+  historyData: HistoryData[]
   hasAI: boolean
   hasHistory: boolean
   hasBI: boolean
