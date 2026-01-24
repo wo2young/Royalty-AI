@@ -13,10 +13,10 @@ export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
   return (
     <div className="flex items-center gap-4 p-5 rounded-xl border hover:bg-secondary/40 hover:shadow-md transition-all cursor-pointer group">
       <div className="w-16 h-16 rounded-xl bg-secondary border flex items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/5 transition-all overflow-hidden">
-        {brand.image_path ? (
+        {brand.logoPath ? (
           <img
-            src={brand.image_path}
-            alt={brand.name}
+            src={brand.logoPath}
+            alt={brand.brandName}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -25,10 +25,10 @@ export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
       </div>
 
       <div className="flex-1 min-w-0 space-y-1.5">
-        <h3 className="font-semibold text-foreground">{brand.name}</h3>
+        <h3 className="font-semibold text-foreground">{brand.brandName}</h3>
         <p className="text-sm text-muted-foreground">{brand.category}</p>
         <p className="text-xs text-muted-foreground">
-          등록일: {brand.created_at}
+          등록일: {brand.createdAt.split("T")[0]}
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onView?.(brand.id)}
+          onClick={() => onView?.(brand.brandId)}
           className="h-8 w-8 text-muted-foreground hover:text-primary"
         >
           <Eye className="w-4 h-4" />
@@ -44,7 +44,7 @@ export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onEdit?.(brand.id)}
+          onClick={() => onEdit?.(brand.brandId)}
           className="h-8 w-8 text-muted-foreground hover:text-blue-600"
         >
           <Edit2 className="w-4 h-4" />
@@ -52,7 +52,7 @@ export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onDelete?.(brand.id)}
+          onClick={() => onDelete?.(brand.brandId)}
           className="h-8 w-8 text-muted-foreground hover:text-destructive"
         >
           <Trash2 className="w-4 h-4" />

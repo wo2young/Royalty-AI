@@ -24,7 +24,7 @@ export function BrandList({ brands }: BrandListProps) {
   return (
     <div className="flex flex-col gap-4">
       {brands.map((brand) => (
-        <BrandItem key={brand.id} brand={brand} onView={handleView} />
+        <BrandItem key={brand.brandId} brand={brand} onView={handleView} />
       ))}
     </div>
   )

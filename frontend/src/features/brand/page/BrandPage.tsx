@@ -9,68 +9,84 @@ const ITEMS_PER_PAGE = 5
 
 const myBrands = [
   {
-    id: 1,
-    name: "테크솔루션 주식회사",
+    brandId: 1,
+    brandName: "테크솔루션 주식회사",
     category: "IT",
-    image_path:
+    logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    notificationEnabled: false,
     description:
       "혁신적인 IT 솔루션을 제공하는 기업으로, 클라우드 서비스 및 AI 기반 소프트웨어 개발을 전문으로 합니다. 글로벌 시장 진출을 목표로 지속적인 기술 혁신을 이어가고 있습니다.",
-    created_at: "2020.01.15",
+    createdAt: "2020-01-15T00:00:00",
   },
   {
-    id: 2,
-    name: "이노베이션랩",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 2,
+    brandName: "이노베이션랩",
     category: "MEDICAL",
-    created_at: "2026.01.08",
+    logoPath:
+      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2026-01-08T00:00:00",
   },
   {
-    id: 3,
-    name: "퓨처테크",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 3,
+    brandName: "퓨처테크",
     category: "FOOD",
-    created_at: "2025.12.20",
+    logoPath:
+      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2025-12-20T00:00:00",
   },
   {
-    id: 4,
-    name: "스마트솔루션",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 4,
+    brandName: "스마트솔루션",
     category: "COMMERCE",
-    created_at: "2025.12.15",
+    logoPath:
+      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2025-12-15T00:00:00",
   },
   {
-    id: 5,
-    name: "디지털웍스",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 5,
+    brandName: "디지털웍스",
     category: "CONTENT",
-    created_at: "2025.12.10",
+    logoPath:
+      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2025-12-10T00:00:00",
   },
   {
-    id: 6,
-    name: "클라우드허브",
-    image_path:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    brandId: 6,
+    brandName: "클라우드허브",
     category: "PET",
-    created_at: "2025.12.05",
-  },
-  {
-    id: 7,
-    name: "데이터플로우",
-    image_path:
+    logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    category: "FINANCE",
-    created_at: "2025.11.28",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2025-12-05T00:00:00",
   },
   {
-    id: 8,
-    name: "넥스트젠AI",
+    brandId: 7,
+    brandName: "데이터플로우",
+    category: "FINANCE",
+    logoPath:
+      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2025-11-28T00:00:00",
+  },
+  {
+    brandId: 8,
+    brandName: "넥스트젠AI",
     category: "MANUFACTURING",
-    created_at: "2025.11.20",
+    logoPath: "",
+    notificationEnabled: false,
+    description: "",
+    createdAt: "2025-11-20T00:00:00",
   },
 ]
 
@@ -81,7 +97,7 @@ export default function BrandsPage() {
 
   const filteredBrands = myBrands.filter((brand) => {
     const matchesSearch =
-      brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      brand.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brand.category.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory =
       selectedCategory === "ALL" || brand.category === selectedCategory

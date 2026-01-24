@@ -1,10 +1,11 @@
 export interface Brand {
-  id: number
-  name: string
-  image_path?: string
+  brandId: number
+  brandName: string
+  logoPath?: string
   category: string
-  created_at: string
+  createdAt: string
   description?: string
+  notificationEnabled: boolean
 }
 
 export interface HistoryData {
