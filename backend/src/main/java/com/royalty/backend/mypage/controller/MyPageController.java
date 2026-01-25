@@ -75,6 +75,29 @@ public class MyPageController {
         myPageService.createBrand(userId, brandName, category, description, logoImage);
         return ResponseEntity.ok("브랜드가 성공적으로 등록되었습니다.");
     }
+    
+ // ==========================================
+    // [추가] 브랜드 수정 (이미지는 선택 사항)
+    // 호환성을 위해 PUT 대신 POST 사용 (URL에 ID 포함)
+    // ==========================================
+    @PostMapping(value = "/brand/{brandId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updateBrand(
+            /* @AuthenticationPrincipal Long userId, */
+            @PathVariable Long brandId,
+            @RequestParam(value = "brandName", required = false) String brandName,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "logoImage", required = false) MultipartFile logoImage // ⭐ 수정 시 이미지는 없을 수도 있음
+    ) {
+        Long userId = TEST_USER_ID;
+
+        log.info("브랜드 수정 요청: UserID={}, BrandID={}, NameChange={}", userId, brandId, brandName);
+
+        // 서비스 호출 (이미지가 null이면 기존 이미지 유지)
+        myPageService.updateBrand(userId, brandId, brandName, category, description, logoImage);
+        
+        return ResponseEntity.ok("브랜드 정보가 수정되었습니다.");
+    }
 
     // 삭제
     @DeleteMapping("/brand/{brandId}")

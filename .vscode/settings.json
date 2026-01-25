@@ -1,0 +1,23 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": false
+                }
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "royalty.czikksygigvr.ap-northeast-2.rds.amazonaws.com",
+            "port": 5432,
+            "askForPassword": true,
+            "sshOptions": {
+                "port": 22
+            },
+            "driver": "PostgreSQL",
+            "name": "Royalty AWS",
+            "database": "postgres",
+            "username": "postgres"
+        }
+    ]
+}

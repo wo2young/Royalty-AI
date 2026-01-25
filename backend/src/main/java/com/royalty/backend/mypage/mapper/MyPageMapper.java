@@ -29,6 +29,11 @@ public interface MyPageMapper {
     void updateNotificationStatus(@Param("userId") Long userId, 
                                   @Param("brandId") Long brandId, 
                                   @Param("isEnabled") boolean isEnabled);
+    
+    void updateBrand(BrandDTO brandDTO);
+
+	 // @Param 어노테이션을 쓰면 XML에서 #{brandId}, #{imagePath}로 바로 인식됩니다.
+	 void updateBrandLogo(@Param("brandId") Long brandId, @Param("imagePath") String imagePath);
 
     // 브랜드 삭제
     void deleteBrand(@Param("userId") Long userId, @Param("brandId") Long brandId);
