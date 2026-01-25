@@ -1,15 +1,18 @@
-import { Building2, ArrowLeft } from "lucide-react"
+import { Building2, ArrowLeft, Plus } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
 import { BookmarkSearch } from "@/features/bookmark/components/BookmarkSearch"
 import { BrandList } from "../components/BrandList"
 import { useBrands } from "../api/brand.queries"
+import { Button } from "@/shared/components/ui/button"
+import { AddBrandModal } from "../components/modal/AddBrandModal"
 
 const ITEMS_PER_PAGE = 5
 
 export default function BrandsPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState("ALL")
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -66,6 +69,13 @@ export default function BrandsPage() {
                 등록한 브랜드(로고/상호)를 관리합니다
               </p>
             </div>
+            <Button
+              className="gap-2 shadow-sm"
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              <Plus className="w-4 h-4" />
+              브랜드 추가
+            </Button>
           </div>
         </div>
 
@@ -91,6 +101,9 @@ export default function BrandsPage() {
           </div>
         )}
       </div>
+
+      {/* 나의 브랜드 추가 모달 */}
+      <AddBrandModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
     </div>
   )
 }
