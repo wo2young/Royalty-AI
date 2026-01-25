@@ -4,98 +4,18 @@ import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
 import { BookmarkSearch } from "@/features/bookmark/components/BookmarkSearch"
 import { BrandList } from "../components/BrandList"
+import { useBrands } from "../api/brand.queries"
 
 const ITEMS_PER_PAGE = 5
-
-const myBrands = [
-  {
-    brandId: 1,
-    brandName: "테크솔루션 주식회사",
-    category: "IT",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description:
-      "혁신적인 IT 솔루션을 제공하는 기업으로, 클라우드 서비스 및 AI 기반 소프트웨어 개발을 전문으로 합니다. 글로벌 시장 진출을 목표로 지속적인 기술 혁신을 이어가고 있습니다.",
-    createdAt: "2020-01-15T00:00:00",
-  },
-  {
-    brandId: 2,
-    brandName: "이노베이션랩",
-    category: "MEDICAL",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2026-01-08T00:00:00",
-  },
-  {
-    brandId: 3,
-    brandName: "퓨처테크",
-    category: "FOOD",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2025-12-20T00:00:00",
-  },
-  {
-    brandId: 4,
-    brandName: "스마트솔루션",
-    category: "COMMERCE",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2025-12-15T00:00:00",
-  },
-  {
-    brandId: 5,
-    brandName: "디지털웍스",
-    category: "CONTENT",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2025-12-10T00:00:00",
-  },
-  {
-    brandId: 6,
-    brandName: "클라우드허브",
-    category: "PET",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2025-12-05T00:00:00",
-  },
-  {
-    brandId: 7,
-    brandName: "데이터플로우",
-    category: "FINANCE",
-    logoPath:
-      "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2025-11-28T00:00:00",
-  },
-  {
-    brandId: 8,
-    brandName: "넥스트젠AI",
-    category: "MANUFACTURING",
-    logoPath: "",
-    notificationEnabled: false,
-    description: "",
-    createdAt: "2025-11-20T00:00:00",
-  },
-]
 
 export default function BrandsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("ALL")
   const [currentPage, setCurrentPage] = useState(1)
 
-  const filteredBrands = myBrands.filter((brand) => {
+  const { data: brands = [], isLoading, isError } = useBrands()
+
+  const filteredBrands = brands.filter((brand) => {
     const matchesSearch =
       brand.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brand.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -120,6 +40,9 @@ export default function BrandsPage() {
     setSelectedCategory(cat)
     setCurrentPage(1) // 카테고리 변경 시 페이지 리셋
   }
+
+  if (isLoading) return <div>로딩 중...</div>
+  if (isError) return <div>데이터를 불러오지 못했습니다.</div>
 
   return (
     <div className="min-h-screen bg-background">
