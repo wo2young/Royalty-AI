@@ -43,7 +43,7 @@ export const brandFormSchema = z.object({
   brandName: z.string().min(1, "브랜드명을 입력해주세요."),
   category: z.string().min(1, "카테고리를 선택해주세요."),
   description: z.string().optional(),
-  logoFile: z.any().optional(), // 파일 검증은 필요에 따라 세밀하게 조절 가능
+  logoImage: z.any().optional(), // 파일 검증은 필요에 따라 세밀하게 조절 가능
 })
 
 export type BrandFormValues = z.infer<typeof brandFormSchema>
