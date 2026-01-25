@@ -5,7 +5,7 @@ export const MOCK_MY_BRANDS_LIST = [
     category: "IT",
     logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
+    notificationEnabled: true,
     description:
       "혁신적인 IT 솔루션을 제공하는 기업으로, 클라우드 서비스 및 AI 기반 소프트웨어 개발을 전문으로 합니다. 글로벌 시장 진출을 목표로 지속적인 기술 혁신을 이어가고 있습니다.",
     createdAt: "2020-01-15T00:00:00",
@@ -127,7 +127,7 @@ export const MOCK_BRAND_DETAILS = [
       "차세대 원격 진료 및 스마트 헬스케어 시스템을 개발하는 의료 전문 기업입니다.",
     currentLogoPath:
       "https://images.unsplash.com/photo-1505751172107-5739a00723a5?auto=format&fit=crop&q=80&w=200",
-    notificationEnabled: false,
+    notificationEnabled: true,
     createdAt: "2026.01.08",
     historyList: [], // 데이터 없는 상태 테스트용 (Empty State)
     reportList: [], // 데이터 없는 상태 테스트용 (Empty State)
