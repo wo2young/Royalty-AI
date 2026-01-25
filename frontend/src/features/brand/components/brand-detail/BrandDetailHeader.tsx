@@ -1,19 +1,44 @@
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Bell, BellOff } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
+import { useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 
 interface BrandDetailHeaderProps {
   brand: {
+    brandId: number
     brandName: string
     category: string
     currentLogoPath: string
     description: string
     createdAt: string
+    notificationEnabled: boolean
   }
+  hasHistory: boolean
+  onToggleNotify?: (id: number, enabled: boolean) => void
 }
 
-export function BrandDetailHeader({ brand }: BrandDetailHeaderProps) {
+export function BrandDetailHeader({
+  brand,
+  hasHistory,
+  onToggleNotify,
+}: BrandDetailHeaderProps) {
+  const [showBadge, setShowBadge] = useState(false)
+  const isActive = brand.notificationEnabled
+  const isDisableNotify = !hasHistory
+
+  const handleNotifyClick = () => {
+    if (isDisableNotify) return
+    const nextState = !isActive
+    onToggleNotify?.(brand.brandId, nextState)
+
+    if (nextState) {
+      setShowBadge(true)
+      setTimeout(() => setShowBadge(false), 1000)
+    }
+  }
+
   return (
     <div className="bg-white border-b border-slate-200/60">
       <div className="mx-auto max-w-6xl px-4 py-6">
@@ -34,7 +59,6 @@ export function BrandDetailHeader({ brand }: BrandDetailHeaderProps) {
                 className="h-full w-full object-cover"
               />
             </div>
-
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-2.5">
@@ -53,7 +77,41 @@ export function BrandDetailHeader({ brand }: BrandDetailHeaderProps) {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          {/* 버튼 영역 */}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <AnimatePresence>
+                {showBadge && (
+                  <motion.span
+                    initial={{ opacity: 0, y: 0 }}
+                    animate={{ opacity: 1, y: -30 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute left-1/2 -translate-x-1/2 px-2 py-0.5 bg-indigo-600 text-[10px] font-bold text-white rounded-full"
+                  >
+                    On
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNotifyClick}
+                disabled={isDisableNotify}
+                className={`gap-2 transition-all ${
+                  isActive
+                    ? "border-indigo-500 text-indigo-600 bg-indigo-50 hover:text-indigo-700"
+                    : ""
+                } ${isDisableNotify ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
+              >
+                {isDisableNotify || !isActive ? (
+                  <BellOff className="h-4 w-4" />
+                ) : (
+                  <Bell className="h-4 w-4 fill-current animate-[ring_0.5s_ease-in-out]" />
+                )}
+              </Button>
+            </div>
+
             <Button variant="outline" size="sm">
               정보 수정
             </Button>

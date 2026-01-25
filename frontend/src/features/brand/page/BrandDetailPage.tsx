@@ -8,11 +8,12 @@ import { BrandDetailHeader } from "../components/brand-detail/BrandDetailHeader"
 import { BrandHistoryTab } from "../components/brand-detail/BrandHistoryTab"
 import { BrandAITab } from "../components/brand-detail/BrandAITab"
 import { BrandSummaryTab } from "../components/brand-detail/BrandSummaryTab"
-import { useBrandDetail } from "../api/brand.queries"
+import { useBrandDetail, useToggleNotification } from "../api/brand.queries"
 
 export default function BrandDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState("history")
+  const { mutate: toggleNotify } = useToggleNotification()
 
   const { data: brandData, isLoading, isError } = useBrandDetail(Number(id))
 
@@ -42,13 +43,21 @@ export default function BrandDetailPage() {
   const hasAI = (brandData?.reportList?.length ?? 0) > 0
   const hasBI = false // 현재 데이터가 없으므로 false
 
+  const handleToggleNotify = (brandId: number, enabled: boolean) => {
+    toggleNotify({ brandId, enabled })
+  }
+
   if (!brandData) {
     return <div className="p-20 text-center">브랜드를 찾을 수 없습니다.</div>
   }
 
   return (
     <div className="min-h-screen pb-20 bg-background">
-      <BrandDetailHeader brand={brandData} />
+      <BrandDetailHeader
+        brand={brandData}
+        hasHistory={hasHistory}
+        onToggleNotify={handleToggleNotify}
+      />
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="space-y-8">

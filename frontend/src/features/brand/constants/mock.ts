@@ -89,7 +89,7 @@ export const MOCK_BRAND_DETAILS = [
     description: "혁신적인 AI 기반 클라우드 보안 솔루션을 제공합니다.",
     currentLogoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
-    notificationEnabled: false,
+    notificationEnabled: true,
     createdAt: "2026.01.15",
     historyList: [
       {
