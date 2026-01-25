@@ -29,6 +29,7 @@ import {
 import { brandFormSchema, type BrandFormValues } from "../../types"
 import { useState } from "react"
 import { Textarea } from "@/shared/components/ui/textarea"
+import { useCreateBrand } from "../../api/brand.queries"
 
 interface AddBrandModalProps {
   open: boolean
@@ -36,6 +37,7 @@ interface AddBrandModalProps {
 }
 
 export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
+  const { mutate: createBrand, isPending } = useCreateBrand()
   const [isDragging, setIsDragging] = useState(false)
 
   const form = useForm<BrandFormValues>({
@@ -72,10 +74,27 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
   const [brandName, category, logoImage] = watchedValues
 
   const onSubmit = (data: BrandFormValues) => {
-    console.log("제출 데이터:", data)
-    // API 호출 로직 (useMutation 등)
-    onOpenChange(false)
-    form.reset()
+    const formData = new FormData()
+    formData.append("brandName", data.brandName)
+    formData.append("category", data.category)
+    if (data.description) formData.append("description", data.description)
+
+    if (data.logoImage) {
+      formData.append("logoImage", data.logoImage)
+    }
+
+    createBrand(formData, {
+      onSuccess: () => {
+        onOpenChange(false)
+        form.reset()
+        //TODO: Toast 알림
+      },
+      onError: (error) => {
+        console.error("등록 실패:", error)
+        alert("브랜드 등록 중 오류가 발생했습니다.")
+        //TODO: Toast 알림
+      },
+    })
   }
 
   return (
@@ -230,7 +249,9 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                   >
                     취소
                   </Button>
-                  <Button type="submit">브랜드 등록</Button>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? "등록 중..." : "브랜드 등록"}
+                  </Button>
                 </div>
               </form>
             </Form>

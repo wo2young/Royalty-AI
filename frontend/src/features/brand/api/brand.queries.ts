@@ -32,6 +32,18 @@ export const useToggleNotification = () => {
   })
 }
 
+// 브랜드 추가
+export const useCreateBrand = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (brandData: FormData) => brandApi.createBrand(brandData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
+    },
+  })
+}
+
 // 브랜드 삭제
 export const useDeleteBrand = () => {
   const queryClient = useQueryClient()
