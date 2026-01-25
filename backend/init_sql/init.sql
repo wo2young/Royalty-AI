@@ -1,12 +1,16 @@
 -- ==========================================
--- [0] 기본 설정 (시간대 및 확장기능)
+-- [Royalty Team] AWS DB Schema Archive
+-- 작성이: 사용자 & Gemini
+-- 설명: AWS RDS의 최종 배포 상태를 기록한 설계도입니다.
+-- 주의: 이미 배포된 DB에 이 스크립트를 직접 실행하지 마세요. (참고용)
 -- ==========================================
--- 1. 한국 시간대 설정 (DB 세션 레벨)
+
+-- [0] 기본 설정
 SET TIME ZONE 'Asia/Seoul';
 
--- 2. 필수 확장기능 활성화
-CREATE EXTENSION IF NOT EXISTS vector;  -- 벡터 연산용 (필수)
-CREATE EXTENSION IF NOT EXISTS pg_trgm; -- 텍스트 유사도 검색용
+-- 필수 확장기능
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- ==========================================
 -- 1. 사용자 (Users)
@@ -21,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- ==========================================
--- 2. 브랜드 (Brand) - 사용자가 등록한 브랜드
+-- 2. 브랜드 (Brand)
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand (
     brand_id     BIGSERIAL PRIMARY KEY,
@@ -38,12 +42,13 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     logo_id      BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_path   TEXT NOT NULL,
-    image_vector vector(1000), -- ResNet50 (1000차원)
+    -- [중요] AI 모델(MobileNetV2 등) 출력에 맞춰 1280차원 설정
+    image_vector vector(1280),
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
--- 4. 로고 히스토리 (Brand Logo History)
+-- 4. 로고 히스토리
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand_logo_history (
     history_id       BIGSERIAL PRIMARY KEY,
@@ -56,14 +61,14 @@ CREATE TABLE IF NOT EXISTS brand_logo_history (
 );
 
 -- ==========================================
--- 5. 분석 결과 (Brand Analysis)
+-- 5. 분석 결과
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand_analysis (
     analysis_id  BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_score  FLOAT,
     text_score   FLOAT,
-    risk_level   VARCHAR(20), -- 'HIGH', 'MEDIUM', 'LOW'
+    risk_level   VARCHAR(20),
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -78,26 +83,28 @@ CREATE TABLE IF NOT EXISTS patent (
     image_url           TEXT,          -- 이미지 URL
     
     applicant           TEXT,          -- 출원인
-    application_date    DATE,          -- 출원일
-    registered_date     DATE,          -- 등록일
+    application_date    VARCHAR(20),   -- 출원일
+    registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
     
     -- [AI 벡터 데이터]
-    image_vector        vector(1000),  -- ResNet50 (1000차원)
-    text_vector         vector(768),   -- SBERT (768차원)
+    -- AWS 실제 상태 반영: 이미지는 1280차원, 텍스트는 768차원
+    image_vector        vector(1280),  
+    text_vector         vector(768),   
     
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- [인덱스 최적화]
--- 1. 날짜 조회용 B-Tree 인덱스
+-- [인덱스 아카이브]
+-- 1. 날짜 및 상태 조회용 B-Tree
 CREATE INDEX IF NOT EXISTS idx_patent_app_date ON patent(application_date);
 CREATE INDEX IF NOT EXISTS idx_patent_status ON patent(status);
 
--- 2. 벡터 검색용 HNSW 인덱스 (검색 속도 100배 향상)
-CREATE INDEX IF NOT EXISTS idx_patent_image_vec ON patent USING hnsw (image_vector vector_cosine_ops);
-CREATE INDEX IF NOT EXISTS idx_patent_text_vec ON patent USING hnsw (text_vector vector_cosine_ops);
+-- 2. 벡터 검색용 IVFFlat 인덱스 (AWS 적용 완료)
+-- lists=400 옵션은 데이터 32만 개 기준 최적화 값
+CREATE INDEX IF NOT EXISTS patent_image_vector_idx ON patent USING ivfflat (image_vector vector_cosine_ops) WITH (lists = 400);
+CREATE INDEX IF NOT EXISTS patent_text_vector_idx ON patent USING ivfflat (text_vector vector_cosine_ops) WITH (lists = 400);
 
 -- ==========================================
 -- 7. 감지 이벤트 (Detection Event)
@@ -105,7 +112,7 @@ CREATE INDEX IF NOT EXISTS idx_patent_text_vec ON patent USING hnsw (text_vector
 CREATE TABLE IF NOT EXISTS detection_event (
     event_id         BIGSERIAL PRIMARY KEY,
     brand_id         BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
-    patent_id        BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE, 
+    patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE, 
     image_similarity FLOAT,
     text_similarity  FLOAT,
     risk_level       VARCHAR(20),
@@ -131,9 +138,9 @@ CREATE TABLE IF NOT EXISTS notification (
 CREATE TABLE IF NOT EXISTS bookmark (
     bookmark_id  BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    patent_id    BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
+    patent_id    VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, patent_id) -- 중복 북마크 방지
+    UNIQUE(user_id, patent_id)
 );
 
 -- ==========================================
@@ -151,7 +158,7 @@ CREATE TABLE IF NOT EXISTS report (
 -- ==========================================
 CREATE TABLE IF NOT EXISTS trademark_expiration (
     expiration_id    BIGSERIAL PRIMARY KEY,
-    patent_id        BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
+    patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
     days_left        INT,
     status           VARCHAR(20), 
     last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
