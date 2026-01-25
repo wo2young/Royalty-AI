@@ -4,9 +4,10 @@ import { BrandItem } from "./BrandItem"
 
 interface BrandListProps {
   brands: Brand[]
+  onDelete: (id: number, name: string) => void
 }
 
-export function BrandList({ brands }: BrandListProps) {
+export function BrandList({ brands, onDelete }: BrandListProps) {
   const navigate = useNavigate()
 
   const handleView = (id: number) => {
@@ -24,7 +25,12 @@ export function BrandList({ brands }: BrandListProps) {
   return (
     <div className="flex flex-col gap-4">
       {brands.map((brand) => (
-        <BrandItem key={brand.brandId} brand={brand} onView={handleView} />
+        <BrandItem
+          key={brand.brandId}
+          brand={brand}
+          onView={handleView}
+          onDelete={() => onDelete(brand.brandId, brand.brandName)}
+        />
       ))}
     </div>
   )

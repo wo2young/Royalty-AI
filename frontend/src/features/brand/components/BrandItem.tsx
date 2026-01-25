@@ -7,6 +7,7 @@ interface BrandItemProps {
   onView?: (id: number) => void
   onEdit?: (id: number) => void
   onDelete?: (id: number) => void
+  onToggleNotify?: (id: number, active: boolean) => void
 }
 
 export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
@@ -52,7 +53,10 @@ export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onDelete?.(brand.brandId)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete?.(brand.brandId)
+          }}
           className="h-8 w-8 text-muted-foreground hover:text-destructive"
         >
           <Trash2 className="w-4 h-4" />

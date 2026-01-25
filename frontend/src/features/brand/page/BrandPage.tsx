@@ -7,12 +7,17 @@ import { BrandList } from "../components/BrandList"
 import { useBrands } from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
 import { AddBrandModal } from "../components/modal/AddBrandModal"
+import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
 
 const ITEMS_PER_PAGE = 5
 
 export default function BrandsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number
+    name: string
+  } | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("ALL")
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -88,7 +93,10 @@ export default function BrandsPage() {
         />
 
         {/* 나의 브랜드 리스트 */}
-        <BrandList brands={paginatedBrands} />
+        <BrandList
+          brands={paginatedBrands}
+          onDelete={(id, name) => setDeleteTarget({ id, name })}
+        />
 
         {/* 페이지네이션 */}
         {filteredBrands.length > 0 && (
@@ -104,6 +112,12 @@ export default function BrandsPage() {
 
       {/* 나의 브랜드 추가 모달 */}
       <AddBrandModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
+      <DeleteBrandModal
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        brandId={deleteTarget?.id ?? 0}
+        brandName={deleteTarget?.name ?? ""}
+      />
     </div>
   )
 }
