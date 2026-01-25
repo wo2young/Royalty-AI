@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/badge/AI-FastAPI-3776AB?style=flat-square&logo=python&logoColor=white)
 
 > 📢 **공지사항**
-> **2024.XX.XX 부로 DB 서버가 로컬 Docker에서 `AWS RDS`로 이관되었습니다.**
+> **2026.01.25 부로 DB 서버가 로컬 Docker에서 `AWS RDS`로 이관되었습니다.**
 > 기존 로컬 DB를 사용하던 분들은 **반드시** 아래 절차를 따라 환경을 재설정해주세요.
 
 ---
