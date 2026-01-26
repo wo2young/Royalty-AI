@@ -9,21 +9,31 @@ import { MyPage } from "@/features/mypage"
 import ErrorPage from "@/shared/page/ErrorPage"
 import { BookmarksPage } from "@/features/bookmark/page/BookmarkPage"
 import KakaoCallbackPage from "@/features/auth/page/KakaoCallbackPage"
+import RequireAuth from "@/shared/auth/RequireAuth"
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <AppLayout />,
-    errorElement: <ErrorPage />,
-    children: [
-      { index: true, element: <LandingPage /> },
-      { path: "analysis", element: <AnalysisPage /> },
-      { path: "recommend", element: <RecommendationPage /> },
-      { path: "trademarks", element: <TrademarkListPage /> },
-      { path: "mypage", element: <MyPage /> },
-      { path: "mypage/bookmark", element: <BookmarksPage /> },
-    ],
-  },
+ {
+  path: "/",
+  element: <AppLayout />,
+  errorElement: <ErrorPage />,
+  children: [
+    // ✅ 메인 (공개 + 헤더 유지)
+    { index: true, element: <LandingPage /> },
+
+    // 🔒 로그인 필요한 페이지만 보호
+    {
+      element: <RequireAuth />,
+      children: [
+        { path: "analysis", element: <AnalysisPage /> },
+        { path: "recommend", element: <RecommendationPage /> },
+        { path: "trademarks", element: <TrademarkListPage /> },
+        { path: "mypage", element: <MyPage /> },
+        { path: "mypage/bookmark", element: <BookmarksPage /> },
+      ],
+    },
+  ],
+},
+
   {
     path: "/login",
     element: <Navigate to="/auth/login" replace />,
@@ -43,4 +53,5 @@ export const router = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPasswordPage />,
   },
+  
 ])

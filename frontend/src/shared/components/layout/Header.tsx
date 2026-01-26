@@ -70,12 +70,13 @@ export function Header() {
               <Button variant="ghost" onClick={() => navigate("/auth/login")}>
                 로그인
               </Button>
-              <Button
-                variant="default"
-                onClick={() => navigate("/auth/signup")}
-              >
-                회원가입
-              </Button>
+            <Button
+              variant="default"
+              onClick={() => navigate("/auth/login?mode=signup")}
+            >
+              회원가입
+            </Button>
+
             </>
           )}
         </div>

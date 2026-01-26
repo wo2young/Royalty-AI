@@ -1,5 +1,6 @@
 import axios from "axios"
 import type { AxiosError, InternalAxiosRequestConfig } from "axios"
+import { authStorage } from "@/shared/auth/authStorage"
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
@@ -22,10 +23,9 @@ const AUTH_EXCLUDE_PATHS = [
 // =========================
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("accessToken")
+    const token = authStorage.getToken()
     const url = config.url ?? ""
 
-    // ✅ auth 관련 요청에는 토큰 붙이지 않음
     const isAuthExcluded = AUTH_EXCLUDE_PATHS.some((path) =>
       url.startsWith(path)
     )
@@ -36,9 +36,7 @@ axiosInstance.interceptors.request.use(
 
     return config
   },
-  (error: AxiosError) => {
-    return Promise.reject(error)
-  }
+  (error: AxiosError) => Promise.reject(error)
 )
 
 // =========================
@@ -46,7 +44,7 @@ axiosInstance.interceptors.request.use(
 // =========================
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
+  (error: AxiosError) => {
     const status = error.response?.status
     const url = error.config?.url ?? ""
 
@@ -54,18 +52,19 @@ axiosInstance.interceptors.response.use(
       url.includes(path)
     )
 
-    // ✅ 로그인/회원가입 실패는 여기서 끝
+    // 🔹 로그인/회원가입 요청에서의 401은 그대로 전달
     if (status === 401 && isAuthRequest) {
       return Promise.reject(error)
     }
 
-    // 🔴 진짜 인증 만료만 강제 로그아웃
+    // 🔴 토큰 만료 / 인증 실패
     if (status === 401) {
-      localStorage.removeItem("accessToken")
-      window.location.href = "/login"
+      authStorage.clear()
+      window.location.href = "/auth/login"
     }
 
     return Promise.reject(error)
   }
 )
+
 export default axiosInstance
