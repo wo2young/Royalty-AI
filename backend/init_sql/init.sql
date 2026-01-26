@@ -1,30 +1,36 @@
 -- ==========================================
--- [0] 필수 확장기능 (가장 먼저 실행!)
+-- [0] 기본 설정 (시간대 및 확장기능)
 -- ==========================================
-CREATE EXTENSION IF NOT EXISTS vector;  -- 이미지/텍스트 벡터 저장용
-CREATE EXTENSION IF NOT EXISTS pg_trgm; -- ★ 상표명 철자 유사도 검색용 (추가됨)
+-- 1. 한국 시간대 설정 (DB 세션 레벨)
+SET TIME ZONE 'Asia/Seoul';
+
+-- 2. 필수 확장기능 활성화
+CREATE EXTENSION IF NOT EXISTS vector;  -- 벡터 연산용 (필수)
+CREATE EXTENSION IF NOT EXISTS pg_trgm; -- 텍스트 유사도 검색용
 
 -- ==========================================
--- 1. 사용자 (Users) - 스프링 시큐리티 호환
+-- 1. 사용자 (Users)
 -- ==========================================
-CREATE TABLE IF NOT EXISTS users (
-    user_id      BIGSERIAL PRIMARY KEY,
-    username     VARCHAR(50) NOT NULL UNIQUE,  -- ★ 아이디 (추가)
-    password     VARCHAR(200) NOT NULL,        -- 비밀번호 (암호화)
-    email        VARCHAR(100),                 -- ★ 이메일 (추가)
-    role         VARCHAR(20) DEFAULT 'ROLE_USER', -- ★ 권한 (추가)
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE users (
+    user_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    email VARCHAR(100),
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
+    provider VARCHAR(20),
+    provider_id VARCHAR(100),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
--- 2. 브랜드 (Brand)
+-- 2. 브랜드 (Brand) - 사용자가 등록한 브랜드
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand (
     brand_id     BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     brand_name   VARCHAR(100) NOT NULL,
     description  TEXT,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -34,8 +40,8 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     logo_id      BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_path   TEXT NOT NULL,
-    embedding    vector(512), -- 내 로고 벡터
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    image_vector vector(1000), -- ResNet50 (1000차원)
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -48,7 +54,7 @@ CREATE TABLE IF NOT EXISTS brand_logo_history (
     image_path       TEXT NOT NULL,
     image_similarity FLOAT,
     text_similarity  FLOAT,
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -59,35 +65,37 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_score  FLOAT,
     text_score   FLOAT,
-    risk_level   VARCHAR(20),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    risk_level   VARCHAR(20), -- 'HIGH', 'MEDIUM', 'LOW'
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
--- 6. 특허/상표 데이터 (Patent) - ★ 핵심 수정됨
+-- 6. 특허/상표 데이터 (Patent) - ★ 핵심 테이블
 -- ==========================================
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
-    
-    -- [수정] 50 -> 100으로 넉넉하게 변경
-    application_number  VARCHAR(100) NOT NULL UNIQUE,
-    
-    trademark_name      TEXT NOT NULL,
-    image_url           TEXT NOT NULL,
-    applicant           TEXT,
-    application_date    DATE,
-    registered_date     DATE,
-    
-    -- [수정] VARCHAR(50) -> TEXT (무제한)으로 변경! ★여기가 핵심★
-    category            TEXT,
-    
-    embedding           vector(512),
-    text_embedding      vector(768),
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
+    trademark_name      TEXT NOT NULL, -- 상표명
+    image_url           TEXT,          -- 이미지 URL 
+    applicant           TEXT,          -- 출원인
+    application_date    DATE,          -- 출원일
+    registered_date     DATE,          -- 등록일
+    status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
+    category            TEXT,          -- 지정상품 분류
+    -- [AI 벡터 데이터]
+    image_vector        vector(1000),  -- ResNet50 (1000차원)
+    text_vector         vector(768),   -- SBERT (768차원)
+    created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
--- 검색 최적화 인덱스
-CREATE INDEX idx_patent_app_date ON patent(application_date);
--- (데이터가 많아지면 벡터 인덱스도 추가 고려)
+
+-- [인덱스 최적화]
+-- 1. 날짜 조회용 B-Tree 인덱스
+CREATE INDEX IF NOT EXISTS idx_patent_app_date ON patent(application_date);
+CREATE INDEX IF NOT EXISTS idx_patent_status ON patent(status);
+
+-- 2. 벡터 검색용 HNSW 인덱스 (검색 속도 100배 향상)
+CREATE INDEX IF NOT EXISTS idx_patent_image_vec ON patent USING hnsw (image_vector vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_patent_text_vec ON patent USING hnsw (text_vector vector_cosine_ops);
 
 -- ==========================================
 -- 7. 감지 이벤트 (Detection Event)
@@ -99,7 +107,7 @@ CREATE TABLE IF NOT EXISTS detection_event (
     image_similarity FLOAT,
     text_similarity  FLOAT,
     risk_level       VARCHAR(20),
-    detected_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    detected_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -112,7 +120,7 @@ CREATE TABLE IF NOT EXISTS notification (
     event_id         BIGINT REFERENCES detection_event(event_id) ON DELETE SET NULL,
     message          TEXT,
     is_read          BOOLEAN DEFAULT FALSE,
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -122,7 +130,8 @@ CREATE TABLE IF NOT EXISTS bookmark (
     bookmark_id  BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     patent_id    BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, patent_id) -- 중복 북마크 방지
 );
 
 -- ==========================================
@@ -132,49 +141,18 @@ CREATE TABLE IF NOT EXISTS report (
     report_id   BIGSERIAL PRIMARY KEY,
     brand_id    BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     file_path   TEXT, 
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
--- 11. 상표 소멸 관리 (Trademark Expiration)
+-- 11. 토큰 관리 (refresh_token)
 -- ==========================================
-CREATE TABLE IF NOT EXISTS trademark_expiration (
-    expiration_id    BIGSERIAL PRIMARY KEY,
-    patent_id        BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
-    days_left        INT,
-    status           VARCHAR(20), 
-    last_checked_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE refresh_token (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    refresh_token VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
 );
-
--- ==========================================
--- 12. 브랜드 스타일 가이드 (Style Guide)
--- ==========================================
-CREATE TABLE IF NOT EXISTS brand_style_guide (
-    style_id      BIGSERIAL PRIMARY KEY,
-    brand_id      BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
-    main_color_1  VARCHAR(20),
-    main_color_2  VARCHAR(20),
-    sub_color_1   VARCHAR(20),
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==========================================
--- 13. AI 네이밍 후보 (Naming Candidate)
--- ==========================================
-CREATE TABLE IF NOT EXISTS naming_candidate (
-    candidate_id    BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    keyword         TEXT,
-    generated_name  VARCHAR(100),
-    risk_signal     VARCHAR(20),
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 1. 사용자 (Users)
--- 비밀번호 '1234'를 그대로 넣음.
--- 나중에 Spring Security 적용 전까지는 이걸로 로그인 테스트하세요.
-INSERT INTO users (username, password, email, role) 
-VALUES 
-('admin', '1234', 'admin@royalty.com', 'ROLE_ADMIN'),
-('tester', '1234', 'test@royalty.com', 'ROLE_USER')
-ON CONFLICT (username) DO NOTHING;
