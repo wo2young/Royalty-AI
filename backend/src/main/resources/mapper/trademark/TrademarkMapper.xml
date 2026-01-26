@@ -13,7 +13,7 @@
             applicant          AS applicant,
             category           AS category,
             application_date   AS applicationDate,
-            registered_date    AS registeredDate
+            registration_date    AS registrationdate
         FROM patent
         WHERE 1=1
         <if test="category != null and category != ''">
@@ -82,26 +82,26 @@
             applicant          AS applicant,
             category           AS category,
             application_date   AS applicationDate,
-            registered_date    AS registeredDate
+            registration_date    AS registrationdate
         FROM patent
         WHERE patent_id = #{id}
     </select>
 
-    <select id="existsBookmark" resultType="int">
-        SELECT count(*) 
-        FROM bookmark 
-        WHERE user_id = #{userId} AND patent_id = #{patentId}
-    </select>
-
-    <insert id="insertBookmark">
-        INSERT INTO bookmark (user_id, patent_id, created_at)
-        VALUES (#{userId}, #{patentId}, NOW())
-        ON CONFLICT (user_id, patent_id) DO NOTHING
-    </insert>
-
-    <delete id="deleteBookmark">
-        DELETE FROM bookmark 
-        WHERE user_id = #{userId} AND patent_id = #{patentId}
-    </delete>
+	<select id="existsBookmark" resultType="int">
+	    SELECT count(*) 
+	    FROM bookmark 
+	    WHERE user_id = #{userId} AND patent_id = #{patentId}
+	</select>
+	
+	<insert id="insertBookmark">
+	    INSERT INTO bookmark (user_id, patent_id, created_at)
+	    VALUES (#{userId}, #{patentId}, NOW())
+	    ON CONFLICT (user_id, patent_id) DO NOTHING
+	</insert>
+	
+	<delete id="deleteBookmark">
+	    DELETE FROM bookmark 
+	    WHERE user_id = #{userId} AND patent_id = #{patentId}
+	</delete>
 
 </mapper>

@@ -40,13 +40,13 @@ public class TrademarkService {
 //        );
 //    }
 
-    // 1-3. 상세 조회 (북마크 여부 포함)
+ // 1-3. 상세 조회 (북마크 여부 포함)
     public TrademarkDto getTrademarkDetail(Long patentId, Long userId) {
         TrademarkDto dto = trademarkMapper.selectTrademarkById(patentId);
         
         if (dto != null && userId != null) {
-            // 로그인 상태라면 북마크 여부 확인
-            int count = trademarkMapper.existsBookmark(userId, patentId);
+            // 이제 patentId 대신 dto에 담긴 applicationNumber를 사용합니다.
+            int count = trademarkMapper.existsBookmark(userId, dto.getPatentId());
             dto.setBookmarked(count > 0);
         }
         return dto;
@@ -56,14 +56,13 @@ public class TrademarkService {
     // 2. 변경 로직 (Write) - @Transactional 필수
     // ==========================================
 
-    // 2-1. 북마크 추가
+    // 2-1. 북마크 추가 (Long patentId -> String applicationNumber)
     @Transactional
     public void addBookmark(Long userId, Long patentId) {
-        // XML에서 ON CONFLICT 처리가 되어 있어 중복 에러 발생 안 함
         trademarkMapper.insertBookmark(userId, patentId);
     }
 
-    // 2-2. 북마크 삭제
+    // 2-2. 북마크 삭제 (Long patentId -> String applicationNumber)
     @Transactional
     public void removeBookmark(Long userId, Long patentId) {
         trademarkMapper.deleteBookmark(userId, patentId);

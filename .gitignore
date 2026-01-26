@@ -1,43 +1,64 @@
-# OS generated files
+# ==========================================
+# 1. OS & IDE Settings
+# ==========================================
 .DS_Store
 Thumbs.db
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+# (주의) launch.json에 비밀번호가 있다면 제외하는 게 안전합니다.
+# .vscode/launch.json
 
-# Python
+# ==========================================
+# 2. Java / Maven (Spring Boot)
+# ==========================================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+*.gz
+
+# ==========================================
+# 3. Python & AI (venv, Cache, Models)
+# ==========================================
 __pycache__/
 *.py[cod]
 venv/
 .env
-
-# Node.js (Frontend)
-node_modules/
-build/
-dist/
-.npm
-
-# AI Models (용량이 커서 Git에서 제외)
 ai_model/models/
 *.h5
 *.pt
 *.pth
 *.bin
 *.safetensors
+ai_model/clean_patent_data.sql
 
-# Eclipse / STS workspace settings (절대 올리면 안됨)
+# ==========================================
+# 4. Node.js (Frontend)
+# ==========================================
+node_modules/
+build/
+dist/
+.npm
+.eslintcache
+
+# ==========================================
+# 5. Local Configuration (민감 정보)
+# ==========================================
+# 로컬 개발 환경용 설정파일이 따로 있다면 추가
+# src/main/resources/application-local.properties
+
 .metadata/
 .recommenders/
-Server/
+RemoteSystemsTempFiles/
 
-# IDE project files (보통 팀 프로젝트에선 뺍니다)
-.classpath
-.project
-.settings/
-.springBeans
-bin/
+# 개인 SQL 작업 파일
+*.sql
+*.session.sql
 
-# Build results
-build/
-out/
-target/
+# application.properties 제외 (민감 정보 포함 시)
+backend/src/main/resources/application.properties
 
-# 대용량 SQL 데이터 파일 무시
-ai_model/clean_patent_data.sql
+# 또는 환경별 설정 파일을 따로 쓸 경우
+backend/src/main/resources/application-*.properties

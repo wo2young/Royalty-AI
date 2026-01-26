@@ -12,7 +12,7 @@ public class TrademarkDto {
     private String imageUrl;          // image_url
     private String applicant;         // applicant
     private String category;          // category
-    private LocalDate applicationDate;// application_date
+    private String applicationDate;// application_date
     private LocalDate registeredDate; // registered_date
 
     // 2. 프론트엔드 표기용 추가 필드 (DB엔 없음)

@@ -52,19 +52,19 @@ public class TrademarkController {
     // 2. 북마크 API (Write)
     // ==========================================
 
-    // 2-1. 북마크 추가
-    // POST /trademark/{id}/bookmark
-    @PostMapping("/{id}/bookmark")
-    public ResponseEntity<?> addBookmark(@PathVariable Long id) {
-        trademarkService.addBookmark(getCurrentUserId(), id);
+	 // 2-1. 북마크 추가
+    // POST /trademark/bookmark/{applicationNumber}
+    @PostMapping("/bookmark/{patentId}")
+    public ResponseEntity<?> addBookmark(@PathVariable Long patentId) {
+        trademarkService.addBookmark(getCurrentUserId(), patentId);
         return ResponseEntity.ok(Map.of("message", "북마크가 추가되었습니다."));
     }
 
     // 2-2. 북마크 해제
-    // DELETE /trademark/{id}/bookmark
-    @DeleteMapping("/{id}/bookmark")
-    public ResponseEntity<?> removeBookmark(@PathVariable Long id) {
-        trademarkService.removeBookmark(getCurrentUserId(), id);
+    // DELETE /trademark/bookmark/{applicationNumber}
+    @DeleteMapping("/bookmark/{patentId}")
+    public ResponseEntity<?> removeBookmark(@PathVariable Long patentId) {
+        trademarkService.removeBookmark(getCurrentUserId(), patentId);
         return ResponseEntity.ok(Map.of("message", "북마크가 해제되었습니다."));
     }
 
