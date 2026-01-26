@@ -1,52 +1,42 @@
+# ==========================================
 # OS generated files
+# ==========================================
 .DS_Store
 Thumbs.db
 
-# Python
+# ==========================================
+# Python / AI Model
+# ==========================================
 __pycache__/
 *.py[cod]
 venv/
 .env
+.ipynb_checkpoints/
 
+# AI Data & Models (용량 큰 파일들)
+ai_model/data/
+ai_model/models/
+models/
+*.npy
+*.h5
+*.pth
+*.bin
+*.pkl
+
+# ==========================================
 # Node.js (Frontend)
+# ==========================================
 node_modules/
 build/
 dist/
 .npm
 
-# AI Data (데이터는 깃에 올리지 마세요! 용량 터집니다)
-ai_model/data/
-*.npy
-*.h5
-
-# AI 관련 대용량 파일 제외
-ai_model/models/
-*.pth
-*.bin
-*.pkl
-
-# 벡터 데이터가 포함된 DB 덤프 파일 (나중에 드라이브 공유용)
+# ==========================================
+# Database & Archives
+# ==========================================
 *.sql
 *.tar
 *.gz
-
-# 가상환경 및 캐시
-venv/
-__pycache__/
-.ipynb_checkpoints/
-
-# AI models & Large files
-ai_model/models/
-*.pth
-*.bin
-
-# Database Dumps (Shared via Google Drive)
-*.sql
-<<<<<<< Updated upstream
-*.tar
-=======
-*.tar
-/.metadata/
 
 # ==========================================
 # Java / Maven (Backend)
@@ -66,14 +56,4 @@ ai_model/models/
 **/bin/
 **/*.iml
 .idea/
-.vscode/
-
-# ==========================================
-# System Files
-# ==========================================
-.DS_Store
-Thumbs.db
->>>>>>> Stashed changes
-# .gitignore 파일
-
 .vscode/

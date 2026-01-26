@@ -1,6 +1,10 @@
 -- ==========================================
 -- [Royalty Team] AWS DB Schema Archive
+<<<<<<< HEAD
 -- 작성이: 김우영 & Gemini
+=======
+-- 작성이: 사용자 & Gemini
+>>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
 -- 설명: AWS RDS의 최종 배포 상태를 기록한 설계도입니다.
 -- 주의: 이미 배포된 DB에 이 스크립트를 직접 실행하지 마세요. (참고용)
 -- ==========================================
@@ -21,7 +25,9 @@ CREATE TABLE IF NOT EXISTS users (
     password     VARCHAR(200) NOT NULL,
     email        VARCHAR(100),
     role         VARCHAR(20) DEFAULT 'ROLE_USER',
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    provider         VARCHAR(20),
+    provider_id      VARCHAR(100),
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -31,8 +37,11 @@ CREATE TABLE IF NOT EXISTS brand (
     brand_id     BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     brand_name   VARCHAR(100) NOT NULL,
+    category     VARCHAR(50),
+    text_vector vector(768),
     description  TEXT,
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_notification_enabled  BOOLEAN DEFAULT FALSE;
 );
 
 -- ==========================================
@@ -44,7 +53,11 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     image_path   TEXT NOT NULL,
     -- [중요] AI 모델(MobileNetV2 등) 출력에 맞춰 1280차원 설정
     image_vector vector(1280),
+<<<<<<< HEAD
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+=======
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+>>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
 );
 
 -- ==========================================
@@ -57,7 +70,7 @@ CREATE TABLE IF NOT EXISTS brand_logo_history (
     image_path       TEXT NOT NULL,
     image_similarity FLOAT,
     text_similarity  FLOAT,
-    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -154,12 +167,36 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
--- 11. 상표 소멸 관리 (Trademark Expiration)
+-- 11. 토큰 관리 
 -- ==========================================
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS trademark_expiration (
     expiration_id    BIGSERIAL PRIMARY KEY,
     patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
     days_left        INT,
     status           VARCHAR(20), 
     last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+=======
+CREATE TABLE refresh_token (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL ,
+    refresh_token VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now()
+,
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+);
+
+-- ==========================================
+-- 12. FCM 토큰 관리 (Push Notification)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS fcm_token (
+    fcm_token_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, token)
+>>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
 );

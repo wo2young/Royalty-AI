@@ -32,6 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
+<<<<<<< HEAD
 # Python 캐시 파일
 __pycache__/
 *.pyc
@@ -43,3 +44,8 @@ models/
 # 가상환경 (혹시 있다면)
 venv/
 .venv/
+=======
+### Secrets ###
+application.properties
+application-secret.properties
+>>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
