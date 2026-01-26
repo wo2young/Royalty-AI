@@ -6,24 +6,25 @@
 <mapper namespace="com.royalty.backend.detection.mapper.DetectionEventMapper">
 
     <insert id="insertDetectionEvent"
-            parameterType="com.royalty.backend.detection.domain.DetectionEventVO">
-        INSERT INTO detection_event
-        (
-            brand_id,
-            patent_id,
-            image_similarity,
-            text_similarity,
-            risk_level
-        )
-        VALUES
-        (
-            #{brandId},
-            #{patentId},
-            #{imageSimilarity},
-            #{textSimilarity},
-            #{riskLevel}
-        )
-    </insert>
+        	parameterType="com.royalty.backend.detection.domain.DetectionEventVO"
+        	useGeneratedKeys="true"
+        	keyProperty="eventId">
+    	INSERT INTO detection_event (
+        	brand_id,
+        	patent_id,
+        	image_similarity,
+        	text_similarity,
+        	match_type,
+        	risk_level
+    	) VALUES (
+        	#{brandId},
+        	#{patentId},
+        	#{imageSimilarity},
+        	#{textSimilarity},
+        	#{matchType},
+        	#{riskLevel}
+    	)
+	</insert>
 
     <!-- 브랜드-특허 이미지 벡터 유사도 -->
     <select id="findImageSimilarity" resultType="java.lang.Double">
@@ -44,6 +45,33 @@
     	WHERE brand_id = #{brandId}
       		AND patent_id = #{patentId}
 	</select>
+	
+	<!-- 브랜드-특허 텍스트 유사도 -->
+	<select id="findTextSimilarity" resultType="java.lang.Double">
+		<![CDATA[
+		SELECT
+    		1 - (b.text_vector <-> p.text_vector)
+		FROM brand b
+		JOIN patent p ON p.patent_id = #{patentId}
+		WHERE b.brand_id = #{brandId}
+		]]>
+	</select>
+	
+	<select id="findById"
+        	resultType="com.royalty.backend.detection.domain.DetectionEventVO">
+    	SELECT
+        	event_id        AS eventId,
+        	brand_id        AS brandId,
+        	patent_id       AS patentId,
+        	image_similarity AS imageSimilarity,
+        	text_similarity  AS textSimilarity,
+        	match_type      AS matchType,
+        	risk_level      AS riskLevel
+    	FROM detection_event
+    	WHERE event_id = #{eventId}
+	</select>
+
+
 
 
 </mapper>

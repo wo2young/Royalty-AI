@@ -6,16 +6,18 @@ import lombok.Getter;
 public class BrandVO {
 
     private Long brandId;
+    private Long userId;
+    private boolean isNotificationEnabled;
 
-    // 상호명 관련
-    private String brandName;        // 상호명
-    private float[] textVector;      // 텍스트 벡터 (nullable)
+    private String brandName;
 
-    // 로고 관련
-    private boolean hasLogo;          // 로고 존재 여부 (JOIN 결과)
+ 
+    private float[] textVector;
+
+    private boolean hasLogo;
 
     /* =========================
-       판별 메서드 (핵심)
+       판별 메서드
        ========================= */
 
     public boolean hasText() {
@@ -24,5 +26,9 @@ public class BrandVO {
 
     public boolean hasLogo() {
         return hasLogo;
+    }
+
+    public boolean isNotificationEnabled() {
+        return isNotificationEnabled;
     }
 }

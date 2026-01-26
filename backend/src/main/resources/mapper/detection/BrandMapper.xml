@@ -2,25 +2,29 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+  
 <mapper namespace="com.royalty.backend.detection.mapper.BrandMapper">
 
     <select id="findEnabledBrands"
-        resultType="com.royalty.backend.detection.domain.BrandVO">
-
+        	resultType="com.royalty.backend.detection.domain.BrandVO">
     	SELECT
-        	b.brand_id        AS brandId,
-        	b.brand_name      AS brandName,
-        	b.text_vector     AS textVector,
+        	b.brand_id   AS brandId,
+        	b.user_id    AS userId,
+        	b.brand_name AS brandName,
+        	b.is_notification_enabled AS isNotificationEnabled,
+
+
+        	b.text_vector AS textVector,
+
         	CASE
             	WHEN bl.brand_id IS NOT NULL THEN true
             	ELSE false
-        	END               	AS hasLogo
+        	END AS hasLogo
     	FROM brand b
     	LEFT JOIN brand_logo bl
-           	ON b.brand_id = bl.brand_id
-    	WHERE b.enabled = true
-
+        	ON b.brand_id = bl.brand_id
+    	WHERE b.is_notification_enabled = true
 	</select>
+
 
 </mapper>
