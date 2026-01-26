@@ -9,19 +9,18 @@ import { useBookmarks } from "../api/bookmark.queries"
 import { Pagination } from "@/shared/components/pagination/Pagination"
 
 export function BookmarksPage() {
-  const { data, isLoading, isError } = useBookmarks()
+  const { data: BookmarkData, isLoading, isError } = useBookmarks()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("ALL")
   const [currentPage, setCurrentPage] = useState(1)
   const ITEMS_PER_PAGE = 12 // 한 페이지에 표시할 카드 개수
 
   const filteredBrands = useMemo(() => {
-    if (!data?.bookmarks) return []
+    if (!BookmarkData) return []
 
-    return data.bookmarks.filter((brand) => {
+    return BookmarkData.filter((brand) => {
       const matchesSearch =
-        brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        brand.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        brand.trademarkName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         brand.category.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesCategory =
@@ -29,7 +28,7 @@ export function BookmarksPage() {
 
       return matchesSearch && matchesCategory
     })
-  }, [data, searchQuery, selectedCategory])
+  }, [BookmarkData, searchQuery, selectedCategory])
 
   const paginatedBrands = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
