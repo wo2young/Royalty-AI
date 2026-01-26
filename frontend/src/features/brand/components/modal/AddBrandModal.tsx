@@ -85,6 +85,7 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
 
     createBrand(formData, {
       onSuccess: () => {
+        console.log(Object.fromEntries(formData))
         onOpenChange(false)
         form.reset()
         //TODO: Toast 알림
@@ -165,7 +166,9 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="전체">전체</SelectItem>
-                          <SelectItem value="IT/플렛폼">IT/플렛폼</SelectItem>
+                          <SelectItem value="IT · 플랫폼">
+                            IT · 플랫폼
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

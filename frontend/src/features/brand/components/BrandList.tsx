@@ -5,9 +5,10 @@ import { BrandItem } from "./BrandItem"
 interface BrandListProps {
   brands: Brand[]
   onDelete: (id: number, name: string) => void
+  onEdit: (id: number) => void
 }
 
-export function BrandList({ brands, onDelete }: BrandListProps) {
+export function BrandList({ brands, onDelete, onEdit }: BrandListProps) {
   const navigate = useNavigate()
 
   const handleView = (id: number) => {
@@ -30,6 +31,7 @@ export function BrandList({ brands, onDelete }: BrandListProps) {
           brand={brand}
           onView={handleView}
           onDelete={() => onDelete(brand.brandId, brand.brandName)}
+          onEdit={onEdit}
         />
       ))}
     </div>

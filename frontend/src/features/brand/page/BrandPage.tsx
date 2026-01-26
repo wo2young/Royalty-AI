@@ -8,12 +8,15 @@ import { useBrands } from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
 import { AddBrandModal } from "../components/modal/AddBrandModal"
 import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
+import type { Brand } from "../types"
+import { EditBrandModal } from "../components/modal/EditBrandModal"
 
 const ITEMS_PER_PAGE = 5
 
 export default function BrandsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<Brand | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{
     id: number
     name: string
@@ -38,6 +41,16 @@ export default function BrandsPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
+
+  const handleEditClick = (id: number) => {
+    const target = brands.find((b) => b.brandId === id)
+    if (target) setEditTarget(target)
+  }
+
+  const handleEditSubmit = (formData: FormData) => {
+    console.log("수정 제출:", Object.fromEntries(formData))
+    setEditTarget(null)
+  }
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query)
@@ -96,6 +109,7 @@ export default function BrandsPage() {
         <BrandList
           brands={paginatedBrands}
           onDelete={(id, name) => setDeleteTarget({ id, name })}
+          onEdit={handleEditClick}
         />
 
         {/* 페이지네이션 */}
@@ -118,6 +132,15 @@ export default function BrandsPage() {
         brandId={deleteTarget?.id ?? 0}
         brandName={deleteTarget?.name ?? ""}
       />
+      {editTarget && (
+        <EditBrandModal
+          key={editTarget.brandId} // 중요: 브랜드가 바뀔 때마다 폼을 새로고침
+          open={!!editTarget}
+          onOpenChange={(open) => !open && setEditTarget(null)}
+          brand={editTarget}
+          onEdit={handleEditSubmit}
+        />
+      )}
     </div>
   )
 }

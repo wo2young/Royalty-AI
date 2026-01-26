@@ -4,6 +4,7 @@ import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import { EditBrandModal } from "../modal/EditBrandModal"
 
 interface BrandDetailHeaderProps {
   brand: {
@@ -25,6 +26,7 @@ export function BrandDetailHeader({
   onToggleNotify,
 }: BrandDetailHeaderProps) {
   const [showBadge, setShowBadge] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
   const isActive = brand.notificationEnabled
   const isDisableNotify = !hasHistory
 
@@ -112,10 +114,26 @@ export function BrandDetailHeader({
               </Button>
             </div>
 
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditOpen(true)}
+            >
               정보 수정
             </Button>
             <Button size="sm">리포트 다운로드</Button>
+
+            {isEditOpen && (
+              <EditBrandModal
+                key={brand.brandId}
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+                brand={brand}
+                onEdit={(formData) => {
+                  console.log(formData)
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

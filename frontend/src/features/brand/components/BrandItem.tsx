@@ -88,7 +88,10 @@ export function BrandItem({
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onEdit?.(brand.brandId)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onEdit?.(brand.brandId)
+          }}
           className="h-8 w-8 text-muted-foreground hover:text-blue-600"
         >
           <Edit2 className="w-4 h-4" />

@@ -2,7 +2,7 @@ export const MOCK_MY_BRANDS_LIST = [
   {
     brandId: 1,
     brandName: "테크솔루션 주식회사",
-    category: "IT",
+    category: "IT · 플랫폼",
     logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     notificationEnabled: true,
@@ -13,7 +13,7 @@ export const MOCK_MY_BRANDS_LIST = [
   {
     brandId: 2,
     brandName: "이노베이션랩",
-    category: "MEDICAL",
+    category: "IT · 플랫폼",
     logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     notificationEnabled: false,
@@ -23,7 +23,7 @@ export const MOCK_MY_BRANDS_LIST = [
   {
     brandId: 3,
     brandName: "퓨처테크",
-    category: "FOOD",
+    category: "IT · 플랫폼",
     logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     notificationEnabled: false,
@@ -33,7 +33,7 @@ export const MOCK_MY_BRANDS_LIST = [
   {
     brandId: 4,
     brandName: "스마트솔루션",
-    category: "COMMERCE",
+    category: "IT · 플랫폼",
     logoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     notificationEnabled: false,
@@ -85,7 +85,7 @@ export const MOCK_BRAND_DETAILS = [
   {
     brandId: 1,
     brandName: "테크솔루션 주식회사",
-    category: "IT/서비스",
+    category: "IT · 플랫폼",
     description: "혁신적인 AI 기반 클라우드 보안 솔루션을 제공합니다.",
     currentLogoPath:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
@@ -122,7 +122,7 @@ export const MOCK_BRAND_DETAILS = [
   {
     brandId: 2,
     brandName: "이노베이션 메디컬",
-    category: "MEDICAL",
+    category: "IT · 플랫폼",
     description:
       "차세대 원격 진료 및 스마트 헬스케어 시스템을 개발하는 의료 전문 기업입니다.",
     currentLogoPath:
@@ -135,7 +135,7 @@ export const MOCK_BRAND_DETAILS = [
   {
     brandId: 3,
     brandName: "퓨처푸드 랩",
-    category: "FOOD",
+    category: "IT · 플랫폼",
     description:
       "지속 가능한 미래 식량을 연구하고 친환경 대체육 솔루션을 제안합니다.",
     currentLogoPath:
