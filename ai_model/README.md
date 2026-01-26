@@ -61,7 +61,7 @@ docker ps
 
 ## ☕ 3. Backend 실행 (Spring Boot)
 
-1. IntelliJ에서 `BackendApplication`을 실행합니다.
+1. sts4에서 `BackendApplication`을 실행합니다.
 2. 콘솔 로그에 아래와 같은 AWS 접속 로그가 뜨는지 확인합니다.
    > `Connected to jdbc:postgresql://royalty...rds.amazonaws.com...`
 3. **참고:** 이제 로컬 DB 주소(`localhost:5433`)는 사용하지 않습니다.
