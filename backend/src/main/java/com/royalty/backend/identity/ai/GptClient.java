@@ -1,4 +1,4 @@
-package com.royalty.backend.recommend.ai;
+package com.royalty.backend.identity.ai;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
