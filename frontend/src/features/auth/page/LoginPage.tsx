@@ -394,11 +394,22 @@ const handleFindPassword = async () => {
                brightness-0 invert"
     onClick={() => navigate("/")}
   />
-  <p className="text-base text-white/120 leading-relaxed text-center">
-    상표 충돌을 실시간으로 분석하고
-    <br />
-    브랜드를 보호하세요
-  </p>
+ <p className="text-base text-white/90 leading-relaxed text-center">
+   나의 브랜드를{" "}
+  <span className="text-xl font-semibold text-white animate-pulse">
+ 
+    실시간
+  </span>
+  으로 분석하고
+  <br />
+  브랜드를{" "}
+ <span className="text-lg font-medium text-white">
+    보호
+  </span>
+   합니다
+</p>
+
+
 </div>
 </div>
 
