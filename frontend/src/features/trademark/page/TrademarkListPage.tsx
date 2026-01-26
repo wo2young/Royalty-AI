@@ -1,106 +1,131 @@
+// trademark.zip/trademark/page/TrademarkListPage.tsx
+
 "use client"
 
 import { useState } from "react"
+import { Search } from "lucide-react"
 
-// 1. 컴포넌트 및 데이터 Import
-// (파일 경로 구조에 따라 '../components/...' 부분은 조정이 필요할 수 있습니다)
-import { SearchFilters } from "../components/search-filters"
 import { TrademarkTable } from "../components/trademark-table"
 import { Pagination } from "../components/pagination"
-import { trademarks as initialData, categories } from "../lib/trademark-data"
+import { categories } from "../lib/trademark-data"
+
+import { trademarkApi } from "../api/trademark.api"
+import { useTrademarks } from "../api/trademark.queries"
 
 export default function TrademarkListPage() {
-  // 2. 상태(State) 관리
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("전체 카테고리")
   const [currentPage, setCurrentPage] = useState(1)
-  const [trademarks, setTrademarks] = useState(initialData) // 북마크 상태 변경을 위해 로컬 state로 관리
 
-  // 페이지당 보여줄 아이템 개수
-  const itemsPerPage = 10
-
-  // 3. 필터링 로직 (검색어 + 카테고리)
-  const filteredTrademarks = trademarks.filter((item) => {
-    // 카테고리 매칭 확인
-    const matchesCategory =
-      selectedCategory === "전체 카테고리" || item.category === selectedCategory
-
-    // 검색어 매칭 확인 (상표명 또는 출원인)
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.applicant.toLowerCase().includes(searchQuery.toLowerCase())
-
-    return matchesCategory && matchesSearch
+  // React Query 훅 사용
+  const { data: response, isLoading, refetch } = useTrademarks({
+    page: currentPage,
+    query: searchQuery,
+    category: selectedCategory,
   })
 
-  // 4. 페이지네이션 로직
-  const totalPages = Math.ceil(filteredTrademarks.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentTrademarks = filteredTrademarks.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  )
+  // API 응답 구조: { totalCount, currentPage, list }
+  const trademarks = response?.list || []
+  const totalCount = response?.totalCount || 0
+  const itemsPerPage = 10
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1
 
-  // 5. 이벤트 핸들러
-
-  // 검색어 변경 시 페이지를 1페이지로 초기화
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value)
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
     setCurrentPage(1)
   }
 
-  // 카테고리 변경 시 페이지를 1페이지로 초기화
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value)
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value)
     setCurrentPage(1)
   }
 
-  // 북마크 토글 기능
-  const handleToggleBookmark = (id: string) => {
-    setTrademarks((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, isBookmarked: !t.isBookmarked } : t
-      )
-    )
+  // 북마크 등록/해제 핸들러
+  const handleToggleBookmark = async (id: number, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await trademarkApi.removeBookmark(id) // DELETE
+      } else {
+        await trademarkApi.addBookmark(id)    // POST
+      }
+      refetch() // 목록 새로고침
+    } catch (error) {
+      console.error("북마크 변경 실패", error)
+    }
   }
 
-  // 6. 화면 렌더링
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* 헤더 영역 */}
+    <div className="container mx-auto px-6 py-10 md:px-16 md:py-12 max-w-6xl space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">상표 모니터링</h1>
-        <p className="text-muted-foreground">
-          등록된 상표들의 상태를 확인하고 관리하세요.
+        <h1 className="text-3xl font-bold tracking-tight">상표 리스트</h1>
+        <p className="text-muted-foreground text-lg">
+          등록된 상표들을 확인하세요.
         </p>
       </div>
 
-      {/* 검색 및 필터 컴포넌트 */}
-      <SearchFilters
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-        categories={categories}
-      />
-
-      {/* 상표 목록 테이블 컴포넌트 */}
-      <TrademarkTable
-        trademarks={currentTrademarks}
-        onToggleBookmark={handleToggleBookmark}
-      />
-
-      {/* 페이지네이션 컴포넌트 (데이터가 있을 때만 표시) */}
-      {filteredTrademarks.length > 0 ? (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      ) : (
-        <div className="text-center py-10 text-muted-foreground">
-          검색 결과가 없습니다.
+      <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="상표명 또는 출원인 검색..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="w-full h-10 pl-9 pr-4 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+          />
         </div>
+
+        <div className="w-full sm:w-48">
+          <select
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none cursor-pointer appearance-none"
+            style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: "right 0.5rem center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "1.5em 1.5em",
+                paddingRight: "2.5rem"
+            }}
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-4 mt-8 mb-4">
+        <p className="text-muted-foreground">
+          총 <span className="text-foreground font-medium">{totalCount}개</span>의 상표
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-20 text-muted-foreground">데이터를 불러오는 중...</div>
+      ) : (
+        <>
+          <TrademarkTable
+            trademarks={trademarks}
+            onToggleBookmark={handleToggleBookmark}
+          />
+
+          {trademarks.length > 0 ? (
+            <div className="mt-8">
+                <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                />
+            </div>
+          ) : (
+            <div className="text-center py-10 text-muted-foreground">
+              검색 결과가 없습니다.
+            </div>
+          )}
+        </>
       )}
     </div>
   )
