@@ -44,3 +44,12 @@ ai_model/models/
 *.sql
 *.tar
 /.metadata/
+
+# AI 모델 파일 무시 (중요!)
+ai_model/src/models/
+**/models/
+*.bin
+*.pth
+
+# VS Code 설정 무시
+.vscode/
