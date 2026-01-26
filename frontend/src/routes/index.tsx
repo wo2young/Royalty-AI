@@ -8,6 +8,7 @@ import { TrademarkListPage } from "@/features/trademark"
 import { MyPage } from "@/features/mypage"
 import ErrorPage from "@/shared/page/ErrorPage"
 import { BookmarksPage } from "@/features/bookmark/page/BookmarkPage"
+import { BrandDetailPage, BrandsPage } from "@/features/brand"
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,8 @@ export const router = createBrowserRouter([
       { path: "trademarks", element: <TrademarkListPage /> },
       { path: "mypage", element: <MyPage /> },
       { path: "mypage/bookmark", element: <BookmarksPage /> },
+      { path: "mypage/brand", element: <BrandsPage /> },
+      { path: "mypage/brand/:id", element: <BrandDetailPage /> },
     ],
   },
   {
