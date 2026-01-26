@@ -159,12 +159,27 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
--- 11. 상표 소멸 관리 (Trademark Expiration)
+-- 11. 토큰 관리 
 -- ==========================================
-CREATE TABLE IF NOT EXISTS trademark_expiration (
-    expiration_id    BIGSERIAL PRIMARY KEY,
-    patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
-    days_left        INT,
-    status           VARCHAR(20), 
-    last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE refresh_token (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL ,
+    refresh_token VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now()
+,
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+);
+
+-- ==========================================
+-- 12. FCM 토큰 관리 (Push Notification)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS fcm_token (
+    fcm_token_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, token)
 );
