@@ -18,3 +18,7 @@ dist/
 ai_model/data/
 *.npy
 *.h5
+
+#firebase key
+backend/src/main/resources/firebase/
+firebase-service-account.json
