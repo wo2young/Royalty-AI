@@ -160,7 +160,7 @@ export const bookmarkApi = {
   // POST /trademark/{id}/bookmark
   addBookmark: async (patentId: string): Promise<BookmarkToggleResponse> => {
     // 실제 서버 연동 시:
-    // const { data } = await axiosInstance.post<BookmarkToggleResponse>(`/trademark/${id}/bookmark`);
+    // const { data } = await axiosInstance.post<BookmarkToggleResponse>(`/trademark/bookmark/{patentId}`);
     // return data;
 
     return new Promise((resolve) => {
@@ -172,7 +172,7 @@ export const bookmarkApi = {
   // DELETE /trademark/{id}/bookmark
   removeBookmark: async (patentId: string): Promise<BookmarkToggleResponse> => {
     // 실제 서버 연동 시:
-    // const { data } = await axiosInstance.delete<BookmarkToggleResponse>(`/trademark/${id}/bookmark`);
+    // const { data } = await axiosInstance.delete<BookmarkToggleResponse>(`/trademark/bookmark/{patentId}`);
     // return data;
 
     return new Promise((resolve) => {
