@@ -1,5 +1,3 @@
-"use client"
-
 import MyProfileSidebar from "../components/MyProfileSidebar"
 import { BookmarkSummaryCard } from "@/features/bookmark/components/BookmarkSummaryCard"
 import { BrandSummaryCard } from "@/features/brand/components/BrandSummaryCard"

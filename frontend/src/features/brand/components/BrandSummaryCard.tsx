@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom"
-import { Building2, ExternalLink } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import { Building2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import {
   Card,
@@ -7,33 +7,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card"
-
-// 샘플 데이터 (추후 API로 변경)
-const myBrands = [
-  {
-    id: 1,
-    name: "테크솔루션 주식회사",
-    category: "기업 로고 등록",
-    date: "2026.01.10",
-    status: "등록완료",
-  },
-  {
-    id: 2,
-    name: "아노베이션랩",
-    category: "스타트업 상호",
-    date: "2026.01.08",
-    status: "심사중",
-  },
-  {
-    id: 3,
-    name: "큐시테크",
-    category: "상표명 등록",
-    date: "2025.12.20",
-    status: "등록완료",
-  },
-]
+import { useBrands } from "../api/brand.queries"
 
 export function BrandSummaryCard() {
+  const { data: brands = [], isLoading, isError } = useBrands()
+  const navigate = useNavigate()
+
+  const summaryData = [...brands].slice(0, 3)
+
+  if (isLoading) return <div>로딩 중...</div>
+  if (isError) return <div>데이터를 불러오지 못했습니다.</div>
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between pb-4">
@@ -52,38 +36,42 @@ export function BrandSummaryCard() {
             asChild
             className="text-primary hover:bg-primary/10"
           >
-            <Link to="/user/brands">전체보기</Link>
-          </Button>
-          <Button size="sm" className="gap-2 shadow-sm">
-            <span>+</span> 브랜드 추가
+            <Link to="/mypage/brand">전체보기</Link>
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {myBrands.map((brand) => (
+        {summaryData.map((brand) => (
           <div
-            key={brand.id}
+            key={brand.brandId}
             className="flex items-center gap-4 p-5 rounded-xl border hover:bg-secondary/40 transition-all cursor-pointer group"
           >
-            <div className="w-14 h-14 rounded-xl bg-secondary border flex items-center justify-center shrink-0 group-hover:bg-background transition-all">
-              <Building2 className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div className="w-14 h-14 rounded-xl bg-secondary border flex items-center justify-center shrink-0 group-hover:bg-background transition-all overflow-hidden">
+              {brand.logoPath ? (
+                <img
+                  src={brand.logoPath}
+                  alt={brand.brandName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Building2 className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+              )}
             </div>
             <div className="flex-1 min-w-0 space-y-1.5">
-              <h3 className="font-semibold text-foreground">{brand.name}</h3>
+              <h3 className="font-semibold text-foreground">
+                {brand.brandName}
+              </h3>
               <p className="text-sm text-muted-foreground">{brand.category}</p>
               <p className="text-xs text-muted-foreground">
-                등록일: {brand.date} · {brand.status}
+                등록일: {brand.createdAt.split("T")[0]}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="gap-1.5 text-primary"
+                onClick={() => navigate(`/mypage/brand/${brand.brandId}`)}
               >
-                <ExternalLink className="w-4 h-4" /> 수정
-              </Button>
-              <Button variant="outline" size="sm">
                 상세보기
               </Button>
             </div>
