@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Python 캐시 파일
+__pycache__/
+*.pyc
+
+# AI 모델 저장 폴더 (절대 올리지 않음)
+ai_model/src/models/
+models/
+
+# 가상환경 (혹시 있다면)
+venv/
+.venv/

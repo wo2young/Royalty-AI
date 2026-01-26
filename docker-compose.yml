@@ -1,15 +1,5 @@
 version: '3.8'
 
-# =================================================================
-# [Royalty Team] AI Model & AWS DB Connection
-# -----------------------------------------------------------------
-# 📢 중요: 기존 로컬 DB 컨테이너는 삭제해야 충돌이 안 납니다.
-#
-# [실행 방법]
-# 1. 기존 컨테이너 삭제: docker-compose down
-# 2. 최신 빌드 및 실행: docker-compose up -d --build
-# =================================================================
-
 services:
   ai-model:
     build: ./ai_model
@@ -17,10 +7,7 @@ services:
     ports:
       - "8000:8000"
     restart: always
-    environment:
-      # AWS RDS 접속 정보
-      - DB_HOST=royalty.czikksygigvr.ap-northeast-2.rds.amazonaws.com
-      - DB_NAME=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=e9MbrDRLAqp2AES
-      - DB_PORT=5432
+    
+    # 여기에 적으면 .env 안의 모든 변수가 컨테이너로 전달됩니다.
+    env_file:
+      - .env

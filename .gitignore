@@ -74,3 +74,6 @@ ai_model/models/
 .DS_Store
 Thumbs.db
 >>>>>>> Stashed changes
+# .gitignore 파일
+
+.vscode/
