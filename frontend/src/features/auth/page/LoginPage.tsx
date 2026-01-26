@@ -6,7 +6,7 @@ import axiosInstance from "@/shared/api/axios"
 import { useNavigate } from "react-router-dom"
 import { useSearchParams } from "react-router-dom"
 import { useEffect } from "react"
-
+import { getFcmToken } from "@/shared/auth/firebase/messaging"
 
 
 // 🔴 Mode 확장
@@ -25,10 +25,15 @@ const [terms, setTerms] = useState({
   service: false,   // 필수
   privacy: false,   // 필수
   marketing: false, // 선택
+
+  
 })
 
   const [mode, setMode] = useState<Mode>("login")
   const [panelMoving, setPanelMoving] = useState(false)
+  // 🔔 푸시 알림 필수 동의
+  const [pushAllowed, setPushAllowed] = useState(false)
+
   const navigate = useNavigate()
   // 로그아웃버튼 누르면 회원가입으로 슬라이드
   const [searchParams] = useSearchParams()
@@ -211,6 +216,13 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
      ✅ 회원가입
      ========================= */
 const handleSignup = async () => {
+  // 🔔 알림 토글 ON일 때만 크롬 알림 권한 요청
+  if (pushAllowed && "Notification" in window) {
+    if (Notification.permission === "default") {
+      await Notification.requestPermission()
+      // ❗ granted / denied 상관없이 회원가입은 계속 진행
+    }
+  }
   // 아이디 길이 체크
   if (signupUsername.length < 6 || signupUsername.length > 12) {
     setUiMessage("아이디는 6자 이상 12자 이하로 입력해주세요.")
@@ -236,6 +248,15 @@ const handleSignup = async () => {
       email: signupEmail,
       emailAuthCode,
     })
+     // ✅✅✅ 바로 여기 (회원가입 성공 직후)
+  if (pushAllowed && Notification.permission === "granted") {
+    try {
+      const token = await getFcmToken()
+      await axiosInstance.post("/api/notifications/token", { token })
+    } catch (e) {
+      console.warn("FCM 토큰 저장 실패", e)
+    }
+  }
 
     let seconds = 3
     setCountdown(seconds)
@@ -257,6 +278,7 @@ const handleSignup = async () => {
         switchMode("login")
       }
     }, 1000)
+    
 
   } catch (err: any) {
     const message = err?.response?.data?.message
@@ -420,7 +442,7 @@ const handleFindPassword = async () => {
 
           <div className="relative flex items-center justify-center px-10 h-full">
 
-              <div className="relative w-full max-w-sm h-[440px]">
+              <div className="relative w-full max-w-sm h-[515px]">
 
                 {/* ================= LOGIN ================= */}
                 {mode === "login" && (
@@ -691,9 +713,37 @@ const handleFindPassword = async () => {
             </p>
           )}
 
-          <Button size="lg" className="w-full" onClick={handleSignup}>
-            회원가입
-          </Button>
+          {/* 🔔 알림 허용 토글 (필수) */}
+<div className="flex items-center justify-between rounded-md border px-3 py-2">
+  <div className="text-sm">
+    <p className="font-medium">알림 설정</p>
+    <p className="text-xs text-muted-foreground">
+      브랜드 위험 및 중요 알림을 수신합니다
+    </p>
+  </div>
+
+  <button
+    type="button"
+    onClick={() => setPushAllowed((prev) => !prev)}
+    className={`w-11 h-6 rounded-full transition-colors
+      ${pushAllowed ? "bg-[#142a5c]" : "bg-gray-300"}`}
+  >
+    <span
+      className={`block w-5 h-5 bg-white rounded-full transition-transform
+        ${pushAllowed ? "translate-x-5" : "translate-x-1"}`}
+    />
+  </button>
+</div>
+
+<Button
+  size="lg"
+  className="w-full mt-3"
+  onClick={handleSignup}
+>
+  회원가입
+</Button>
+
+
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
