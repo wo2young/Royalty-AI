@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.auth.mapper.UserMapper">
+
+    <!-- =========================
+         ResultMap
+         ========================= -->
+    <resultMap id="UserMap" type="com.royalty.backend.auth.domain.User">
+        <id property="id" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="role" column="role"/>
+        <result property="provider" column="provider"/>
+        <result property="providerId" column="provider_id"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- =========================
+         SELECT
+         ========================= -->
+
+    <select id="findByUsername" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE username = #{username}
+    </select>
+
+    <select id="findById" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{id}
+    </select>
+
+    <select id="findByProviderId" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE provider = #{provider}
+          AND provider_id = #{providerId}
+    </select>
+
+    <!-- 🔥 추가됨: 단일 이메일 조회 (비밀번호 재설정용) -->
+    <select id="findByEmail" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <select id="findAllByEmail" resultMap="UserMap">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <select id="existsByUsername" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE username = #{username}
+    </select>
+
+    <select id="existsByEmail" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- =========================
+         INSERT
+         ========================= -->
+    <insert id="save"
+            parameterType="com.royalty.backend.auth.domain.User"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO users (
+            username,
+            password,
+            email,
+            role,
+            provider,
+            provider_id
+        ) VALUES (
+            #{username},
+            #{password},
+            #{email},
+            #{role},
+            #{provider},
+            #{providerId}
+        )
+    </insert>
+
+    <!-- =========================
+         UPDATE
+         ========================= -->
+    <update id="updatePassword"
+            parameterType="com.royalty.backend.auth.domain.User">
+        UPDATE users
+        SET password = #{password}
+        WHERE user_id = #{id}
+    </update>
+
+    <!-- =========================
+         DELETE
+         ========================= -->
+    <delete id="deleteById">
+        DELETE FROM users
+        WHERE user_id = #{id}
+    </delete>
+    <!-- =========================
+     FCM TOKEN
+     ========================= -->
+
+	<insert id="saveFcmToken">
+	    INSERT INTO fcm_token (user_id, token)
+	    VALUES (#{userId}, #{token})
+	    ON CONFLICT (user_id, token) DO NOTHING
+	</insert>
+	
+	<select id="findFcmTokensByUserId" resultType="string">
+	    SELECT token
+	    FROM fcm_token
+	    WHERE user_id = #{userId}
+	</select>
+    
+
+</mapper>

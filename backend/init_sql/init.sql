@@ -11,6 +11,15 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm; -- 텍스트 유사도 검색용
 -- ==========================================
 -- 1. 사용자 (Users)
 -- ==========================================
+CREATE TABLE IF NOT EXISTS users (
+    user_id      BIGSERIAL PRIMARY KEY,
+    username     VARCHAR(50) NOT NULL UNIQUE,
+    password     VARCHAR(200) NOT NULL,
+    email        VARCHAR(100),
+    role         VARCHAR(20) DEFAULT 'ROLE_USER',
+    provider VARCHAR(20),
+    provider_id VARCHAR(100)
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 CREATE TABLE users (
     user_id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
