@@ -169,6 +169,15 @@
             <version>4.0.1</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- =========================
+             🚪  AWS
+             ========================= -->     
+        <dependency>
+		    <groupId>io.awspring.cloud</groupId>
+		    <artifactId>spring-cloud-starter-aws</artifactId>
+		    <version>2.4.4</version>
+		</dependency>
 
     </dependencies>
 
@@ -200,7 +209,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
