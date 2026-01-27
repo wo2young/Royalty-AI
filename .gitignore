@@ -1,23 +1,52 @@
-# OS generated files
+############################
+# OS
+############################
 .DS_Store
 Thumbs.db
 
+############################
 # Python
+############################
 __pycache__/
 *.py[cod]
 venv/
 .env
+.env.*
 
+############################
 # Node.js (Frontend)
+############################
 node_modules/
 build/
 dist/
 .npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# AI Data (데이터는 깃에 올리지 마세요! 용량 터집니다)
+############################
+# Java / Spring Boot
+############################
+target/
+*.log
+hs_err_pid*
+
+############################
+# AI Data / Models (절대 업로드 금지)
+############################
 ai_model/data/
 *.npy
 *.h5
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+############################
+# Eclipse / STS (🔥 핵심)
+############################
+.metadata/
+backend/.metadata/
 # =========================
 # IDE / Editor metadata
 # =========================
@@ -28,6 +57,32 @@ ai_model/data/
 .settings/
 .classpath
 .project
+.factorypath
+*.prefs
+*.launch
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# Docker (로컬 전용일 경우)
+############################
+docker-data/
+
+############################
+# Secrets / Keys
+############################
+*.pem
+*.key
+*.crt
 
 # VS Code
 .vscode/
