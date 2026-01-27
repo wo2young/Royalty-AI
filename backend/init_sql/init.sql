@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
     role         VARCHAR(20) DEFAULT 'ROLE_USER',
     provider         VARCHAR(20),
     provider_id      VARCHAR(100),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS brand (
     category     VARCHAR(50),
     text_vector vector(768),
     description  TEXT,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
     is_notification_enabled  BOOLEAN DEFAULT FALSE;
 );
 
@@ -47,9 +47,8 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     logo_id      BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_path   TEXT NOT NULL,
-    -- [중요] AI 모델(MobileNetV2 등) 출력에 맞춰 1280차원 설정
     image_vector vector(1280),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -62,7 +61,10 @@ CREATE TABLE IF NOT EXISTS brand_logo_history (
     image_path       TEXT NOT NULL,
     image_similarity FLOAT,
     text_similarity  FLOAT,
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    patent_id        BIGINT,
+    ai_summary       TEXT,
+    analysis_detail  TEXT,
+    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -74,7 +76,7 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
     image_score  FLOAT,
     text_score   FLOAT,
     risk_level   VARCHAR(20),
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -82,23 +84,17 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
 -- ==========================================
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
-    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
-    
+    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)  
     trademark_name      TEXT NOT NULL, -- 상표명
     image_url           TEXT,          -- 이미지 URL
-    
     applicant           TEXT,          -- 출원인
     application_date    VARCHAR(20),   -- 출원일
     registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
-    
-    -- [AI 벡터 데이터]
-    -- AWS 실제 상태 반영: 이미지는 1280차원, 텍스트는 768차원
-    image_vector        vector(1280),  
-    text_vector         vector(768),   
-    
-    created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    image_vector        vector(1280),  -- 이미지는 1280차원
+    text_vector         vector(768),   -- 텍스트는 768차원   
+    created_at          TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- [인덱스 아카이브]
@@ -121,7 +117,7 @@ CREATE TABLE IF NOT EXISTS detection_event (
     image_similarity FLOAT,
     text_similarity  FLOAT,
     risk_level       VARCHAR(20),
-    detected_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    detected_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
