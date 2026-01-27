@@ -71,9 +71,9 @@ export function BookmarksPage() {
         <div className="mb-8">
           <Link
             to="/mypage"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            className="group mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             마이페이지로 돌아가기
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
