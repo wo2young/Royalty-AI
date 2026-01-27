@@ -1,10 +1,6 @@
 -- ==========================================
 -- [Royalty Team] AWS DB Schema Archive
-<<<<<<< HEAD
--- 작성이: 김우영 & Gemini
-=======
 -- 작성이: 사용자 & Gemini
->>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
 -- 설명: AWS RDS의 최종 배포 상태를 기록한 설계도입니다.
 -- 주의: 이미 배포된 DB에 이 스크립트를 직접 실행하지 마세요. (참고용)
 -- ==========================================
@@ -25,9 +21,18 @@ CREATE TABLE IF NOT EXISTS users (
     password     VARCHAR(200) NOT NULL,
     email        VARCHAR(100),
     role         VARCHAR(20) DEFAULT 'ROLE_USER',
-    provider         VARCHAR(20),
-    provider_id      VARCHAR(100),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    provider VARCHAR(20),
+    provider_id VARCHAR(100)
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE users (
+    user_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    email VARCHAR(100),
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
+    provider VARCHAR(20),
+    provider_id VARCHAR(100),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -53,11 +58,7 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     image_path   TEXT NOT NULL,
     -- [중요] AI 모델(MobileNetV2 등) 출력에 맞춰 1280차원 설정
     image_vector vector(1280),
-<<<<<<< HEAD
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-=======
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
->>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
 );
 
 -- ==========================================
@@ -91,20 +92,16 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
     application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
-    
     trademark_name      TEXT NOT NULL, -- 상표명
-    image_url           TEXT,          -- 이미지 URL
-    
+    image_url           TEXT,          -- 이미지 URL 
     applicant           TEXT,          -- 출원인
     application_date    VARCHAR(20),   -- 출원일
     registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
-    
     -- [AI 벡터 데이터]
     image_vector        vector(1280),  -- MobileNetV3 (1280차원)
     text_vector         vector(768),   -- SBERT (768차원)
-    
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -166,6 +163,7 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
+<<<<<<< HEAD
 -- 11. 토큰 관리 
 -- ==========================================
 <<<<<<< HEAD
@@ -198,4 +196,16 @@ CREATE TABLE IF NOT EXISTS fcm_token (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, token)
 >>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
+=======
+-- 11. 토큰 관리 (refresh_token)
+-- ==========================================
+CREATE TABLE refresh_token (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    refresh_token VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+>>>>>>> develop
 );
