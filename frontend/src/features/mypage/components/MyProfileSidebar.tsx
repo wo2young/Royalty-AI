@@ -1,8 +1,11 @@
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent } from "@/shared/components/ui/card"
 import { Users } from "lucide-react"
+import { useState } from "react"
+import { ProfileEditModal } from "./MyProfileEditModal"
 
 export default function MyProfileSidebar() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   return (
     <aside>
       <Card className="shadow-sm">
@@ -15,6 +18,7 @@ export default function MyProfileSidebar() {
             <Button
               variant="outline"
               className="w-full gap-2 h-10 bg-transparent"
+              onClick={() => setIsModalOpen(true)}
             >
               <Users className="w-4 h-4" />
               개인정보수정
@@ -22,6 +26,12 @@ export default function MyProfileSidebar() {
           </div>
         </CardContent>
       </Card>
+
+      <ProfileEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        currentEmail="hong@example.com"
+      />
     </aside>
   )
 }
