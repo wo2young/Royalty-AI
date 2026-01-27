@@ -80,19 +80,24 @@
         WHERE brand_id = #{brandId} AND user_id = #{userId}
     </delete>
 
-    <select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
-        SELECT version, image_path, image_similarity, text_similarity, created_at
-        FROM brand_logo_history
-        WHERE brand_id = #{brandId}
-        ORDER BY created_at DESC
-    </select>
+	<select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+	    SELECT 
+	        version, 
+	        image_path AS imagePath, 
+	        image_similarity AS imageSimilarity, 
+	        text_similarity AS textSimilarity, 
+	        created_at AS createdAt,
+	        ai_summary AS aiSummary,      analysis_detail AS analysisDetail, patent_id AS patentId         FROM brand_logo_history
+	    WHERE brand_id = #{brandId}
+	    ORDER BY created_at DESC
+	</select>
 
-    <select id="selectBrandReports" resultType="com.royalty.backend.mypage.dto.ReportDTO">
-        SELECT report_id, brand_id, file_path, created_at
-        FROM report
-        WHERE brand_id = #{brandId}
-        ORDER BY created_at DESC
-    </select>
+<!--    <select id="selectBrandReports" resultType="com.royalty.backend.mypage.dto.ReportDTO">-->
+<!--        SELECT report_id, brand_id, file_path, created_at-->
+<!--        FROM report-->
+<!--        WHERE brand_id = #{brandId}-->
+<!--        ORDER BY created_at DESC-->
+<!--    </select>-->
 
     <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
         SELECT 

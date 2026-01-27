@@ -91,7 +91,7 @@ public class MyPageService {
             throw new IllegalArgumentException("존재하지 않거나 권한이 없는 브랜드입니다.");
         }
         detail.setHistoryList(myPageMapper.selectBrandHistory(brandId));
-        detail.setReportList(myPageMapper.selectBrandReports(brandId));
+//        detail.setReportList(myPageMapper.selectBrandReports(brandId));
 
         return detail;
     }

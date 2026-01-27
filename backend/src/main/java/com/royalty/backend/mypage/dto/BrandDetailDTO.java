@@ -15,5 +15,5 @@ public class BrandDetailDTO {
     
     // 2. 포함된 리스트 정보
     private List<BrandHistoryDTO> historyList; // 로고 변경 이력
-    private List<ReportDTO> reportList;        // 분석 리포트 목록
+//    private List<ReportDTO> reportList;        // 분석 리포트 목록
 }
