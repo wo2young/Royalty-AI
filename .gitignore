@@ -1,55 +1,100 @@
-# OS generated files
+############################
+# OS
+############################
 .DS_Store
 Thumbs.db
 
+############################
 # Python
+############################
 __pycache__/
 *.py[cod]
 venv/
 .env
+.env.*
 
+############################
 # Node.js (Frontend)
+############################
 node_modules/
 build/
 dist/
 .npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# AI Data (데이터는 깃에 올리지 마세요! 용량 터집니다)
+############################
+# Java / Spring Boot
+############################
+target/
+*.log
+hs_err_pid*
+
+############################
+# AI Data / Models (절대 업로드 금지)
+############################
 ai_model/data/
 *.npy
 *.h5
-
-# AI 관련 대용량 파일 제외
-ai_model/models/
+*.pt
 *.pth
-*.bin
-*.pkl
+*.onnx
+*.ckpt
 
-# 벡터 데이터가 포함된 DB 덤프 파일 (나중에 드라이브 공유용)
-*.sql
-*.tar
-*.gz
+############################
+# Eclipse / STS (🔥 핵심)
+############################
+.metadata/
+backend/.metadata/
+# =========================
+# IDE / Editor metadata
+# =========================
 
-# 가상환경 및 캐시
-venv/
-__pycache__/
-.ipynb_checkpoints/
+# Eclipse / STS
+.metadata/
+.recommenders/
+.settings/
+.classpath
+.project
+.factorypath
+*.prefs
+*.launch
 
-# AI models & Large files
-ai_model/models/
-*.pth
-*.bin
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
 
-# Database Dumps (Shared via Google Drive)
-*.sql
-*.tar
-/.metadata/
-
-# AI 모델 파일 무시 (중요!)
-ai_model/src/models/
-**/models/
-*.bin
-*.pth
-
-# VS Code 설정 무시
+############################
+# VS Code
+############################
 .vscode/
+
+############################
+# Docker (로컬 전용일 경우)
+############################
+docker-data/
+
+############################
+# Secrets / Keys
+############################
+*.pem
+*.key
+*.crt
+
+# VS Code
+.vscode/
+
+# IntelliJ
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
