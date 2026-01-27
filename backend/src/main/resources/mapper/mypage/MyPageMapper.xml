@@ -97,7 +97,7 @@
     <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
         SELECT 
             b.bookmark_id, p.patent_id, p.trademark_name, p.image_url, 
-            p.application_number, p.category, p.applicant, b.created_at
+            p.application_number, p.category, p.applicant, P.status ,b.created_at
         FROM bookmark b
         JOIN patent p ON b.patent_id = p.patent_id
         WHERE b.user_id = #{userId}
