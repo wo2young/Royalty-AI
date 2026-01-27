@@ -21,18 +21,9 @@ CREATE TABLE IF NOT EXISTS users (
     password     VARCHAR(200) NOT NULL,
     email        VARCHAR(100),
     role         VARCHAR(20) DEFAULT 'ROLE_USER',
-    provider VARCHAR(20),
-    provider_id VARCHAR(100)
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-CREATE TABLE users (
-    user_id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(200) NOT NULL,
-    email VARCHAR(100),
-    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
-    provider VARCHAR(20),
-    provider_id VARCHAR(100),
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    provider         VARCHAR(20),
+    provider_id      VARCHAR(100),
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -91,9 +82,9 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
 -- ==========================================
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
-    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
+    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)  
     trademark_name      TEXT NOT NULL, -- 상표명
-    image_url           TEXT,          -- 이미지 URL 
+    image_url           TEXT,          -- 이미지 URL
     applicant           TEXT,          -- 출원인
     application_date    VARCHAR(20),   -- 출원일
     registration_date   VARCHAR(20),   -- 등록일
@@ -125,7 +116,7 @@ CREATE TABLE IF NOT EXISTS detection_event (
     image_similarity FLOAT,
     text_similarity  FLOAT,
     risk_level       VARCHAR(20),
-    detected_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    detected_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -163,26 +154,14 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
-<<<<<<< HEAD
 -- 11. 토큰 관리 
 -- ==========================================
-<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS trademark_expiration (
     expiration_id    BIGSERIAL PRIMARY KEY,
     patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
     days_left        INT,
     status           VARCHAR(20), 
     last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-=======
-CREATE TABLE refresh_token (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL ,
-    refresh_token VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now()
-,
-    CONSTRAINT fk_refresh_token_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
 );
 
 -- ==========================================
@@ -195,17 +174,4 @@ CREATE TABLE IF NOT EXISTS fcm_token (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, token)
->>>>>>> 3e52b030e9be158198888c0102c637cc305acce1
-=======
--- 11. 토큰 관리 (refresh_token)
--- ==========================================
-CREATE TABLE refresh_token (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    refresh_token VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
-    CONSTRAINT fk_refresh_token_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
->>>>>>> develop
 );

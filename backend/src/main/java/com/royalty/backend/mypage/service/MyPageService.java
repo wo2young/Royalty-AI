@@ -5,7 +5,7 @@ import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;    
+import java.util.Date;   
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +37,7 @@ import com.royalty.backend.mypage.dto.BrandDTO;
 import com.royalty.backend.mypage.dto.BrandDetailDTO;
 import com.royalty.backend.mypage.dto.BrandHistoryDTO;
 import com.royalty.backend.mypage.dto.MyPageDashboardDTO;
+import com.royalty.backend.mypage.dto.ReportDTO;
 import com.royalty.backend.mypage.mapper.MyPageMapper;
 
 // 5. 롬복
@@ -49,9 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MyPageService {
 
     private final MyPageMapper myPageMapper;
-    private final S3Service s3Service;
-
-    // ⚡ getUserId 메서드 삭제됨 (Controller에서 처리하여 넘겨줌)
+    private final S3Service s3Service; // ⭐ S3Service 주입 (따로 만든 파일 사용)
 
     // ==========================================
     // 1. 🏠 대시보드 (Dashboard)
@@ -92,19 +91,19 @@ public class MyPageService {
             throw new IllegalArgumentException("존재하지 않거나 권한이 없는 브랜드입니다.");
         }
         detail.setHistoryList(myPageMapper.selectBrandHistory(brandId));
-        detail.setReportList(myPageMapper.selectBrandReports(brandId));
+//        detail.setReportList(myPageMapper.selectBrandReports(brandId));
 
         return detail;
     }
 
-    // 브랜드 등록
+    // 브랜드 등록 (S3 업로드 적용)
     @Transactional
     public void createBrand(Long userId, String brandName, String category, String description, MultipartFile logoImage) {
         
-        // 1. 이미지 파일 업로드
+        // 1. 이미지 파일 업로드 (S3Service 사용)
         String imagePath = null;
         if (logoImage != null && !logoImage.isEmpty()) {
-            imagePath = s3Service.upload(logoImage);
+            imagePath = s3Service.upload(logoImage); // ⭐ S3에 올리고 URL 받기
         } else {
             throw new IllegalArgumentException("로고 이미지는 필수입니다.");
         }
@@ -126,7 +125,7 @@ public class MyPageService {
         }
     }
     
-    // 브랜드 수정
+    // 브랜드 수정 (S3 업로드 적용)
     @Transactional
     public void updateBrand(Long userId, Long brandId, String name, String category, String desc, MultipartFile file) {
         // 1. 텍스트 업데이트
@@ -141,7 +140,7 @@ public class MyPageService {
 
         // 2. 이미지가 변경된 경우에만 S3 업로드 & DB 업데이트
         if (file != null && !file.isEmpty()) {
-            String newImagePath = s3Service.upload(file);
+            String newImagePath = s3Service.upload(file); // ⭐ S3 업로드
             myPageMapper.updateBrandLogo(brandId, newImagePath); 
         }
     }
@@ -240,7 +239,7 @@ public class MyPageService {
             infoTable.setSpacingBefore(10);
             infoTable.setSpacingAfter(30);
 
-            // 로고 이미지 (S3 URL에서 불러옴 - 예외 처리 강화)
+            // 로고 이미지 (S3 URL에서 불러옴)
             PdfPCell imageCell = new PdfPCell();
             imageCell.setBorder(Rectangle.NO_BORDER);
             try {
@@ -253,8 +252,6 @@ public class MyPageService {
                     imageCell.addElement(new Paragraph("(이미지 없음)", bodyFont));
                 }
             } catch (Exception e) {
-                // ✅ 로그 추가: 이미지가 왜 안 뜨는지 디버깅용
-                log.error("PDF 생성 중 S3 이미지 로드 실패: url={}, error={}", brand.getCurrentLogoPath(), e.getMessage());
                 imageCell.addElement(new Paragraph("[이미지 로드 실패]", bodyFont));
             }
             infoTable.addCell(imageCell);
