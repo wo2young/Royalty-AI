@@ -16,4 +16,11 @@ python-Levenshtein
 jamo
 apscheduler
 dotenv
+<<<<<<< HEAD
 jamo
+=======
+
+# 아래 2개 추가를 추천합니다!
+python-multipart
+scikit-learn
+>>>>>>> efa32f14ca08c128a76e32d3f88ca947ca15aac3
