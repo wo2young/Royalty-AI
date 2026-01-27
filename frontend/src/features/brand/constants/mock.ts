@@ -128,6 +128,15 @@ export const MOCK_BRAND_DETAILS = [
         imagePath:
           "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
       },
+      {
+        historyId: 1201,
+        version: "v5",
+        imageSimilarity: 22.8,
+        textSimilarity: 17.2,
+        createdAt: "2026-01-24T12:00:01",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
+      },
     ],
     reportList: [
       {

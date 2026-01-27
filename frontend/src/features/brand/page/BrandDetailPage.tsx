@@ -37,6 +37,7 @@ export default function BrandDetailPage() {
       ?.map((item) => ({
         historyId: item.historyId,
         version: item.version,
+        fullTimestamp: item.createdAt,
         createdAt: item.createdAt.split("T")[0].replace(/-/g, "."), // "2026-01-22" -> "2026.01.22"
         imageSimilarity: item.imageSimilarity,
         textSimilarity: item.textSimilarity,
@@ -44,7 +45,8 @@ export default function BrandDetailPage() {
       }))
       .sort(
         (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          new Date(a.fullTimestamp).getTime() -
+          new Date(b.fullTimestamp).getTime()
       ) || []
 
   // 데이터 존재 여부 확인 (실제 API 연동 시 이 부분을 데이터 유무로 체크하세요)

@@ -89,10 +89,13 @@ export function BrandHistoryChart({ data }: BrandHistoryProps) {
             />
 
             <XAxis
-              dataKey="createdAt"
+              dataKey="fullTimestamp"
+              tickFormatter={(value) => {
+                return value.split("T")[0].replace(/-/g, ".")
+              }}
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 12, fill: colors.text, fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: colors.text }}
               dy={10}
             />
             <YAxis
