@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS brand (
     category     VARCHAR(50),
     text_vector vector(768),
     description  TEXT,
-    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     is_notification_enabled  BOOLEAN DEFAULT FALSE;
 );
 
@@ -47,8 +47,9 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     logo_id      BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_path   TEXT NOT NULL,
+    -- [중요] AI 모델(MobileNetV2 등) 출력에 맞춰 1280차원 설정
     image_vector vector(1280),
-    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -61,10 +62,7 @@ CREATE TABLE IF NOT EXISTS brand_logo_history (
     image_path       TEXT NOT NULL,
     image_similarity FLOAT,
     text_similarity  FLOAT,
-    patent_id        BIGINT,
-    ai_summary       TEXT,
-    analysis_detail  TEXT,
-    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -76,7 +74,7 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
     image_score  FLOAT,
     text_score   FLOAT,
     risk_level   VARCHAR(20),
-    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -92,9 +90,10 @@ CREATE TABLE IF NOT EXISTS patent (
     registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
-    image_vector        vector(1280),  -- 이미지는 1280차원
-    text_vector         vector(768),   -- 텍스트는 768차원   
-    created_at          TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    -- [AI 벡터 데이터]
+    image_vector        vector(1280),  -- MobileNetV3 (1280차원)
+    text_vector         vector(768),   -- SBERT (768차원)
+    created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- [인덱스 아카이브]
@@ -157,15 +156,12 @@ CREATE TABLE IF NOT EXISTS report (
 -- ==========================================
 -- 11. 토큰 관리 
 -- ==========================================
-CREATE TABLE refresh_token (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL ,
-    refresh_token VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now()
-,
-    CONSTRAINT fk_refresh_token_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
+CREATE TABLE IF NOT EXISTS trademark_expiration (
+    expiration_id    BIGSERIAL PRIMARY KEY,
+    patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
+    days_left        INT,
+    status           VARCHAR(20), 
+    last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================

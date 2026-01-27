@@ -1,6 +1,10 @@
 # 1. 가벼운 파이썬 베이스 이미지 사용
 FROM python:3.10-slim
 
+# 시간대를 한국으로 설정하는 설정 추가
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # 2. 필수 패키지 설치 (패키지명 수정)
 RUN apt-get update && apt-get install -y \
     build-essential \

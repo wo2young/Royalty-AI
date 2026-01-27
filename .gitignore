@@ -121,3 +121,4 @@ special_tokens_map.json
 
 # 알 수 없는 해시 파일들 (캐시 파일로 추정)
 [0-9a-f]*[0-9a-f]
+

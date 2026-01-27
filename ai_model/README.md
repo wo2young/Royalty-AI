@@ -1,67 +1,89 @@
-# 🚀 AI 기반 상표 유사도 검색 엔진 (Royalty Project)
+# 🦁 Royalty Project: 개발 환경 가이드 (AWS Migration Ver.)
 
-본 모듈은 KIPRIS로부터 수집된 100만 건 이상의 상표 데이터를 벡터화하고, 고속 유사도 검색(HNSW)을 제공하는 AI 검색 엔진입니다. **FastAPI**를 통해 텍스트/이미지 임베딩 API를 제공하며, **Docker**를 통해 간편한 실행 환경을 지원합니다.
+![AWS RDS](https://img.shields.io/badge/AWS-RDS-232F3E?style=flat-square&logo=amazon-aws&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Backend-Spring%20Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
+![Python](https://img.shields.io/badge/AI-FastAPI-3776AB?style=flat-square&logo=python&logoColor=white)
 
----
-
-## 📊 1. 데이터 현황 및 AI 모델 스펙
-- **전체 데이터 수**: 1,058,481건
-- **핵심 파이프라인**:
-  - **Text Embedding**: `jhgan/ko-sbert-multitask` (768차원)
-    - 한국어 상표명의 문맥적 의미를 파악하여 벡터화합니다.
-  - **Image Embedding**: `ResNet50` (1000차원)
-    - 상표 이미지의 특징점(Feature)을 추출하여 벡터화합니다.
-  - **Search Index**: PostgreSQL `pgvector` 기반 **HNSW** 인덱스 적용
+> 📢 **공지사항**
+> **2026.01.25 부로 DB 서버가 로컬 Docker에서 `AWS RDS`로 이관되었습니다.**
+> 기존 로컬 DB를 사용하던 분들은 **반드시** 아래 절차를 따라 환경을 재설정해주세요.
 
 ---
 
-## 🛠 2. 백엔드(Java/Spring) 연동 가이드
-본 서버에서 반환하는 벡터 값을 활용하여 MyBatis에서 아래와 같이 검색을 수행할 수 있습니다.
+## 🛠️ 1. 필수 사전 준비 (Prerequisites)
 
-### MyBatis 매퍼(XML) 예시
-```xml
-<select id="searchSimilarTrademarks" resultType="TrademarkDTO">
-    SELECT application_number, trademark_name, image_url
-    FROM patent
-    ORDER BY text_vector <![CDATA[<=>]]> #{inputVector, typeHandler=VectorTypeHandler}::vector
-    LIMIT 10
-</select>
-```
-> **Tip**: `<=>` 연산자는 코사인 거리를 의미하며, 값이 작을수록 유사도가 높습니다.
+작업을 시작하기 전에 소스코드를 최신화하고 설정을 변경해야 합니다.
 
----
-
-## 🐳 3. AI API 서버 실행 방법 (Docker)
-
-백엔드 개발자는 로컬 환경에 별도의 파이썬 설정 없이 **Docker**만으로 AI 서버를 기동할 수 있습니다.
-
-### ① 사전 준비 (Prerequisites)
-1. **Docker Desktop** 설치 확인
-2. **모델 파일(Heavy Data) 다운로드**: 
-   - [구글 드라이브 링크]에서 `models/` 폴더를 다운로드합니다.
-   - 다운로드한 폴더를 `ai_model/models/` 경로에 배치합니다. (용량 문제로 Git 제외)
-
-### ② 이미지 빌드 및 컨테이너 실행
-터미널에서 `ai_model` 폴더로 이동 후 아래 명령어를 입력하세요.
-
-**1. 도커 이미지 빌드**
+### ① 코드 최신화
+`develop` 브랜치의 최신 변경 사항을 당겨옵니다.
 ```bash
-docker build -t royalty-ai-api .
+git pull origin develop
 ```
 
-**2. 컨테이너 실행 (Windows CMD 기준)**
-```cmd
-docker run -d --name royalty-ai-container -v "%cd%/models:/app/models" -p 8000:8000 royalty-ai-api
+### ② Backend 설정 파일 교체 (중요!)
+팀장님이 공유한 **`application.properties`** 파일을 아래 경로에 덮어씌워 주세요.
+(AWS 접속 정보가 포함되어 있으므로 **외부 유출 절대 금지** 🚫)
+
+```text
+backend
+ └── src
+      └── main
+           └── resources
+                └── 📄 application.properties  <-- (이 파일을 교체하세요)
 ```
 
 ---
 
-## 📖 4. API 명세 및 테스트
-서버 가동 후 브라우저에서 아래 주소에 접속하면 **Swagger UI**를 통해 API를 직접 테스트할 수 있습니다.
+## 🐳 2. Docker 환경 재설정 (AI Model)
 
-- **Swagger URL**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **주요 Endpoint**:
-  - `POST /api/v1/embed/text`: 검색어(String) -> 768차원 벡터 반환
-  - `POST /api/v1/embed/image`: 이미지 파일 -> 1000차원 벡터 반환
+기존 로컬 DB(PostgreSQL 컨테이너)는 이제 사용하지 않습니다.
+**구버전 컨테이너를 삭제**하고, AWS와 연결된 **신규 AI 모델**을 실행해야 합니다.
+
+**터미널(프로젝트 루트)에서 순서대로 실행하세요:**
+
+```bash
+# 1. 실행 중인 모든 컨테이너 종료 및 삭제 (로컬 DB 삭제됨)
+docker-compose down
+
+# 2. 캐시 없이 새로 빌드 및 실행 (AWS 연결 버전)
+docker-compose up -d --build
+```
+
+#### ✅ 정상 실행 확인 방법
+```bash
+docker ps
+```
+> 목록에 **`royalty-ai` 컨테이너 딱 1개만** 떠 있으면 성공입니다!
+> (만약 `db` 관련 컨테이너가 보이면 `docker-compose down`을 다시 해주세요.)
 
 ---
+
+## ☕ 3. Backend 실행 (Spring Boot)
+
+1. sts4에서 `BackendApplication`을 실행합니다.
+2. 콘솔 로그에 아래와 같은 AWS 접속 로그가 뜨는지 확인합니다.
+   > `Connected to jdbc:postgresql://royalty...rds.amazonaws.com...`
+3. **참고:** 이제 로컬 DB 주소(`localhost:5433`)는 사용하지 않습니다.
+
+---
+
+## ❓ 자주 묻는 질문 (FAQ)
+
+<details>
+<summary><strong>Q1. 로그인이 안 되고 '존재하지 않는 사용자'라고 떠요!</strong></summary>
+<div markdown="1">
+    <br>
+    <strong>A.</strong> DB가 AWS로 바뀌면서 기존 로컬 데이터가 아닌 <strong>새로운 DB</strong>를 바라보게 되었습니다.
+    따라서 회원 정보가 초기화된 상태입니다. <strong>새로 회원가입</strong>을 하시거나 테스트 계정을 생성해주세요.
+</div>
+</details>
+
+<details>
+<summary><strong>Q2. AI 검색이 작동하지 않아요!</strong></summary>
+<div markdown="1">
+    <br>
+    <strong>A.</strong> <code>docker-compose up -d --build</code>를 실행하지 않아서, <strong>과거 설정(로컬 DB)을 가진 컨테이너</strong>가 돌고 있을 확률이 높습니다.
+    반드시 <strong>재빌드(--build)</strong> 명령어를 실행해주세요.
+</div>
+</details>
