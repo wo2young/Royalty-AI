@@ -14,6 +14,9 @@ public class IdentityVO {
 
     // 현재 연결된 로고 ID (brand 테이블 기준)
     private Long logoId;
+    
+    //로고 이미지 경로 (brand_logo.image_path)
+    private String logoImagePath;
 
     // 현재 상호명 (brand 테이블 기준)
     private String brandName;

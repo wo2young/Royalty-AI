@@ -15,4 +15,7 @@ public interface IdentityMapper {
 
     // 아이덴티티 갱신
     int update(IdentityVO identityVO);
+    
+    //로고 이미지 조회
+    String findLogoImagePathByLogoId(Long logoId);
 }
