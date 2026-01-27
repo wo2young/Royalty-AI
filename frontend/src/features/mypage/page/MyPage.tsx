@@ -9,8 +9,8 @@ export default function MyPage() {
         <div className="grid lg:grid-cols-[340px_1fr] gap-8">
           <MyProfileSidebar />
           <main className="space-y-8">
-            <BookmarkSummaryCard />
             <BrandSummaryCard />
+            <BookmarkSummaryCard />
           </main>
         </div>
       </div>
