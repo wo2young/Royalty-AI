@@ -3,7 +3,7 @@
 import { ArrowLeft, Bookmark } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BookmarkSearch } from "../components/BookmarkSearch"
+import { BookmarkSearch } from "../../../shared/components/search-bar/SearchBar"
 import { BookmarkCard } from "../components/BookmarkCard"
 import { useBookmarks } from "../api/bookmark.queries"
 import { Pagination } from "@/shared/components/pagination/Pagination"
@@ -24,7 +24,9 @@ export function BookmarksPage() {
         brand.category.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesCategory =
-        selectedCategory === "ALL" || brand.category === selectedCategory
+        selectedCategory === "ALL" ||
+        (selectedCategory === "IT" && brand.category === "IT") ||
+        (selectedCategory === "OTHERS" && brand.category !== "IT")
 
       return matchesSearch && matchesCategory
     })

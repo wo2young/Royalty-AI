@@ -2,7 +2,7 @@ import { Building2, ArrowLeft, Plus } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
-import { BookmarkSearch } from "@/features/bookmark/components/BookmarkSearch"
+import { BookmarkSearch } from "@/shared/components/search-bar/SearchBar"
 import { BrandList } from "../components/BrandList"
 import { useBrands } from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
@@ -31,7 +31,9 @@ export default function BrandsPage() {
       brand.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brand.category.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory =
-      selectedCategory === "ALL" || brand.category === selectedCategory
+      selectedCategory === "ALL" ||
+      (selectedCategory === "IT" && brand.category === "IT") ||
+      (selectedCategory === "OTHERS" && brand.category !== "IT")
 
     return matchesSearch && matchesCategory
   })
