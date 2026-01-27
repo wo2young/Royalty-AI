@@ -102,9 +102,8 @@ CREATE TABLE IF NOT EXISTS patent (
     category            TEXT,          -- 지정상품 분류
     
     -- [AI 벡터 데이터]
-    -- AWS 실제 상태 반영: 이미지는 1280차원, 텍스트는 768차원
-    image_vector        vector(1280),  
-    text_vector         vector(768),   
+    image_vector        vector(1280),  -- MobileNetV3 (1280차원)
+    text_vector         vector(768),   -- SBERT (768차원)
     
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
