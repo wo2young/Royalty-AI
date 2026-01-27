@@ -2,13 +2,14 @@ import { BarChart3 } from "lucide-react"
 import { BrandAIReportCard } from "./BrandAIReportCard"
 import { BrandHistoryChart } from "./BrandHistoryChart"
 import { TabEmptyState } from "./TabEmptyState"
-import { Card } from "@/shared/components/ui/card"
-import type { BrandReport } from "../../types"
+import type { BrandIdentityPayload, BrandReport } from "../../types"
 import type { HistoryData } from "../../types"
+import { BrandBIReportCard } from "./BrandBIReportCard"
 
 interface BrandSummaryTabProps {
   report: BrandReport
   historyData: HistoryData[]
+  identityPayload?: BrandIdentityPayload
   hasAI: boolean
   hasHistory: boolean
   hasBI: boolean
@@ -17,6 +18,7 @@ interface BrandSummaryTabProps {
 export function BrandSummaryTab({
   report,
   historyData,
+  identityPayload,
   hasAI,
   hasHistory,
   hasBI,
@@ -36,9 +38,13 @@ export function BrandSummaryTab({
       <h2 className="text-xl font-bold text-slate-900 ml-1">
         종합 분석 리포트
       </h2>
+      {hasBI && identityPayload && (
+        <div className="space-y-6">
+          <BrandBIReportCard identityPayload={identityPayload} />
+        </div>
+      )}
       {hasAI && <BrandAIReportCard report={report} />}
       {hasHistory && <BrandHistoryChart data={historyData} />}
-      {hasBI && <Card className="p-6">BI 분석 요약 내용...</Card>}
     </div>
   )
 }

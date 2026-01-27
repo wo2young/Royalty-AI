@@ -98,6 +98,8 @@ export const MOCK_BRAND_DETAILS = [
         imageSimilarity: 12.5,
         textSimilarity: 5.0,
         createdAt: "2026-01-22T14:30:00",
+        imagePath:
+          "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
       },
       {
         historyId: 5,
@@ -162,5 +164,46 @@ export const MOCK_BRAND_DETAILS = [
         createdAt: "2025-12-25T11:00:00",
       },
     ],
+  },
+]
+
+export const BrandBiData = [
+  {
+    brandId: 1,
+    brandName: "삼성",
+    identityPayload: {
+      core: {
+        kr: "삼성은 현대적이고 복잡한 상징형 로고를 가지고 있습니다.",
+        en: "Samsung has a modern, complex symbolic logo.",
+      },
+      language: {
+        kr: "한국어",
+        en: "English",
+      },
+      brandKeywords: {
+        kr: ["복잡한", "현대적인", "상징", "높은 대칭", "밝은 색조"],
+        en: [
+          "complex",
+          "modern",
+          "symbol",
+          "high symmetry",
+          "light color tone",
+        ],
+      },
+      copyExamples: {
+        kr: [
+          "삼성의 로고는 현대적인 디자인과 복잡함이 돋보입니다.",
+          "이 로고는 밝고 대칭적인 구조로 이루어져 있습니다.",
+        ],
+        en: [
+          "Samsung's logo stands out with its modern design and complexity.",
+          "This logo features a bright and symmetrical structure.",
+        ],
+      },
+    },
+    lastBrandName: "삼성",
+    lastLogoId: 1,
+    logoId: 1,
+    logoImagePath: null,
   },
 ]
