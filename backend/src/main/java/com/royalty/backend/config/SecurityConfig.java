@@ -46,16 +46,30 @@ public class SecurityConfig {
 
             // 🔹 URL 권한 설정
             .authorizeHttpRequests(auth -> auth
+            		// 🔥 이건 인증 필요
+                    .requestMatchers("/api/auth/notifications/**").authenticated()
+                    
                     // 인증 없이 접근 허용
                     .requestMatchers(
-                    		"/api/auth/**", 
+                    		"/api/auth/login",
+                            "/api/auth/signup",
+                            "/api/auth/kakao/**",
                             "/oauth/**",
-                            "/auth/**", 
+                            "/api/auth/email/send",
+                            "/api/auth/password/**",  
+                            "/auth/**",
+                            "/api/auth/find-username",
                             "/error"
+                            
                     ).permitAll()
+
+                    
 
                     // 나머지는 인증 필요
                     .anyRequest().authenticated()
+                    
+                    
+                    
             )
 
             // 🔹 JWT 필터 등록

@@ -182,7 +182,10 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
   if (e.key === "Enter") {
     handleLogin()
   }
+
 }
+
+
 
 
   /* =========================
@@ -224,13 +227,13 @@ const handleSignup = async () => {
     }
   }
   // 아이디 길이 체크
-  if (signupUsername.length < 6 || signupUsername.length > 12) {
+  if (signupUsername.length < 2 || signupUsername.length > 12) {
     setUiMessage("아이디는 6자 이상 12자 이하로 입력해주세요.")
     return
   }
 
   // 비밀번호 길이 체크
-  if (signupPassword.length < 8 || signupPassword.length > 16) {
+  if (signupPassword.length < 2 || signupPassword.length > 16) {
     setUiMessage("비밀번호는 8자 이상 16자 이하로 입력해주세요.")
     return
   }
@@ -242,49 +245,54 @@ const handleSignup = async () => {
   }
 
   try {
-    await axiosInstance.post("/api/auth/signup", {
-      username: signupUsername,
-      password: signupPassword,
-      email: signupEmail,
-      emailAuthCode,
-    })
-     // ✅✅✅ 바로 여기 (회원가입 성공 직후)
-  if (pushAllowed && Notification.permission === "granted") {
-    try {
-      const token = await getFcmToken()
-      await axiosInstance.post("/api/notifications/token", { token })
-    } catch (e) {
-      console.warn("FCM 토큰 저장 실패", e)
-    }
-  }
+  await axiosInstance.post("/api/auth/signup", {
+    username: signupUsername,
+    password: signupPassword,
+    email: signupEmail,
+    emailAuthCode,
+  })
 
-    let seconds = 3
-    setCountdown(seconds)
-    setUiMessage(
-      `회원가입이 완료되었습니다. ${seconds}초 후 로그인 화면으로 이동합니다.`
-    )
+  alert("회원가입이 완료되었습니다. 로그인해주세요.")
+  switchMode("login")
 
-    const timer = setInterval(() => {
-      seconds -= 1
-      setCountdown(seconds)
-
-      if (seconds > 0) {
-        setUiMessage(
-          `회원가입이 완료되었습니다. ${seconds}초 후 로그인 화면으로 이동합니다.`
-        )
-      } else {
-        clearInterval(timer)
-        setCountdown(null)
-        switchMode("login")
-      }
-    }, 1000)
-    
-
-  } catch (err: any) {
-    const message = err?.response?.data?.message
-    setUiMessage(message || "회원가입에 실패했습니다.")
-  }
+} catch (err: any) {
+  const message = err?.response?.data?.message
+  setUiMessage(message || "회원가입에 실패했습니다.")
 }
+}
+
+
+//회원가입 토글 버튼
+const handleTogglePush = async () => {
+  // OFF → 그냥 끔
+  if (pushAllowed) {
+    setPushAllowed(false)
+    return
+  }
+
+  // ON 시도
+  if (!("Notification" in window)) {
+    alert("이 브라우저는 알림을 지원하지 않습니다.")
+    return
+  }
+
+  // 아직 요청 안 했으면 크롬 팝업
+  if (Notification.permission === "default") {
+    await Notification.requestPermission()
+  }
+
+  // ❗ 권한 상태 상관없이 ON은 됨
+  if (Notification.permission === "denied") {
+    alert(
+      "브라우저 알림이 꺼져 있어 알림을 받을 수 없습니다.\n" +
+      "허용 시 혜택 감지를 안내해드립니다."
+    )
+  }
+
+  setPushAllowed(true)
+}
+
+
 
 
 
@@ -717,27 +725,29 @@ const handleFindPassword = async () => {
 <div className="flex items-center justify-between rounded-md border px-3 py-2">
   <div className="text-sm">
     <p className="font-medium">알림 설정</p>
-    <p className="text-xs text-muted-foreground">
-      브랜드 위험 및 중요 알림을 수신합니다
-    </p>
+ 
+<p className="text-[11px] text-muted-foreground opacity-80 mt-0.5">
+   * 알림은 브라우저 설정에 따라 제한될 수 있습니다
+</p>
   </div>
 
   <button
-    type="button"
-    onClick={() => setPushAllowed((prev) => !prev)}
-    className={`w-11 h-6 rounded-full transition-colors
-      ${pushAllowed ? "bg-[#142a5c]" : "bg-gray-300"}`}
-  >
-    <span
-      className={`block w-5 h-5 bg-white rounded-full transition-transform
-        ${pushAllowed ? "translate-x-5" : "translate-x-1"}`}
-    />
-  </button>
+  type="button"
+  onClick={handleTogglePush}
+  className={`w-11 h-6 rounded-full transition-colors
+    ${pushAllowed ? "bg-[#142a5c]" : "bg-gray-300"}`}
+>
+  <span
+    className={`block w-5 h-5 bg-white rounded-full transition-transform
+      ${pushAllowed ? "translate-x-5" : "translate-x-1"}`}
+  />
+</button>
 </div>
 
 <Button
   size="lg"
   className="w-full mt-3"
+  disabled={!pushAllowed}
   onClick={handleSignup}
 >
   회원가입

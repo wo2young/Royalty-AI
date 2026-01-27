@@ -37,28 +37,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * - 토큰 / 유저 저장
    * - FCM 토큰 발급 후 서버에 전달
    */
-  const login = async (token: string, user: any) => {
-    // 1️⃣ 기존 로그인 처리
-    authStorage.set(token, user)
-    setUser(user)
-    setIsLoggedIn(true)
+const login = async (token: string, user: any) => {
+  // 🔒 이미 로그인 상태면 중복 실행 방지
+  if (isLoggedIn) return
 
-    // 2️⃣ FCM 토큰 처리 (실패해도 로그인은 유지)
-    try {
-      console.log("🚀 FCM 토큰 발급 시도")
-      const fcmToken = await getFcmToken()
-      console.log("📱 FCM Token:", fcmToken)
+  // 1️⃣ 기존 로그인 처리
+  authStorage.set(token, user)
+  setUser(user)
+  setIsLoggedIn(true)
 
-      if (fcmToken) {
-        await axiosInstance.post("/api/notifications/fcm-token", {
-          token: fcmToken,
-        })
-        console.log("✅ FCM 토큰 서버 저장 완료")
-      }
-    } catch (e) {
-      console.warn("❌ FCM 토큰 저장 실패", e)
+  // 2️⃣ FCM 토큰 처리 (실패해도 로그인은 유지)
+  try {
+    console.log("🚀 FCM 토큰 발급 시도")
+    const fcmToken = await getFcmToken()
+    console.log("📱 FCM Token:", fcmToken)
+
+    if (fcmToken) {
+      await axiosInstance.post("/api/auth/notifications/token", {
+        token: fcmToken,
+      })
+      console.log("✅ FCM 토큰 서버 저장 완료")
     }
+  } catch (e) {
+    console.warn("❌ FCM 토큰 저장 실패", e)
   }
+}
 
   const logout = () => {
     authStorage.clear()

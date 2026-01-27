@@ -32,7 +32,13 @@ public interface UserMapper {
     
     void updatePassword(User user);
     
-    
+    // fcm토큰쪽
+    void saveFcmToken(
+    	    @Param("userId") Long userId,
+    	    @Param("token") String token
+    	);
+
+    	List<String> findFcmTokensByUserId(Long userId);
     
 
     

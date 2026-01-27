@@ -24,16 +24,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
 
     /* =========================
-       🔥 JWT 필터 제외 경로
-       ========================= */
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
+    🔥 JWT 필터 제외 경로
+    ========================= */
+ @Override
+ protected boolean shouldNotFilter(HttpServletRequest request) {
+     String path = request.getRequestURI();
 
-        return path.startsWith("/api/auth/")
-            || path.startsWith("/oauth/")
-            || path.equals("/error");
-    }
+     return path.equals("/api/auth/login")
+         || path.equals("/api/auth/signup")
+         || path.equals("/api/auth/refresh")
+         || path.startsWith("/api/auth/kakao/")
+         || path.startsWith("/oauth/")
+         || path.equals("/api/auth/email/send") 
+         || path.equals("/api/auth/find-username")  
+         || path.startsWith("/api/auth/password/")
+         || path.equals("/error");
+ }
 
     @Override
     protected void doFilterInternal(

@@ -12,10 +12,13 @@ const axiosInstance = axios.create({
 
 // 🔹 JWT 제외 경로
 const AUTH_EXCLUDE_PATHS = [
-  "/auth/login",
-  "/auth/signup",
-  "/auth/refresh",
-  "/auth/kakao",
+  "/api/auth/login",
+  "/api/auth/signup",
+  "/api/auth/refresh",
+  "/api/auth/kakao",
+   "/api/auth/email/send",        // ✅ 이메일 인증
+  "/api/auth/find-username",     // ✅ 아이디 찾기
+  "/api/auth/password",          // ✅ 비밀번호 재설정 계열
 ]
 
 // =========================

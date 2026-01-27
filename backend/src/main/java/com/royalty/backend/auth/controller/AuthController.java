@@ -1,5 +1,6 @@
 package com.royalty.backend.auth.controller;
 
+import com.royalty.backend.auth.domain.CustomUserDetails;
 import com.royalty.backend.auth.dto.AuthResponseDTO;
 import com.royalty.backend.auth.dto.LoginRequestDTO;
 import com.royalty.backend.auth.dto.SignupRequestDTO;
@@ -11,12 +12,15 @@ import com.royalty.backend.config.Aes256Util;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import com.royalty.backend.auth.kakao.KakaoLoginRequestDTO;
 import com.royalty.backend.auth.dto.FindUsernameRequestDTO;
 import com.royalty.backend.auth.mail.MailService;
 import com.royalty.backend.auth.mapper.UserMapper;
-
+import com.royalty.backend.auth.dto.FcmTokenRequestDTO;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequiredArgsConstructor
@@ -158,5 +162,18 @@ public class AuthController {
             throw new IllegalArgumentException("Authorization 헤더가 없거나 올바르지 않습니다.");
         }
         return bearerToken.substring(7);
+    }
+    
+    @PostMapping("/notifications/token")
+    public ResponseEntity<Void> saveFcmToken(
+            Authentication authentication,
+            @RequestBody FcmTokenRequestDTO request
+    ) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Long userId)) {
+            throw new AuthException("인증 정보가 없습니다.");
+        }
+
+        userMapper.saveFcmToken(userId, request.getToken());
+        return ResponseEntity.ok().build();
     }
 }
