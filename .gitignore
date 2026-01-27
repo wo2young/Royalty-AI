@@ -47,6 +47,12 @@ ai_model/data/
 ############################
 .metadata/
 backend/.metadata/
+# =========================
+# IDE / Editor metadata
+# =========================
+
+# Eclipse / STS
+.metadata/
 .recommenders/
 .settings/
 .classpath
@@ -77,3 +83,18 @@ docker-data/
 *.pem
 *.key
 *.crt
+
+# VS Code
+.vscode/
+
+# IntelliJ
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+

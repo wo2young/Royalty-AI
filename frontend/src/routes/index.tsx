@@ -10,34 +10,40 @@ import ErrorPage from "@/shared/page/ErrorPage"
 import { BookmarksPage } from "@/features/bookmark/page/BookmarkPage"
 import KakaoCallbackPage from "@/features/auth/page/KakaoCallbackPage"
 import RequireAuth from "@/shared/auth/RequireAuth"
+import { BrandDetailPage, BrandsPage } from "@/features/brand"
 
 export const router = createBrowserRouter([
- {
-  path: "/",
-  element: <AppLayout />,
-  errorElement: <ErrorPage />,
-  children: [
-    // ✅ 메인 (공개 + 헤더 유지)
-    { index: true, element: <LandingPage /> },
+  // ✅ 메인 레이아웃
+  {
+    path: "/",
+    element: <AppLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <LandingPage /> },
 
-    // 🔒 로그인 필요한 페이지만 보호
-    {
-      element: <RequireAuth />,
-      children: [
-        { path: "analysis", element: <AnalysisPage /> },
-        { path: "recommend", element: <RecommendationPage /> },
-        { path: "trademarks", element: <TrademarkListPage /> },
-        { path: "mypage", element: <MyPage /> },
-        { path: "mypage/bookmark", element: <BookmarksPage /> },
-      ],
-    },
-  ],
-},
+      // 🔒 로그인 필요
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: "analysis", element: <AnalysisPage /> },
+          { path: "recommend", element: <RecommendationPage /> },
+          { path: "trademarks", element: <TrademarkListPage /> },
+          { path: "mypage", element: <MyPage /> },
+          { path: "mypage/bookmark", element: <BookmarksPage /> },
+          { path: "mypage/brand", element: <BrandsPage /> },
+          { path: "mypage/brand/:id", element: <BrandDetailPage /> },
+        ],
+      },
+    ],
+  },
 
+  // 🔁 /login → /auth/login
   {
     path: "/login",
     element: <Navigate to="/auth/login" replace />,
   },
+
+  // 🔐 인증
   {
     path: "/auth",
     children: [
@@ -45,13 +51,16 @@ export const router = createBrowserRouter([
       { path: "signup", element: <SignUpPage /> },
     ],
   },
+
+  // 🔑 OAuth
   {
     path: "/oauth/kakao/callback",
     element: <KakaoCallbackPage />,
   },
+
+  // 🔑 비밀번호 재설정
   {
     path: "/reset-password",
     element: <ResetPasswordPage />,
   },
-  
 ])
