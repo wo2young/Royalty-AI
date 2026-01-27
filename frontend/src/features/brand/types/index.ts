@@ -17,6 +17,7 @@ export interface HistoryData {
   imageSimilarity: number
   textSimilarity: number
   createdAt: string
+  imagePath: string
 }
 
 /* 브랜드 AI 분석 */
