@@ -57,3 +57,25 @@ export const useDeleteBrand = () => {
     },
   })
 }
+
+// BI 조회
+export const useBrandIdentity = (brandId: number) => {
+  return useQuery({
+    queryKey: brandKeys.identity(brandId),
+    queryFn: () => brandApi.fetchBrandIdentity(brandId),
+    enabled: !!brandId,
+  })
+}
+
+// BI 분석 실행
+export const useAnalyzeIdentity = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (brandId: number) => brandApi.analyzeBrandIdentity(brandId),
+    onSuccess: (data, brandId) => {
+      queryClient.setQueryData(brandKeys.identity(brandId), data)
+      queryClient.invalidateQueries({ queryKey: brandKeys.detail(brandId) })
+    },
+  })
+}

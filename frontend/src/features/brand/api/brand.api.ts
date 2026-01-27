@@ -1,5 +1,9 @@
-import { MOCK_BRAND_DETAILS, MOCK_MY_BRANDS_LIST } from "../constants/mock"
-import type { Brand, BrandDetail } from "../types"
+import {
+  BrandBiData,
+  MOCK_BRAND_DETAILS,
+  MOCK_MY_BRANDS_LIST,
+} from "../constants/mock"
+import type { Brand, BrandBIData, BrandDetail } from "../types"
 
 export const brandApi = {
   // GET /mypage/brand (목록 조회)
@@ -78,6 +82,31 @@ export const brandApi = {
     */
     return new Promise((resolve) => {
       setTimeout(() => resolve({ success: true }), 300)
+    })
+  },
+
+  // GET /api/identity/{brandId}
+  fetchBrandIdentity: async (brandId: number): Promise<BrandBIData | null> => {
+    /* 실제 서버 연동:
+    const { data } = await axiosInstance.get(`/api/identity/${brandId}`);
+    return data;
+    */
+    return new Promise((resolve) => {
+      const bi = BrandBiData.find((b) => b.brandId === brandId)
+      setTimeout(() => resolve(bi || null), 500)
+    })
+  },
+
+  // POST /api/identity/{brandId}/analyze
+  analyzeBrandIdentity: async (brandId: number): Promise<BrandBIData> => {
+    /* 실제 서버 연동:
+    const { data } = await axiosInstance.post(`/api/identity/${brandId}/analyze`);
+    return data;
+    */
+    return new Promise((resolve) => {
+      // 분석 후 갱신된 목데이터 반환 가정
+      const bi = BrandBiData.find((b) => b.brandId === brandId)!
+      setTimeout(() => resolve(bi), 1500) // 분석 로딩 시간
     })
   },
 }
