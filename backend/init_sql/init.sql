@@ -125,13 +125,17 @@ CREATE TABLE IF NOT EXISTS detection_event (
 -- ==========================================
 CREATE TABLE IF NOT EXISTS notification (
     notification_id  BIGSERIAL PRIMARY KEY,
-    user_id          BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    brand_id         BIGINT REFERENCES brand(brand_id) ON DELETE CASCADE,
-    event_id         BIGINT REFERENCES detection_event(event_id) ON DELETE SET NULL,
-    message          TEXT,
-    is_read          BOOLEAN DEFAULT FALSE,
+    user_id          BIGINT NOT NULL
+        REFERENCES users(user_id) ON DELETE CASCADE,
+    brand_id         BIGINT NULL
+        REFERENCES brand(brand_id) ON DELETE CASCADE,
+    event_id         BIGINT NULL
+        REFERENCES detection_event(event_id) ON DELETE SET NULL,
+    message          TEXT NOT NULL,
+    is_read          BOOLEAN NOT NULL DEFAULT FALSE,
     created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- ==========================================
 -- 9. 북마크 (Bookmark)
