@@ -102,3 +102,8 @@ Thumbs.db
 # Logs
 *.log
 
+# ===== secrets =====
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+.env
+

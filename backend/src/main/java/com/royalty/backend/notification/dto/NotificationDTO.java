@@ -1,5 +1,7 @@
 package com.royalty.backend.notification.dto;
 
+import java.time. LocalDateTime;
+
 import lombok.Getter;
 
 @Getter
@@ -23,5 +25,7 @@ public class NotificationDTO {
     private Long patentId;
     private String trademarkName;
     private String applicationNumber;
+    
+    private LocalDateTime createdAt;
 }
 

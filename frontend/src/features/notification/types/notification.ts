@@ -21,4 +21,6 @@ export interface NotificationDTO {
   patentId: number
   trademarkName: string
   applicationNumber: string
+
+  createdAt?: any
 }
