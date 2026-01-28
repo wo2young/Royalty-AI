@@ -53,18 +53,25 @@ public class MyPageController {
 
     // 등록 (이미지 업로드 필수)
     @PostMapping(value = "/brand", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createBrand(
-            @AuthenticationPrincipal Long userId,
-            @RequestParam(value = "brandName", required = false) String brandName,
-            @RequestParam("category") String category,
-            @RequestParam("description") String description,
-            @RequestParam("logoImage") MultipartFile logoImage) {
-        
-        log.info("브랜드 등록 요청 (TEST): UserID={}, Name={}", userId, brandName);
-        
-        myPageService.createBrand(userId, brandName, category, description, logoImage);
-        return ResponseEntity.ok("브랜드가 성공적으로 등록되었습니다.");
-    }
+        public ResponseEntity<String> createBrand(
+                @AuthenticationPrincipal Long userId,
+                
+                // 👇 수정됨: required = false 추가!
+                @RequestParam(value = "brandName", required = false) String brandName,
+                @RequestParam(value = "category", required = false) String category, 
+                @RequestParam(value = "description", required = false) String description,
+                
+                @RequestParam("logoImage") MultipartFile logoImage) {
+            
+            log.info("브랜드 등록 요청 (TEST): UserID={}, Name={}", userId, brandName);
+            
+            // null 방지 (혹시 서비스에서 null 처리를 안 했을까 봐 빈 문자열로 변환)
+            if (description == null) description = "";
+            if (category == null) category = "기타"; 
+            
+            myPageService.createBrand(userId, brandName, category, description, logoImage);
+            return ResponseEntity.ok("브랜드가 성공적으로 등록되었습니다.");
+        }
     
  // ==========================================
     // [추가] 브랜드 수정 (이미지는 선택 사항)
@@ -127,11 +134,8 @@ public class MyPageController {
     // ==========================================
     @GetMapping("/brand/{brandId}/report")
     public ResponseEntity<byte[]> downloadReport(
-            // @AuthenticationPrincipal Long userId, // 로그인 연동 후 주석 해제
-            @PathVariable Long brandId) {
-        
-        // [테스트용] 로그인 없이도 동작하도록 1번 유저로 고정
-        Long userId = 1L; 
+            @AuthenticationPrincipal Long userId, // 로그인 연동 후 주석 해제
+            @PathVariable Long brandId) { 
         
         log.info("리포트 다운로드 요청: BrandId={}", brandId);
 
