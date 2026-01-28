@@ -10,6 +10,7 @@ import { AddBrandModal } from "../components/modal/AddBrandModal"
 import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
 import type { Brand } from "../types"
 import { EditBrandModal } from "../components/modal/EditBrandModal"
+import { BrandSkeleton } from "../components/skeleons/BrandSkeleton"
 
 const ITEMS_PER_PAGE = 5
 
@@ -64,7 +65,6 @@ export default function BrandsPage() {
     setCurrentPage(1) // 카테고리 변경 시 페이지 리셋
   }
 
-  if (isLoading) return <div>로딩 중...</div>
   if (isError) return <div>데이터를 불러오지 못했습니다.</div>
 
   return (
@@ -108,14 +108,26 @@ export default function BrandsPage() {
         />
 
         {/* 나의 브랜드 리스트 */}
-        <BrandList
-          brands={paginatedBrands}
-          onDelete={(id, name) => setDeleteTarget({ id, name })}
-          onEdit={handleEditClick}
-        />
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            {[...Array(5)].map((_, i) => (
+              <BrandSkeleton key={i} />
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="py-20 text-center border rounded-xl">
+            데이터 로드 실패
+          </div>
+        ) : (
+          <BrandList
+            brands={paginatedBrands}
+            onDelete={(id, name) => setDeleteTarget({ id, name })}
+            onEdit={handleEditClick}
+          />
+        )}
 
         {/* 페이지네이션 */}
-        {filteredBrands.length > 0 && (
+        {!isLoading && filteredBrands.length > 0 && (
           <div className="mt-12">
             <Pagination
               currentPage={currentPage}
