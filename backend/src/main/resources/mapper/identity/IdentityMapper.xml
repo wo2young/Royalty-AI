@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.identity.mapper.IdentityMapper">
+
+    <!-- ========================= -->
+    <!-- ResultMap -->
+    <!-- ========================= -->
+    <resultMap id="IdentityResultMap"
+               type="com.royalty.backend.identity.domain.IdentityVO">
+        <id property="brandId" column="brandId"/>
+        <result property="logoId" column="logoId"/>
+        <result property="logoImagePath" column="logoImagePath"/>
+        <result property="brandName" column="brandName"/>
+        <result property="identityPayload"
+                column="identityPayload"
+                typeHandler="com.royalty.backend.common.typehandler.JsonbTypeHandler"/>
+        <result property="lastLogoId" column="lastLogoId"/>
+        <result property="lastBrandName" column="lastBrandName"/>
+    </resultMap>
+
+    <!-- ========================= -->
+    <!-- 아이덴티티 조회 -->
+    <!-- ========================= -->
+    <select id="findByBrandId"
+            parameterType="long"
+            resultMap="IdentityResultMap">
+        SELECT
+            b.brand_id           AS brandId,
+            bl.logo_id           AS logoId,
+            bl.image_path        AS logoImagePath,
+            b.brand_name         AS brandName,
+            bi.identity_payload  AS identityPayload,
+            bi.last_logo_id      AS lastLogoId,
+            bi.last_brand_name   AS lastBrandName
+        FROM brand b
+        LEFT JOIN brand_logo bl
+            ON b.brand_id = bl.brand_id
+        LEFT JOIN brand_identity bi
+            ON b.brand_id = bi.brand_id
+        WHERE b.brand_id = #{brandId}
+    </select>
+
+    <!-- ========================= -->
+    <!-- 아이덴티티 최초 생성 -->
+    <!-- ========================= -->
+    <insert id="insert"
+            parameterType="com.royalty.backend.identity.domain.IdentityVO">
+        INSERT INTO brand_identity (
+            brand_id,
+            logo_id,
+            identity_payload,
+            last_logo_id,
+            last_brand_name
+        ) VALUES (
+            #{brandId},
+            #{logoId},
+            #{identityPayload,
+              typeHandler=com.royalty.backend.common.typehandler.JsonbTypeHandler},
+            #{lastLogoId},
+            #{lastBrandName}
+        )
+    </insert>
+
+    <!-- ========================= -->
+    <!-- 아이덴티티 갱신 -->
+    <!-- ========================= -->
+    <update id="update"
+            parameterType="com.royalty.backend.identity.domain.IdentityVO">
+        UPDATE brand_identity
+        SET
+            logo_id = #{logoId},
+            identity_payload =
+                #{identityPayload,
+                  typeHandler=com.royalty.backend.common.typehandler.JsonbTypeHandler},
+            last_logo_id = #{lastLogoId},
+            last_brand_name = #{lastBrandName},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE brand_id = #{brandId}
+    </update>
+    
+    <!-- 로고 이미지 경로 조회 -->
+	<select id="findLogoImagePathByLogoId"
+    	    parameterType="long"
+        	resultType="string">
+    	SELECT image_path
+    	FROM brand_logo
+    	WHERE logo_id = #{logoId}
+	</select>
+
+
+</mapper>
