@@ -1,64 +1,180 @@
+<<<<<<< HEAD
 # ==========================================
-# 1. OS & IDE Settings
+# OS generated files
 # ==========================================
 .DS_Store
 Thumbs.db
-.idea/
-*.iml
-.vscode/
-*.code-workspace
-# (주의) launch.json에 비밀번호가 있다면 제외하는 게 안전합니다.
-# .vscode/launch.json
 
 # ==========================================
-# 2. Java / Maven (Spring Boot)
+# Python / AI Model
 # ==========================================
-target/
-!.mvn/wrapper/maven-wrapper.jar
-*.class
-*.log
-*.gz
+=======
+>>>>>>> efa32f14ca08c128a76e32d3f88ca947ca15aac3
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
 
-# ==========================================
-# 3. Python & AI (venv, Cache, Models)
-# ==========================================
+############################
+# Python
+############################
 __pycache__/
 *.py[cod]
 venv/
 .env
+<<<<<<< HEAD
+.ipynb_checkpoints/
+
+# AI Data & Models (용량 큰 파일들)
+ai_model/data/
 ai_model/models/
+models/
+*.npy
 *.h5
-*.pt
 *.pth
 *.bin
-*.safetensors
-ai_model/clean_patent_data.sql
+*.pkl
 
 # ==========================================
-# 4. Node.js (Frontend)
+# Node.js (Frontend)
 # ==========================================
+=======
+>>>>>>> efa32f14ca08c128a76e32d3f88ca947ca15aac3
+.env.*
+
+############################
+# Node.js (Frontend)
+############################
 node_modules/
 build/
 dist/
 .npm
-.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # ==========================================
-# 5. Local Configuration (민감 정보)
+# Database & Archives
 # ==========================================
-# 로컬 개발 환경용 설정파일이 따로 있다면 추가
-# src/main/resources/application-local.properties
+*.sql
+*.tar
+*.gz
 
+# ==========================================
+# Java / Maven (Backend)
+# ==========================================
+**/target/
+**/*.class
+**/.settings/
+**/.classpath
+**/.project
+**/.factorypath
+
+# ==========================================
+# IDE (STS4, IntelliJ, VS Code)
+# ==========================================
 .metadata/
 .recommenders/
-RemoteSystemsTempFiles/
+**/bin/
+**/*.iml
+.idea/
+.vscode/
+############################
+# Java / Spring Boot
+############################
+target/
+*.log
+hs_err_pid*
 
-# 개인 SQL 작업 파일
-*.sql
-*.session.sql
+############################
+# AI Data / Models (절대 업로드 금지)
+############################
+ai_model/data/
+*.npy
+*.h5
+*.pt
+*.pth
+*.onnx
+*.ckpt
 
-# application.properties 제외 (민감 정보 포함 시)
-backend/src/main/resources/application.properties
+############################
+# Eclipse / STS (🔥 핵심)
+############################
+.metadata/
+backend/.metadata/
+# =========================
+# IDE / Editor metadata
+# =========================
 
-# 또는 환경별 설정 파일을 따로 쓸 경우
-backend/src/main/resources/application-*.properties
+# Eclipse / STS
+.metadata/
+.recommenders/
+.settings/
+.classpath
+.project
+.factorypath
+*.prefs
+*.launch
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# Docker (로컬 전용일 경우)
+############################
+docker-data/
+
+############################
+# Secrets / Keys
+############################
+*.pem
+*.key
+*.crt
+
+# VS Code
+.vscode/
+
+# IntelliJ
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# --- [긴급 추가] 로컬 DB 세션 및 AI 모델 파일 무시 ---
+
+# DBeaver 등 DB 세션 파일
+*.session
+
+# SQL 덤프 파일 (로컬 테스트용이면 무시)
+final_deploy.sql
+
+# AI 모델 가중치 파일 (용량 큼)
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# AI 모델 관련 설정 파일 (프로젝트 소스코드가 아니라면 무시)
+adapter_config.json
+added_tokens.json
+chat_template.jinja
+tokenizer_config.json
+special_tokens_map.json
+
+# 알 수 없는 해시 파일들 (캐시 파일로 추정)
+[0-9a-f]*[0-9a-f]
+
