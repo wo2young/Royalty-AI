@@ -87,6 +87,10 @@ docker-data/
 *.pem
 *.key
 *.crt
+application.properties
+application-*.properties
+application.yml
+application-*.yml
 
 # VS Code
 .vscode/
@@ -107,3 +111,18 @@ backend/src/main/resources/application.properties
 backend/src/main/resources/application-*.properties
 .env
 
+# AI 모델 가중치 파일 (용량 큼)
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# AI 모델 관련 설정 파일 (프로젝트 소스코드가 아니라면 무시)
+adapter_config.json
+added_tokens.json
+chat_template.jinja
+tokenizer_config.json
+special_tokens_map.json
+
+# 알 수 없는 해시 파일들 (캐시 파일로 추정)
+[0-9a-f]*[0-9a-f]
