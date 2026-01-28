@@ -5,6 +5,7 @@ import com.royalty.backend.trademark.dto.TrademarkSearchReq;
 import com.royalty.backend.trademark.service.TrademarkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // 👈 import 추가
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -20,7 +21,7 @@ public class TrademarkController {
     // 1. 조회 API (Read)
     // ==========================================
 
-    // 1-1. 상표 리스트 조회 (검색/필터/페이징)
+    // 1-1. 상표 리스트 조회 (검색/필터/페이징) - 비회원도 가능하면 그대로 둠
     // GET /trademark/list
     @GetMapping("/list")
     public ResponseEntity<?> getList(@ModelAttribute TrademarkSearchReq request) {
@@ -28,19 +29,15 @@ public class TrademarkController {
         return ResponseEntity.ok(result);
     }
 
-    // 1-2. 소멸 예정 상표 조회 (선점 기회)
-    // GET /trademark/expiring
-//    @GetMapping("/expiring")
-//    public ResponseEntity<?> getExpiringList(@ModelAttribute TrademarkSearchReq request) {
-//        Map<String, Object> result = trademarkService.getExpiringTrademarks(request);
-//        return ResponseEntity.ok(result);
-//    }
-
     // 1-3. 상표 상세 조회
     // GET /trademark/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<?> getDetail(@PathVariable Long id) {
-        TrademarkDto result = trademarkService.getTrademarkDetail(id, getCurrentUserId());
+    public ResponseEntity<?> getDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Long userId // 👈 토큰에서 진짜 ID 주입
+    ) {
+        // userId가 null이면(비회원) 서비스에서 처리하거나, SecurityConfig에서 막아야 함
+        TrademarkDto result = trademarkService.getTrademarkDetail(id, userId);
         
         if (result == null) {
             return ResponseEntity.notFound().build();
@@ -52,31 +49,27 @@ public class TrademarkController {
     // 2. 북마크 API (Write)
     // ==========================================
 
-	 // 2-1. 북마크 추가
-    // POST /trademark/bookmark/{applicationNumber}
+    // 2-1. 북마크 추가
+    // POST /trademark/bookmark/{patentId}
     @PostMapping("/bookmark/{patentId}")
-    public ResponseEntity<?> addBookmark(@PathVariable Long patentId) {
-        trademarkService.addBookmark(getCurrentUserId(), patentId);
+    public ResponseEntity<?> addBookmark(
+            @PathVariable Long patentId,
+            @AuthenticationPrincipal Long userId // 👈 토큰에서 진짜 ID 주입
+    ) {
+        trademarkService.addBookmark(userId, patentId);
         return ResponseEntity.ok(Map.of("message", "북마크가 추가되었습니다."));
     }
 
     // 2-2. 북마크 해제
-    // DELETE /trademark/bookmark/{applicationNumber}
+    // DELETE /trademark/bookmark/{patentId}
     @DeleteMapping("/bookmark/{patentId}")
-    public ResponseEntity<?> removeBookmark(@PathVariable Long patentId) {
-        trademarkService.removeBookmark(getCurrentUserId(), patentId);
+    public ResponseEntity<?> removeBookmark(
+            @PathVariable Long patentId,
+            @AuthenticationPrincipal Long userId // 👈 토큰에서 진짜 ID 주입
+    ) {
+        trademarkService.removeBookmark(userId, patentId);
         return ResponseEntity.ok(Map.of("message", "북마크가 해제되었습니다."));
     }
 
-    // ==========================================
-    // 3. Helper Methods (Private)
-    // ==========================================
-
-    /**
-     * 현재 로그인한 사용자의 ID를 반환합니다.
-     * TODO: 추후 Spring Security 적용 시 SecurityContextHolder에서 추출하도록 수정 필요
-     */
-    private Long getCurrentUserId() {
-        return 1L; // 테스트용 하드코딩 (1번 유저)
-    }
+    // 기존의 getCurrentUserId() 메서드는 삭제했습니다.
 }
