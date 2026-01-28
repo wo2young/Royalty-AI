@@ -44,6 +44,25 @@ export const useCreateBrand = () => {
   })
 }
 
+// 브랜드 수정
+export const useUpdateBrand = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      brandId,
+      formData,
+    }: {
+      brandId: number
+      formData: FormData
+    }) => brandApi.updateBrand(brandId, formData),
+    onSuccess: (_, { brandId }) => {
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: brandKeys.detail(brandId) })
+    },
+  })
+}
+
 // 브랜드 삭제
 export const useDeleteBrand = () => {
   const queryClient = useQueryClient()
