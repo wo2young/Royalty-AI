@@ -1,6 +1,6 @@
 import MyProfileSidebar from "../components/MyProfileSidebar"
 import { BookmarkSummaryCard } from "@/features/bookmark/components/BookmarkSummaryCard"
-import { BrandSummaryCard } from "@/features/brand/components/BrandSummaryCard"
+import { BrandSummaryCard } from "@/features/brands/components/BrandSummaryCard"
 
 export default function MyPage() {
   return (
