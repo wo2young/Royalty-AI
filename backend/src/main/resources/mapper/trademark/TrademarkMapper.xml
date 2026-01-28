@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.trademark.mapper.TrademarkMapper">
+
+    <select id="selectTrademarkList" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
+        SELECT 
+            patent_id          AS patentId,
+            application_number AS applicationNumber,
+            trademark_name     AS trademarkName,
+            image_url          AS imageUrl,
+            applicant          AS applicant,
+            category           AS category,
+            application_date   AS applicationDate,
+            registration_date    AS registrationdate
+        FROM patent
+        WHERE 1=1
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND trademark_name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY application_date DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+    
+    <select id="countTrademarkList" resultType="int">
+        SELECT count(*) FROM patent WHERE 1=1
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND trademark_name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+<!--    <select id="selectExpiringTrademarks" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
+        SELECT 
+            patent_id          AS patentId,
+            application_number AS applicationNumber,
+            trademark_name     AS trademarkName,
+            image_url          AS imageUrl,
+            applicant          AS applicant,
+            category           AS category,
+            application_date   AS applicationDate,
+            registered_date    AS registeredDate,
+            
+            (COALESCE(registered_date, application_date) + 
+                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+            )::date AS expirationDate,
+            
+            EXTRACT(DAY FROM (
+                (COALESCE(registered_date, application_date) + 
+                    (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+                ) - CURRENT_DATE
+            )) AS daysLeft
+            
+        FROM patent
+        WHERE COALESCE(registered_date, application_date) IS NOT NULL
+          AND (COALESCE(registered_date, application_date) + 
+                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+            ) &gt; CURRENT_DATE  ORDER BY daysLeft ASC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+	<select id="countExpiringTrademarks" resultType="int">
+        SELECT count(*) FROM patent
+        WHERE COALESCE(registered_date, application_date) IS NOT NULL
+          AND (COALESCE(registered_date, application_date) + 
+                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
+            ) &gt; CURRENT_DATE 
+    </select>-->
+
+    <select id="selectTrademarkById" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
+        SELECT 
+            patent_id          AS patentId,
+            application_number AS applicationNumber,
+            trademark_name     AS trademarkName,
+            image_url          AS imageUrl,
+            applicant          AS applicant,
+            category           AS category,
+            application_date   AS applicationDate,
+            registration_date    AS registrationdate
+        FROM patent
+        WHERE patent_id = #{id}
+    </select>
+
+	<select id="existsBookmark" resultType="int">
+	    SELECT count(*) 
+	    FROM bookmark 
+	    WHERE user_id = #{userId} AND patent_id = #{patentId}
+	</select>
+	
+	<insert id="insertBookmark">
+	    INSERT INTO bookmark (user_id, patent_id, created_at)
+	    VALUES (#{userId}, #{patentId}, NOW())
+	    ON CONFLICT (user_id, patent_id) DO NOTHING
+	</insert>
+	
+	<delete id="deleteBookmark">
+	    DELETE FROM bookmark 
+	    WHERE user_id = #{userId} AND patent_id = #{patentId}
+	</delete>
+
+</mapper>
