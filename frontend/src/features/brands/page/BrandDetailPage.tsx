@@ -10,6 +10,7 @@ import {
   useBrandDetail,
   useBrandIdentity,
   useToggleNotification,
+  useUpdateBrand,
 } from "../api/brand.queries"
 import { BrandBITab } from "../components/brand-detail/BrandBITab"
 
@@ -20,6 +21,7 @@ export default function BrandDetailPage() {
   const brandId = Number(id)
 
   const { data: brandData, isLoading, isError } = useBrandDetail(Number(id))
+  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
   const { data: biData, isLoading: isBiLoading } = useBrandIdentity(brandId)
 
   if (isLoading)
@@ -58,6 +60,18 @@ export default function BrandDetailPage() {
     toggleNotify({ brandId, enabled })
   }
 
+  const handleEditSubmit = (formData: FormData) => {
+    updateBrand(
+      { brandId, formData },
+      {
+        onSuccess: () => {
+          console.log("수정 완료")
+        },
+        onError: () => alert("수정 중 오류가 발생했습니다."),
+      }
+    )
+  }
+
   if (!brandData) {
     return <div className="p-20 text-center">브랜드를 찾을 수 없습니다.</div>
   }
@@ -68,6 +82,8 @@ export default function BrandDetailPage() {
         brand={brandData}
         hasHistory={hasHistory}
         onToggleNotify={handleToggleNotify}
+        onEditSubmit={handleEditSubmit}
+        isUpdatePending={isUpdatePending}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-10">

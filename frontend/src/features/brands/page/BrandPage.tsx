@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
 import { SearchBar } from "@/shared/components/search-bar/SearchBar"
 import { BrandList } from "../components/BrandList"
-import { useBrands } from "../api/brand.queries"
+import { useBrands, useUpdateBrand } from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
 import { AddBrandModal } from "../components/modal/AddBrandModal"
 import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
@@ -26,6 +26,7 @@ export default function BrandsPage() {
   const [currentPage, setCurrentPage] = useState(1)
 
   const { data: brands = [], isLoading, isError } = useBrands()
+  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
 
   const filteredBrands = brands.filter((brand) => {
     const matchesSearch =
@@ -51,8 +52,18 @@ export default function BrandsPage() {
   }
 
   const handleEditSubmit = (formData: FormData) => {
-    console.log("수정 제출:", Object.fromEntries(formData))
-    setEditTarget(null)
+    if (!editTarget) return
+
+    updateBrand(
+      { brandId: editTarget.brandId, formData },
+      {
+        onSuccess: () => {
+          setEditTarget(null)
+          // TODO: Toast알림
+        },
+        onError: () => alert("브랜드 수정 중 오류가 발생했습니다."),
+      }
+    )
   }
 
   const handleSearchChange = (query: string) => {
@@ -148,11 +159,12 @@ export default function BrandsPage() {
       />
       {editTarget && (
         <EditBrandModal
-          key={editTarget.brandId} // 중요: 브랜드가 바뀔 때마다 폼을 새로고침
+          key={editTarget.brandId}
           open={!!editTarget}
           onOpenChange={(open) => !open && setEditTarget(null)}
           brand={editTarget}
           onEdit={handleEditSubmit}
+          isPending={isUpdatePending} // 처리 중 로딩 상태 전달
         />
       )}
     </div>
