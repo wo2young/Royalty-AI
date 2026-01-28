@@ -51,27 +51,21 @@ public class MyPageController {
         return ResponseEntity.ok(myPageService.getBrandDetail(userId, brandId));
     }
 
-    // 등록 (이미지 업로드 필수)
+   // 등록 (브랜드명 필수, 이미지는 선택)
     @PostMapping(value = "/brand", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-        public ResponseEntity<String> createBrand(
-                @AuthenticationPrincipal Long userId,
-                
-                // 👇 수정됨: required = false 추가!
-                @RequestParam(value = "brandName", required = false) String brandName,
-                @RequestParam(value = "category", required = false) String category, 
-                @RequestParam(value = "description", required = false) String description,
-                
-                @RequestParam("logoImage") MultipartFile logoImage) {
-            
-            log.info("브랜드 등록 요청 (TEST): UserID={}, Name={}", userId, brandName);
-            
-            // null 방지 (혹시 서비스에서 null 처리를 안 했을까 봐 빈 문자열로 변환)
-            if (description == null) description = "";
-            if (category == null) category = "기타"; 
-            
-            myPageService.createBrand(userId, brandName, category, description, logoImage);
-            return ResponseEntity.ok("브랜드가 성공적으로 등록되었습니다.");
-        }
+    public ResponseEntity<String> createBrand(
+            @AuthenticationPrincipal Long userId,
+            @RequestParam("brandName") String brandName, // 👈 얘는 필수(NOT NULL)
+            @RequestParam(value = "category", required = false, defaultValue = "기타") String category,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            // 👇 [중요] 이미지는 이제 필수가 아님!
+            @RequestParam(value = "logoImage", required = false) MultipartFile logoImage) {
+        
+        log.info("브랜드 등록 요청: UserID={}, Name={}, HasImage={}", userId, brandName, (logoImage != null && !logoImage.isEmpty()));
+        
+        myPageService.createBrand(userId, brandName, category, description, logoImage);
+        return ResponseEntity.ok("브랜드가 성공적으로 등록되었습니다.");
+    }
     
  // ==========================================
     // [추가] 브랜드 수정 (이미지는 선택 사항)
