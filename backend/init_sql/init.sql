@@ -1,16 +1,21 @@
 -- ==========================================
--- [0] 기본 설정 (시간대 및 확장기능)
+-- [Royalty Team] AWS DB Schema Archive
+-- 작성이: 사용자 & Gemini
+-- 설명: AWS RDS의 최종 배포 상태를 기록한 설계도입니다.
+-- 주의: 이미 배포된 DB에 이 스크립트를 직접 실행하지 마세요. (참고용)
 -- ==========================================
--- 1. 한국 시간대 설정 (DB 세션 레벨)
+
+-- [0] 기본 설정
 SET TIME ZONE 'Asia/Seoul';
 
--- 2. 필수 확장기능 활성화
-CREATE EXTENSION IF NOT EXISTS vector;  -- 벡터 연산용 (필수)
-CREATE EXTENSION IF NOT EXISTS pg_trgm; -- 텍스트 유사도 검색용
+-- 필수 확장기능
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- ==========================================
 -- 1. 사용자 (Users)
 -- ==========================================
+<<<<<<< HEAD
 CREATE TABLE users (
     user_id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
@@ -20,17 +25,31 @@ CREATE TABLE users (
     provider VARCHAR(20),
     provider_id VARCHAR(100),
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+=======
+CREATE TABLE IF NOT EXISTS users (
+    user_id      BIGSERIAL PRIMARY KEY,
+    username     VARCHAR(50) NOT NULL UNIQUE,
+    password     VARCHAR(200) NOT NULL,
+    email        VARCHAR(100),
+    role         VARCHAR(20) DEFAULT 'ROLE_USER',
+    provider         VARCHAR(20),
+    provider_id      VARCHAR(100),
+    created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+>>>>>>> 2786e71d56077fec6d62df977e5a7eee95f5e167
 );
 
 -- ==========================================
--- 2. 브랜드 (Brand) - 사용자가 등록한 브랜드
+-- 2. 브랜드 (Brand)
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand (
     brand_id     BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     brand_name   VARCHAR(100) NOT NULL,
+    category     VARCHAR(50),
+    text_vector vector(768),
     description  TEXT,
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_notification_enabled  BOOLEAN DEFAULT FALSE;
 );
 
 -- ==========================================
@@ -40,12 +59,13 @@ CREATE TABLE IF NOT EXISTS brand_logo (
     logo_id      BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_path   TEXT NOT NULL,
-    image_vector vector(1000), -- ResNet50 (1000차원)
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    -- [중요] AI 모델(MobileNetV2 등) 출력에 맞춰 1280차원 설정
+    image_vector vector(1280),
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
--- 4. 로고 히스토리 (Brand Logo History)
+-- 4. 로고 히스토리
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand_logo_history (
     history_id       BIGSERIAL PRIMARY KEY,
@@ -54,18 +74,18 @@ CREATE TABLE IF NOT EXISTS brand_logo_history (
     image_path       TEXT NOT NULL,
     image_similarity FLOAT,
     text_similarity  FLOAT,
-    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
--- 5. 분석 결과 (Brand Analysis)
+-- 5. 분석 결과
 -- ==========================================
 CREATE TABLE IF NOT EXISTS brand_analysis (
     analysis_id  BIGSERIAL PRIMARY KEY,
     brand_id     BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
     image_score  FLOAT,
     text_score   FLOAT,
-    risk_level   VARCHAR(20), -- 'HIGH', 'MEDIUM', 'LOW'
+    risk_level   VARCHAR(20),
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -74,28 +94,35 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
 -- ==========================================
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
+<<<<<<< HEAD
     application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
     trademark_name      TEXT NOT NULL, -- 상표명
     image_url           TEXT,          -- 이미지 URL 
+=======
+    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)  
+    trademark_name      TEXT NOT NULL, -- 상표명
+    image_url           TEXT,          -- 이미지 URL
+>>>>>>> 2786e71d56077fec6d62df977e5a7eee95f5e167
     applicant           TEXT,          -- 출원인
-    application_date    DATE,          -- 출원일
-    registered_date     DATE,          -- 등록일
+    application_date    VARCHAR(20),   -- 출원일
+    registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
     -- [AI 벡터 데이터]
-    image_vector        vector(1000),  -- ResNet50 (1000차원)
+    image_vector        vector(1280),  -- MobileNetV3 (1280차원)
     text_vector         vector(768),   -- SBERT (768차원)
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- [인덱스 최적화]
--- 1. 날짜 조회용 B-Tree 인덱스
+-- [인덱스 아카이브]
+-- 1. 날짜 및 상태 조회용 B-Tree
 CREATE INDEX IF NOT EXISTS idx_patent_app_date ON patent(application_date);
 CREATE INDEX IF NOT EXISTS idx_patent_status ON patent(status);
 
--- 2. 벡터 검색용 HNSW 인덱스 (검색 속도 100배 향상)
-CREATE INDEX IF NOT EXISTS idx_patent_image_vec ON patent USING hnsw (image_vector vector_cosine_ops);
-CREATE INDEX IF NOT EXISTS idx_patent_text_vec ON patent USING hnsw (text_vector vector_cosine_ops);
+-- 2. 벡터 검색용 IVFFlat 인덱스 (AWS 적용 완료)
+-- lists=400 옵션은 데이터 32만 개 기준 최적화 값
+CREATE INDEX IF NOT EXISTS patent_image_vector_idx ON patent USING ivfflat (image_vector vector_cosine_ops) WITH (lists = 400);
+CREATE INDEX IF NOT EXISTS patent_text_vector_idx ON patent USING ivfflat (text_vector vector_cosine_ops) WITH (lists = 400);
 
 -- ==========================================
 -- 7. 감지 이벤트 (Detection Event)
@@ -103,11 +130,11 @@ CREATE INDEX IF NOT EXISTS idx_patent_text_vec ON patent USING hnsw (text_vector
 CREATE TABLE IF NOT EXISTS detection_event (
     event_id         BIGSERIAL PRIMARY KEY,
     brand_id         BIGINT NOT NULL REFERENCES brand(brand_id) ON DELETE CASCADE,
-    patent_id        BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE, 
+    patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE, 
     image_similarity FLOAT,
     text_similarity  FLOAT,
     risk_level       VARCHAR(20),
-    detected_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    detected_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -129,9 +156,9 @@ CREATE TABLE IF NOT EXISTS notification (
 CREATE TABLE IF NOT EXISTS bookmark (
     bookmark_id  BIGSERIAL PRIMARY KEY,
     user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    patent_id    BIGINT NOT NULL REFERENCES patent(patent_id) ON DELETE CASCADE,
+    patent_id    VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, patent_id) -- 중복 북마크 방지
+    UNIQUE(user_id, patent_id)
 );
 
 -- ==========================================
@@ -145,6 +172,7 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
+<<<<<<< HEAD
 -- 11. 토큰 관리 (refresh_token)
 -- ==========================================
 CREATE TABLE refresh_token (
@@ -155,4 +183,26 @@ CREATE TABLE refresh_token (
     CONSTRAINT fk_refresh_token_user
         FOREIGN KEY (user_id)
         REFERENCES users(user_id)
+=======
+-- 11. 토큰 관리 
+-- ==========================================
+CREATE TABLE IF NOT EXISTS trademark_expiration (
+    expiration_id    BIGSERIAL PRIMARY KEY,
+    patent_id        VARCHAR(100) NOT NULL REFERENCES patent(application_number) ON DELETE CASCADE,
+    days_left        INT,
+    status           VARCHAR(20), 
+    last_checked_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- 12. FCM 토큰 관리 (Push Notification)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS fcm_token (
+    fcm_token_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, token)
+>>>>>>> 2786e71d56077fec6d62df977e5a7eee95f5e167
 );

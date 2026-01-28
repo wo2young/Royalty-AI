@@ -1,5 +1,3 @@
-// src/shared/components/category-filter/CategoryFilter.tsx
-
 import {
   Select,
   SelectContent,
