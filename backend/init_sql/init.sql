@@ -90,6 +90,7 @@ CREATE TABLE IF NOT EXISTS patent (
     registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
+    
     -- [AI 벡터 데이터]
     image_vector        vector(1280),  -- MobileNetV3 (1280차원)
     text_vector         vector(768),   -- SBERT (768차원)
