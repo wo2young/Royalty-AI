@@ -20,7 +20,7 @@ export default function BrandDetailPage() {
   const brandId = Number(id)
 
   const { data: brandData, isLoading, isError } = useBrandDetail(Number(id))
-  const { data: biData } = useBrandIdentity(brandId)
+  const { data: biData, isLoading: isBiLoading } = useBrandIdentity(brandId)
 
   if (isLoading)
     return <div className="p-20 text-center">브랜드 정보를 불러오는 중...</div>
@@ -103,7 +103,13 @@ export default function BrandDetailPage() {
                 <BrandAITab reportList={brandData.reportList} />
               )}
 
-              {activeTab === "bi" && <BrandBITab data={biData} />}
+              {activeTab === "bi" && (
+                <BrandBITab
+                  brandId={brandId}
+                  data={biData}
+                  isLoading={isBiLoading}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
