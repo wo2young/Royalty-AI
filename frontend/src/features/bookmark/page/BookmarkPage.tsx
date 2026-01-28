@@ -3,7 +3,7 @@
 import { ArrowLeft, Bookmark } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BookmarkSearch } from "../../../shared/components/search-bar/SearchBar"
+import { SearchBar } from "../../../shared/components/search-bar/SearchBar"
 import { BookmarkCard } from "../components/BookmarkCard"
 import { useBookmarks } from "../api/bookmark.queries"
 import { Pagination } from "@/shared/components/pagination/Pagination"
@@ -99,7 +99,7 @@ export function BookmarksPage() {
         </div>
 
         {/* 검색, 필터 부분 */}
-        <BookmarkSearch
+        <SearchBar
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           category={selectedCategory}

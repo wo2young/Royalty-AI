@@ -2,7 +2,7 @@ import { Building2, ArrowLeft, Plus } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
-import { BookmarkSearch } from "@/shared/components/search-bar/SearchBar"
+import { SearchBar } from "@/shared/components/search-bar/SearchBar"
 import { BrandList } from "../components/BrandList"
 import { useBrands } from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
@@ -100,7 +100,7 @@ export default function BrandsPage() {
         </div>
 
         {/* 검색 및 카테고리 필터 */}
-        <BookmarkSearch
+        <SearchBar
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           category={selectedCategory}

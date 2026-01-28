@@ -9,7 +9,7 @@ interface SearchProps {
   onCategoryChange: (value: string) => void
 }
 
-export function BookmarkSearch({
+export function SearchBar({
   searchQuery,
   onSearchChange,
   category,
