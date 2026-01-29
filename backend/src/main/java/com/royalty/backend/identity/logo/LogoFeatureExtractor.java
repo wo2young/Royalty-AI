@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.net.URL;
 
 @Component
 public class LogoFeatureExtractor {
@@ -45,9 +46,13 @@ public class LogoFeatureExtractor {
 
     private BufferedImage load(String path) {
         try {
-            return ImageIO.read(new File(path));
+            if (path.startsWith("http://") || path.startsWith("https://")) {
+                return ImageIO.read(new URL(path));
+            } else {
+                return ImageIO.read(new File(path));
+            }
         } catch (Exception e) {
-            throw new IllegalStateException("로고 이미지 로드 실패");
+            throw new IllegalStateException("로고 이미지 로드 실패", e);
         }
     }
 
