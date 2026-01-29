@@ -1,166 +1,187 @@
-import type {
-  BookmarkedTrademark,
-  BookmarksResponse,
-  BookmarkToggleResponse,
-} from "../types"
+import type { BookmarkedTrademark, BookmarkToggleResponse } from "../types"
 
 // 목데이터 사용
 const MOCK_DATA: BookmarkedTrademark[] = [
   {
-    patentId: "1",
-    name: "브랜드명 1",
-    code: "출원번호 #0001",
+    bookmarkId: 1,
+    patentId: 1189120,
+    trademarkName: "브랜드명 1",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "IT",
-    date: "2026.01.15",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "2",
-    name: "브랜드명 2",
-    code: "특허번호 #0002",
+    bookmarkId: 2,
+    patentId: 1189121,
+    trademarkName: "브랜드명 2",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "COMMERCE",
-    date: "2026.01.14",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "3",
-    name: "브랜드명 3",
-    code: "특허번호 #0003",
+    bookmarkId: 3,
+    patentId: 1189122,
+    trademarkName: "브랜드명 3",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "FOOD",
-    date: "2026.01.13",
+    createdAt: "2026-01-21T06:25:45",
     isBookmarked: true,
   },
   {
-    patentId: "4",
-    name: "브랜드명 4",
-    code: "특허번호 #0004",
+    bookmarkId: 4,
+    patentId: 1189123,
+    trademarkName: "브랜드명 4",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "CONTENT",
-    date: "2026.01.12",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "5",
-    name: "브랜드명 5",
-    code: "특허번호 #0005",
+    bookmarkId: 5,
+    patentId: 1189124,
+    trademarkName: "브랜드명 5",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "PET",
-    date: "2026.01.11",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "6",
-    name: "브랜드명 6",
-    code: "특허번호 #0006",
+    bookmarkId: 6,
+    patentId: 1189125,
+    trademarkName: "브랜드명 6",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "MEDICAL",
-    date: "2026.01.10",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "7",
-    name: "브랜드명 7",
-    code: "특허번호 #0007",
+    bookmarkId: 7,
+    patentId: 1189126,
+    trademarkName: "브랜드명 7",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "FINANCE",
-    date: "2026.01.09",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "8",
-    name: "브랜드명 8",
-    code: "특허번호 #0008",
+    bookmarkId: 8,
+    patentId: 1189127,
+    trademarkName: "브랜드명 8",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "MANUFACTURING",
-    date: "2026.01.08",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "9",
-    name: "브랜드명 9",
-    code: "특허번호 #0009",
+    bookmarkId: 9,
+    patentId: 1189128,
+    trademarkName: "브랜드명 9",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "IT",
-    date: "2026.01.07",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "10",
-    name: "브랜드명 10",
-    code: "특허번호 #0010",
+    bookmarkId: 10,
+    patentId: 1189129,
+    trademarkName: "브랜드명 10",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "COMMERCE",
-    date: "2026.01.06",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2013/11/26/11/27/niagara-falls-218591_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "11",
-    name: "브랜드명 11",
-    code: "특허번호 #0011",
+    bookmarkId: 11,
+    patentId: 1189130,
+    trademarkName: "브랜드명 11",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "FOOD",
-    date: "2026.01.05",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2019/03/04/14/35/sydney-4034244_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "12",
-    name: "브랜드명 12",
-    code: "특허번호 #0012",
+    bookmarkId: 12,
+    patentId: 1189131,
+    trademarkName: "브랜드명 12",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "IT",
-    date: "2026.01.04",
+    createdAt: "2026-01-21T06:25:45",
     isBookmarked: true,
   },
   {
-    patentId: "13",
-    name: "브랜드명 13",
-    code: "특허번호 #0013",
+    bookmarkId: 13,
+    patentId: 1189132,
+    trademarkName: "브랜드명 13",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "FOOD",
-    date: "2026.01.04",
-    image:
+    createdAt: "2026-01-21T06:25:45",
+    imageUrl:
       "https://cdn.pixabay.com/photo/2019/03/04/14/35/sydney-4034244_1280.jpg",
     isBookmarked: true,
   },
   {
-    patentId: "14",
-    name: "브랜드명 14",
-    code: "특허번호 #0014",
+    bookmarkId: 14,
+    patentId: 1189133,
+    trademarkName: "브랜드명 14",
+    applicant: "삼성전자",
+    code: 12345678,
     category: "IT",
-    date: "2026.01.04",
+    createdAt: "2026-01-21T06:25:45",
     isBookmarked: true,
   },
 ]
 
 export const bookmarkApi = {
   // GET /mypage/bookmark
-  fetchBookmarks: async (): Promise<BookmarksResponse> => {
+  fetchBookmarks: async (): Promise<BookmarkedTrademark[]> => {
     // 실제 서버 연동 시:
     // const { data } = await axiosInstance.get<BookmarksResponse>("/mypage/bookmark");
     // return data;
 
     return new Promise((resolve) => {
-      setTimeout(
-        () => resolve({ bookmarks: MOCK_DATA, total: MOCK_DATA.length }),
-        500
-      )
+      setTimeout(() => resolve(MOCK_DATA), 500)
     })
   },
 
-  // POST /trademark/{id}/bookmark
+  // POST /trademark/bookmark/{patentId}
   addBookmark: async (patentId: string): Promise<BookmarkToggleResponse> => {
     // 실제 서버 연동 시:
-    // const { data } = await axiosInstance.post<BookmarkToggleResponse>(`/trademark/${id}/bookmark`);
+    // const { data } = await axiosInstance.post<BookmarkToggleResponse>(`/trademark/bookmark/{patentId}`);
     // return data;
 
     return new Promise((resolve) => {
@@ -169,10 +190,10 @@ export const bookmarkApi = {
     })
   },
 
-  // DELETE /trademark/{id}/bookmark
+  // DELETE /trademark/bookmark/{patentId}
   removeBookmark: async (patentId: string): Promise<BookmarkToggleResponse> => {
     // 실제 서버 연동 시:
-    // const { data } = await axiosInstance.delete<BookmarkToggleResponse>(`/trademark/${id}/bookmark`);
+    // const { data } = await axiosInstance.delete<BookmarkToggleResponse>(`/trademark/bookmark/{patentId}`);
     // return data;
 
     return new Promise((resolve) => {

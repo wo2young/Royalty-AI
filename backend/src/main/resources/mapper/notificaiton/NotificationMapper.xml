@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.notification.mapper.NotificationMapper">
+
+    <update id="markAsRead">
+        UPDATE notification
+        SET is_read = TRUE
+        WHERE notification_id = #{notificationId}
+    </update>
+
+    <insert id="insertNotification"
+            parameterType="com.royalty.backend.notification.domain.NotificationVO">
+        INSERT INTO notification (
+            user_id,
+            brand_id,
+            event_id,
+            message,
+            is_read
+        ) VALUES (
+            #{userId},
+            #{brandId},
+            #{eventId},
+            #{message},
+            FALSE
+        )
+    </insert>
+
+    <select id="findMyNotifications"
+            resultType="com.royalty.backend.notification.dto.NotificationDTO">
+        SELECT
+            n.notification_id     AS notificationId,
+            n.is_read             AS isRead,
+            n.created_at AT TIME ZONE 'UTC' AS createdAt,
+
+
+            b.brand_id            AS brandId,
+            b.brand_name          AS brandName,
+
+            d.event_id            AS eventId,
+            d.match_type          AS matchType,
+            d.image_similarity    AS imageSimilarity,
+            d.text_similarity     AS textSimilarity,
+
+            p.patent_id           AS patentId,
+            p.trademark_name      AS trademarkName,
+            p.application_number AS applicationNumber
+
+        FROM notification n
+        JOIN brand b ON n.brand_id = b.brand_id
+        JOIN detection_event d ON n.event_id = d.event_id
+        JOIN patent p ON d.patent_id = p.patent_id
+        WHERE n.user_id = #{userId}
+        ORDER BY n.notification_id DESC
+    </select>
+
+</mapper>
