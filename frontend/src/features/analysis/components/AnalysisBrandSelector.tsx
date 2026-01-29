@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Card } from "@/shared/components/ui/card"
 import { Button } from "@/shared/components/ui/button"

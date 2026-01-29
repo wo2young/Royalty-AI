@@ -1,18 +1,21 @@
-import { CategoryFilter } from "@/shared/components/category-filter/CategoryFilter"
+import { CategoryFilter } from "@/shared/components/search-bar/CategoryFilter"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import { FileText, Sparkles, Upload, X } from "lucide-react"
+import { FileText, PlusCircle, Sparkles, Upload, X } from "lucide-react"
 import { useRef, useState } from "react"
+import { motion } from "framer-motion"
 
 interface GeneralSelectorProps {
   onAnalyze: () => void
   analyzing: boolean
+  analyzed: boolean
 }
 
 export default function AnalysisGeneralSelector({
   onAnalyze,
   analyzing,
+  analyzed,
 }: GeneralSelectorProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [file, setFile] = useState<File | null>(null)
@@ -135,10 +138,30 @@ export default function AnalysisGeneralSelector({
         />
       </div>
 
-      <Button onClick={onAnalyze} className="w-full mt-2 sm:w-auto">
-        <Sparkles className="mr-2 h-4 w-4" />
-        {analyzing ? "분석 중..." : "상표 분석"}
-      </Button>
+      <div className="flex gap-4 items-center pt-2">
+        <Button onClick={onAnalyze} className="w-full sm:w-auto">
+          <Sparkles className="mr-2 h-4 w-4" />
+          {analyzing ? "분석 중..." : "상표 분석"}
+        </Button>
+
+        {analyzed && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex-1 sm:flex-none"
+          >
+            <Button
+              variant="outline"
+              className="w-full border-primary text-primary hover:bg-primary/5 shadow-sm"
+              onClick={() => {
+                console.log("브랜드 등록 페이지로 이동")
+              }}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />내 브랜드 등록하기
+            </Button>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }

@@ -1,17 +1,15 @@
-"use client"
-
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Card } from "@/shared/components/ui/card"
-
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/components/ui/tabs"
+import { cn } from "@/lib/utils"
 import { MyBrandSelector } from "../components/AnalysisBrandSelector"
 import { AnalysisResults } from "../components/AnalysisResult"
 import AnalysisGeneralSelector from "../components/AnalysisGeneralSelector"
+
+const TABS = [
+  { id: "both", label: "종합 분석" },
+  { id: "mybrand", label: "나의 브랜드" },
+]
 
 export default function TrademarkAnalysisPage() {
   const [activeTab, setActiveTab] = useState("both")
@@ -30,7 +28,6 @@ export default function TrademarkAnalysisPage() {
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 lg:px-6 py-8 md:py-12 max-w-5xl">
         <div className="mb-10">
-          {/* 타이틀 */}
           <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">
             상표 분석
           </h1>
@@ -39,38 +36,63 @@ export default function TrademarkAnalysisPage() {
           </p>
         </div>
 
-        <Card className="mb-10 shadow-sm">
+        <Card className="mb-10 shadow-sm overflow-hidden">
           <div className="p-4 md:px-8">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-secondary/60">
-                <TabsTrigger value="both">종합 분석</TabsTrigger>
-                <TabsTrigger value="mybrand">나의 브랜드</TabsTrigger>
-              </TabsList>
+            {/* 탭 영역 */}
+            <div className="relative flex w-full p-1 bg-secondary/60 rounded-xl mb-8">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "relative z-10 flex-1 py-2.5 text-sm font-medium transition-colors duration-200",
+                    activeTab === tab.id
+                      ? "text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {activeTab === tab.id && (
+                    <motion.div
+                      layoutId="active-pill"
+                      className="absolute inset-0 bg-primary rounded-lg shadow-sm"
+                      transition={{
+                        type: "spring",
+                        bounce: 0.2,
+                        duration: 0.6,
+                      }}
+                    />
+                  )}
+                  <span className="relative z-20">{tab.label}</span>
+                </button>
+              ))}
+            </div>
 
-              {/* 종합 분석 */}
-              <TabsContent value="both" className="mt-8 space-y-6">
-                <AnalysisGeneralSelector
-                  onAnalyze={handleAnalyze}
-                  analyzing={analyzing}
-                />
-              </TabsContent>
-
-              {/* 나의 브랜드 분석 */}
-              <TabsContent value="mybrand" className="mt-8">
-                <MyBrandSelector
-                  onAnalyze={handleAnalyze}
-                  analyzing={analyzing}
-                />
-              </TabsContent>
-            </Tabs>
+            {/* 컨텐츠 애니메이션 */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === "both" ? (
+                  <AnalysisGeneralSelector
+                    onAnalyze={handleAnalyze}
+                    analyzing={analyzing}
+                    analyzed={analyzed}
+                  />
+                ) : (
+                  <MyBrandSelector
+                    onAnalyze={handleAnalyze}
+                    analyzing={analyzing}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </Card>
 
-        {/* 분석 결과 */}
         {analyzed && <AnalysisResults />}
       </main>
     </div>
