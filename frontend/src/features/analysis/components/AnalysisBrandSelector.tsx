@@ -1,35 +1,9 @@
 import { useState } from "react"
 import { Card } from "@/shared/components/ui/card"
 import { Button } from "@/shared/components/ui/button"
-import { Building2, Sparkles } from "lucide-react"
+import { Building2, Loader2, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const myBrands = [
-  {
-    patentId: "2111530",
-    name: "METEO",
-    code: "4020150021686",
-    category: "COMMERCE",
-    date: "2015.03.24",
-    image:
-      "http://plus.kipris.or.kr/openapi/fileToss.jsp?arg=ad7a17eeeef6e4ea4b5e22ef00dd3e298cd4f29188d8481610d39d5a8261c9fbfd527ffdb2a46e7c79b266c05792fa0315df4f2cded80b6a",
-    status: "등록완료",
-  },
-  {
-    patentId: "2",
-    name: "이노베이션랩",
-    category: "스타트업 상호",
-    date: "2026.01.08",
-    status: "심사중",
-  },
-  {
-    patentId: "3",
-    name: "퓨처테크",
-    category: "상표권 등록",
-    date: "2025.12.20",
-    status: "등록완료",
-  },
-]
+import { useBrands } from "@/features/brands/api/brand.queries"
 
 interface MyBrandSelectorProps {
   onAnalyze: () => void
@@ -40,7 +14,25 @@ export function MyBrandSelector({
   onAnalyze,
   analyzing,
 }: MyBrandSelectorProps) {
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
+  const [selectedBrand, setSelectedBrand] = useState<number | null>(null)
+
+  const { data: myBrands, isLoading, isError } = useBrands()
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (isError || !myBrands) {
+    return (
+      <div className="text-center py-10 text-destructive">
+        브랜드 목록을 불러오는 중 오류가 발생했습니다.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -50,19 +42,19 @@ export function MyBrandSelector({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {myBrands.map((brand) => (
           <Card
-            key={brand.patentId}
+            key={brand.brandId}
             className={cn(
               "cursor-pointer p-4 transition-all hover:border-primary",
-              selectedBrand === brand.patentId && "border-primary bg-primary/5"
+              selectedBrand === brand.brandId && "border-primary bg-primary/5"
             )}
-            onClick={() => setSelectedBrand(brand.patentId)}
+            onClick={() => setSelectedBrand(brand.brandId)}
           >
             <div className="flex items-start gap-3">
               <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 border border-slate-100 group-hover:scale-105 transition-transform dark:bg-slate-900 dark:border-slate-800 shadow-sm overflow-hidden">
-                {brand.image ? (
+                {brand.logoPath ? (
                   <img
-                    src={brand.image}
-                    alt={brand.name}
+                    src={brand.logoPath}
+                    alt={brand.brandName}
                     className="object-cover w-full h-full"
                   />
                 ) : (
@@ -70,23 +62,13 @@ export function MyBrandSelector({
                 )}
               </div>
               <div className="flex-1 space-y-1">
-                <h3 className="font-medium leading-none">{brand.name}</h3>
+                <h3 className="font-medium leading-none">{brand.brandName}</h3>
                 <p className="text-xs text-muted-foreground">
                   {brand.category}
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <span className="text-xs text-muted-foreground">
-                    등록일: {brand.date}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-xs",
-                      brand.status === "등록완료"
-                        ? "text-green-600"
-                        : "text-yellow-600"
-                    )}
-                  >
-                    {brand.status}
+                    등록일: {brand.createdAt.split("T")[0]}
                   </span>
                 </div>
               </div>
