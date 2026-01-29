@@ -96,39 +96,44 @@ public class MyPageService {
         return detail;
     }
 
-    // 브랜드 등록 (S3 업로드 적용)
+    // ==========================================
+    // 1. 브랜드 등록 (이미지가 없으면 NULL로 저장)
+    // ==========================================
     @Transactional
     public void createBrand(Long userId, String brandName, String category, String description, MultipartFile logoImage) {
         
-        // 1. 이미지 파일 업로드 (S3Service 사용)
-        String imagePath = null;
-        if (logoImage != null && !logoImage.isEmpty()) {
-            imagePath = s3Service.upload(logoImage); // ⭐ S3에 올리고 URL 받기
-        } else {
-            throw new IllegalArgumentException("로고 이미지는 필수입니다.");
-        }
-
-        // 2. 브랜드 정보 저장
+        // 1. 텍스트 정보 먼저 저장 (Brand 테이블)
         BrandDTO brandDTO = new BrandDTO();
         brandDTO.setUserId(userId);
         brandDTO.setBrandName(brandName);
         brandDTO.setCategory(category);
         brandDTO.setDescription(description);
 
-        myPageMapper.insertBrand(brandDTO);
+        myPageMapper.insertBrand(brandDTO); // 여기서 brandId가 생성됨
 
-        // 3. 로고 테이블 저장
-        if (brandDTO.getBrandId() != null) {
+        // 2. 이미지가 "있을 때만" S3 업로드 & DB 저장
+        String imagePath = null;
+        
+        if (logoImage != null && !logoImage.isEmpty()) {
+            // (1) S3에 파일 업로드하고 URL 받아오기
+            imagePath = s3Service.upload(logoImage); 
+            
+            // (2) 받아온 URL을 DB(BrandLogo 테이블) image_path 컬럼에 저장
             myPageMapper.insertBrandLogo(brandDTO.getBrandId(), imagePath);
-        } else {
-            throw new RuntimeException("브랜드 등록 실패: ID 생성 오류");
         }
+
+        // 3. 히스토리 생성 (이미지 없으면 null로 들어감 -> DB 에러 안 나게 확인 필수)
+        myPageMapper.insertBrandHistory(brandDTO.getBrandId(), imagePath, "최초 등록");
     }
-    
-    // 브랜드 수정 (S3 업로드 적용)
+
+
+    // ==========================================
+    // 2. 브랜드 수정 (나중에 이미지 넣으면 그때 S3 업로드)
+    // ==========================================
     @Transactional
     public void updateBrand(Long userId, Long brandId, String name, String category, String desc, MultipartFile file) {
-        // 1. 텍스트 업데이트
+        
+        // 1. 텍스트 정보 업데이트
         BrandDTO brandDTO = new BrandDTO();
         brandDTO.setUserId(userId);
         brandDTO.setBrandId(brandId);
@@ -138,10 +143,35 @@ public class MyPageService {
         
         myPageMapper.updateBrand(brandDTO); 
 
-        // 2. 이미지가 변경된 경우에만 S3 업로드 & DB 업데이트
+        // 2. 이미지 처리 (새로운 이미지가 들어왔을 때!)
+        boolean isImageUpdated = false;
+        String finalImagePath = null; // 히스토리에 넣을 최종 주소
+
         if (file != null && !file.isEmpty()) {
-            String newImagePath = s3Service.upload(file); // ⭐ S3 업로드
-            myPageMapper.updateBrandLogo(brandId, newImagePath); 
+            // (1) S3에 업로드하고 새 주소(URL) 받기
+            String newS3Url = s3Service.upload(file);
+            finalImagePath = newS3Url;
+
+            // (2) 기존에 로고가 있었는지 확인
+            int count = myPageMapper.countBrandLogo(brandId);
+            
+            if (count > 0) {
+                // 기존 거 있으면 -> URL만 업데이트 (UPDATE)
+                myPageMapper.updateBrandLogo(brandId, newS3Url);
+            } else {
+                // 기존 거 없으면 -> 새로 만들기 (INSERT) - ⭐ 여기가 핵심!
+                myPageMapper.insertBrandLogo(brandId, newS3Url);
+            }
+            
+            isImageUpdated = true;
+        } else {
+            // 이미지를 안 바꿨으면? 기존 URL 유지 (히스토리 기록용)
+            finalImagePath = myPageMapper.selectCurrentLogoPath(brandId);
+        }
+
+        // 3. 이미지가 추가/변경되었을 때만 히스토리(버전) 생성
+        if (isImageUpdated) {
+             myPageMapper.insertBrandHistory(brandId, finalImagePath, "이미지 업데이트 및 버전 기록");
         }
     }
 

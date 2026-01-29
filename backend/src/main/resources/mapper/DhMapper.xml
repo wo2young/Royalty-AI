@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.Analysis.TradeMapper.DhTradeMapper">
+
+    <insert id="insertBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto" 
+            useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
+        INSERT INTO brand (
+            user_id,
+            brand_name,
+            category,
+            description
+        ) VALUES (
+            #{userId}, 
+            #{trademarkName}, 
+            #{category},
+            #{aiSummary}  )
+    </insert>
+
+    <insert id="saveMyBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        INSERT INTO brand_logo_history (
+            brand_id,
+            version,
+            image_path,
+            patent_id,
+            ai_summary,
+            analysis_detail
+        ) VALUES (
+            #{brandId},
+            'v1.0',
+            #{logoPath},
+            #{patentId},
+            #{aiSummary},
+            #{analysisDetail}
+        )
+    </insert>
+    
+<insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+    INSERT INTO brand_logo (
+        brand_id,
+        image_path,  created_at
+    ) VALUES (
+        #{brandId},
+        #{logoPath},   CURRENT_TIMESTAMP
+    )
+</insert>
+	
+
+    <select id="searchSimilarTextTrademarks" resultType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        SELECT
+            patent_id AS patentId,
+            trademark_name AS trademarkName,
+            applicant,
+            category,
+            registered_date AS registeredDate,
+            (1 - (text_vector <![CDATA[ <=> ]]> #{textVector}::vector)) * 100 AS textSimilarity
+        FROM patent ORDER BY text_vector <![CDATA[ <=> ]]> #{textVector}::vector ASC
+        LIMIT 10
+    </select>
+
+</mapper>

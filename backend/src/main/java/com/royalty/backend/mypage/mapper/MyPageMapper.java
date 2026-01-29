@@ -33,11 +33,21 @@ public interface MyPageMapper {
     void updateBrand(BrandDTO brandDTO);
 
 	 // @Param 어노테이션을 쓰면 XML에서 #{brandId}, #{imagePath}로 바로 인식됩니다.
-	 void updateBrandLogo(@Param("brandId") Long brandId, @Param("imagePath") String imagePath);
+	void updateBrandLogo(@Param("brandId") Long brandId, @Param("imagePath") String imagePath);
 
     // 브랜드 삭제
     void deleteBrand(@Param("userId") Long userId, @Param("brandId") Long brandId);
 
+    // 브랜드 로고 개수 조회 (에러 로그: countBrandLogo)
+    int countBrandLogo(@Param("brandId") Long brandId);
+
+    // 현재 로고 경로 조회 (에러 로그: selectCurrentLogoPath)
+    String selectCurrentLogoPath(@Param("brandId") Long brandId);
+    // 브랜드 히스토리 저장 (에러 로그: insertBrandHistory)
+    // 파라미터 순서: Long, String, String
+    void insertBrandHistory(@Param("brandId") Long brandId, 
+                            @Param("imagePath") String imagePath, 
+                            @Param("description") String description);
 
     // ==========================================
     // 2. 상세 화면 서브 데이터 (History & Report)

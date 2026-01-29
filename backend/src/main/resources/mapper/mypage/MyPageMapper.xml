@@ -25,6 +25,7 @@
             b.category,
             b.description,
             b.is_notification_enabled,
+            b.created_at,
             l.image_path AS currentLogoPath
         FROM brand b
         LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
@@ -108,5 +109,31 @@
         WHERE b.user_id = #{userId}
         ORDER BY b.created_at DESC
     </select>
+
+    <select id="countBrandLogo" resultType="int">
+        SELECT COUNT(*)
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <select id="selectCurrentLogoPath" resultType="string">
+        SELECT image_path
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <insert id="insertBrandHistory">
+        INSERT INTO brand_logo_history (
+            brand_id, 
+            image_path, 
+            version, 
+            created_at
+        ) VALUES (
+            #{brandId}, 
+            #{imagePath}, 
+            #{description}, 
+            NOW()
+        )
+    </insert>
 
 </mapper>

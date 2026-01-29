@@ -15,8 +15,11 @@
         <result property="logoId" column="logoId"/>
         <result property="logoImagePath" column="logoImagePath"/>
         <result property="brandName" column="brandName"/>
+        <result property="logoFeatures"
+                column="logo_features"
+                typeHandler="com.royalty.backend.common.typehandler.JsonbTypeHandler"/>
         <result property="identityPayload"
-                column="identityPayload"
+                column="identity_payload"
                 typeHandler="com.royalty.backend.common.typehandler.JsonbTypeHandler"/>
         <result property="lastLogoId" column="lastLogoId"/>
         <result property="lastBrandName" column="lastBrandName"/>
@@ -29,14 +32,15 @@
             parameterType="long"
             resultMap="IdentityResultMap">
         SELECT
-            b.brand_id           AS brandId,
-            b.user_id			 AS userId,
-            bl.logo_id           AS logoId,
-            bl.image_path        AS logoImagePath,
-            b.brand_name         AS brandName,
-            bi.identity_payload  AS identityPayload,
-            bi.last_logo_id      AS lastLogoId,
-            bi.last_brand_name   AS lastBrandName
+            b.brand_id            AS brandId,
+            b.user_id             AS userId,
+            bl.logo_id            AS logoId,
+            bl.image_path         AS logoImagePath,
+            b.brand_name          AS brandName,
+            bi.logo_features      AS logo_features,
+            bi.identity_payload   AS identity_payload,
+            bi.last_logo_id       AS lastLogoId,
+            bi.last_brand_name    AS lastBrandName
         FROM brand b
         LEFT JOIN brand_logo bl
             ON b.brand_id = bl.brand_id
@@ -53,12 +57,15 @@
         INSERT INTO brand_identity (
             brand_id,
             logo_id,
+            logo_features,
             identity_payload,
             last_logo_id,
             last_brand_name
         ) VALUES (
             #{brandId},
             #{logoId},
+            #{logoFeatures,
+              typeHandler=com.royalty.backend.common.typehandler.JsonbTypeHandler},
             #{identityPayload,
               typeHandler=com.royalty.backend.common.typehandler.JsonbTypeHandler},
             #{lastLogoId},
@@ -74,6 +81,9 @@
         UPDATE brand_identity
         SET
             logo_id = #{logoId},
+            logo_features =
+                #{logoFeatures,
+                  typeHandler=com.royalty.backend.common.typehandler.JsonbTypeHandler},
             identity_payload =
                 #{identityPayload,
                   typeHandler=com.royalty.backend.common.typehandler.JsonbTypeHandler},
@@ -82,15 +92,14 @@
             updated_at = CURRENT_TIMESTAMP
         WHERE brand_id = #{brandId}
     </update>
-    
-    <!-- 로고 이미지 경로 조회 -->
-	<select id="findLogoImagePathByLogoId"
-    	    parameterType="long"
-        	resultType="string">
-    	SELECT image_path
-    	FROM brand_logo
-    	WHERE logo_id = #{logoId}
-	</select>
 
+    <!-- 로고 이미지 경로 조회 -->
+    <select id="findLogoImagePathByLogoId"
+            parameterType="long"
+            resultType="string">
+        SELECT image_path
+        FROM brand_logo
+        WHERE logo_id = #{logoId}
+    </select>
 
 </mapper>

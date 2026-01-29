@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     provider         VARCHAR(20),
     provider_id      VARCHAR(100),
     created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -94,6 +95,22 @@ CREATE TABLE IF NOT EXISTS patent (
     -- [AI 벡터 데이터]
     image_vector        vector(1280),  -- MobileNetV3 (1280차원)
     text_vector         vector(768),   -- SBERT (768차원)
+    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
+    
+    trademark_name      TEXT NOT NULL, -- 상표명
+    image_url           TEXT,          -- 이미지 URL
+    
+    applicant           TEXT,          -- 출원인
+    application_date    VARCHAR(20),   -- 출원일
+    registration_date   VARCHAR(20),   -- 등록일
+    status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
+    category            TEXT,          -- 지정상품 분류
+    
+    -- [AI 벡터 데이터]
+    -- AWS 실제 상태 반영: 이미지는 1280차원, 텍스트는 768차원
+    image_vector        vector(1280),  
+    text_vector         vector(768),   
+    
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -118,6 +135,7 @@ CREATE TABLE IF NOT EXISTS detection_event (
     text_similarity  FLOAT,
     risk_level       VARCHAR(20),
     detected_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    detected_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -133,6 +151,11 @@ CREATE TABLE IF NOT EXISTS notification (
         REFERENCES detection_event(event_id) ON DELETE SET NULL,
     message          TEXT NOT NULL,
     is_read          BOOLEAN NOT NULL DEFAULT FALSE,
+    user_id          BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    brand_id         BIGINT REFERENCES brand(brand_id) ON DELETE CASCADE,
+    event_id         BIGINT REFERENCES detection_event(event_id) ON DELETE SET NULL,
+    message          TEXT,
+    is_read          BOOLEAN DEFAULT FALSE,
     created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
