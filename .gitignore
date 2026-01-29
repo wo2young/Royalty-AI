@@ -1,6 +1,6 @@
-############################
-OS
-############################
+# ==========================================
+# OS generated files
+# ==========================================
 .DS_Store
 Thumbs.db
 
@@ -11,7 +11,17 @@ pycache/
 .py[cod]
 venv/
 .env
-.env.
+.ipynb_checkpoints/
+
+# AI Data & Models (용량 큰 파일들)
+ai_model/data/
+ai_model/models/
+models/
+*.npy
+*.h5
+*.pth
+*.bin
+*.pkl
 
 ############################
 Node.js (Frontend)
@@ -23,6 +33,7 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.env.*
 
 ############################
 Java / Spring Boot
@@ -86,6 +97,10 @@ Secrets / Keys
 *.pem
 *.key
 *.crt
+application.properties
+application-*.properties
+application.yml
+application-*.yml
 
 VS Code
 .vscode/
@@ -98,5 +113,30 @@ OS
 .DS_Store
 Thumbs.db
 
-Logs
+# Logs
 *.log
+
+# ===== secrets =====
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+.env
+# --- [긴급 추가] 로컬 DB 세션 및 AI 모델 파일 무시 ---
+
+# DBeaver 등 DB 세션 파일
+*.session
+
+# SQL 덤프 파일 (로컬 테스트용이면 무시)
+final_deploy.sql
+
+# AI 모델 가중치 파일 (용량 큼)
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# AI 모델 관련 설정 파일 (프로젝트 소스코드가 아니라면 무시)
+adapter_config.json
+added_tokens.json
+chat_template.jinja
+tokenizer_config.json
+special_tokens_map.json

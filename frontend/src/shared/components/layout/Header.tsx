@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/shared/components/ui/button"
 import { useAuth } from "@/shared/auth/AuthContext"
+import NotificationBell from "@/features/notification/components/NotificationBell"
 
 export function Header() {
   const navigate = useNavigate()
@@ -52,6 +53,9 @@ export function Header() {
           {/* 로그인 / 유저 영역 */}
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
+              {/* 🔔 알림 벨 */}
+              <NotificationBell />
+
               <span className="text-sm font-medium text-muted-foreground">
                 {displayName ?? "사용자"}님
               </span>
