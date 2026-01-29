@@ -1,6 +1,5 @@
 package com.royalty.backend.notification.controller;
 
-import com.royalty.backend.auth.domain.CustomUserDetails;
 import com.royalty.backend.notification.dto.NotificationDTO;
 import com.royalty.backend.notification.service.NotificationService;
 

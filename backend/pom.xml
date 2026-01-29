@@ -33,13 +33,13 @@
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
 
-		<!-- =========================
+        <!-- =========================
              🔐 Security
-            ========================= -->
-       <dependency>
-           <groupId>org.springframework.boot</groupId>
+             ========================= -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-       </dependency>
+        </dependency>
 
         <!-- =========================
              🔑 JWT
@@ -169,22 +169,22 @@
             <version>4.0.1</version>
             <scope>test</scope>
         </dependency>
-        
-        <!-- =========================
-             🚪  AWS
-             ========================= -->     
-        <dependency>
-		    <groupId>io.awspring.cloud</groupId>
-		    <artifactId>spring-cloud-starter-aws</artifactId>
-		    <version>2.4.4</version>
-		</dependency>
 
+               <!-- =========================
+             🚪  AWS
+             ========================= -->
+        <dependency>
+		           <groupId>io.awspring.cloud</groupId>
+		           <artifactId>spring-cloud-starter-aws</artifactId>
+		           <version>2.4.4</version>
+		      </dependency>
 
 
     </dependencies>
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -210,6 +210,7 @@
                     </excludes>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

@@ -6,13 +6,15 @@ export interface Bookmark {
 }
 
 export interface BookmarkedTrademark {
-  patentId: string
-  name: string
-  code: string
+  bookmarkId: number
+  patentId: number
+  trademarkName: string
+  applicant: string
+  code: number
   category: string
-  date: string
-  image?: string
-  isBookmarked?: boolean
+  createdAt: string
+  imageUrl?: string
+  isBookmarked: boolean
 }
 
 export interface BookmarkToggleRequest {
@@ -26,7 +28,6 @@ export interface BookmarkToggleResponse {
 
 export interface BookmarksResponse {
   bookmarks: BookmarkedTrademark[]
-  total: number
 }
 
 export interface BookmarkFilters {
