@@ -25,21 +25,32 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     @Transactional(readOnly = true)
-    public IdentityVO getCurrent(Long brandId) {
-        return identityMapper.findByBrandId(brandId);
-    }
-
-    @Override
-    public IdentityVO analyze(Long brandId) {
-
-        // 1️ 현재 브랜드 + BI 조회
-        IdentityVO current = identityMapper.findByBrandId(brandId);
+    public IdentityVO getCurrent(Long brandId, Long userId) {
+    	IdentityVO current = identityMapper.findByBrandId(brandId);
         if (current == null) {
             throw new IllegalStateException("브랜드 정보가 존재하지 않습니다.");
         }
 
-        if (current.getLogoId() == null || current.getBrandName() == null) {
-            throw new IllegalStateException("로고와 상호명이 모두 있어야 BI 분석이 가능합니다.");
+        
+        if (!current.getUserId().equals(userId)) {
+            throw new SecurityException("접근 권한이 없습니다.");
+        }
+
+        return current;
+    }
+
+    @Override
+    public IdentityVO analyze(Long brandId, Long userId) {
+
+        // 1️ 현재 브랜드 + BI 조회
+    	IdentityVO current = identityMapper.findByBrandId(brandId);
+        if (current == null) {
+            throw new IllegalStateException("브랜드 정보가 존재하지 않습니다.");
+        }
+
+        // 🔒 소유자 검증 (가장 중요)
+        if (!current.getUserId().equals(userId)) {
+            throw new SecurityException("접근 권한이 없습니다.");
         }
 
         // 2️ 입력 변경 여부 체크
