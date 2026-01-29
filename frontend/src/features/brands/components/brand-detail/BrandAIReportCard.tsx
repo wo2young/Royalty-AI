@@ -23,7 +23,7 @@ export function BrandAIReportCard({ report }: AIReportProps) {
         {/* 점수 섹션 */}
         <div className="flex items-center justify-between border-b pb-6">
           <div>
-            <p className="text-sm text-muted-foreground">반려 점수</p>
+            <p className="text-sm text-muted-foreground">유사도</p>
             <p className={"text-3xl font-black text-indigo-400"}>
               {report.riskScore}점
             </p>

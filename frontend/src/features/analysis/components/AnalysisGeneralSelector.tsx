@@ -2,144 +2,120 @@ import { CategoryFilter } from "@/shared/components/search-bar/CategoryFilter"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import { FileText, PlusCircle, Sparkles, Upload, X } from "lucide-react"
-import { useRef, useState } from "react"
+import { PlusCircle, Sparkles, Upload, X } from "lucide-react"
+import { useRef } from "react"
+import { Controller, useFormContext } from "react-hook-form"
+import type { AnalysisFormValues } from "../page/AnalysisPage"
+import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 
 interface GeneralSelectorProps {
-  onAnalyze: () => void
   analyzing: boolean
   analyzed: boolean
 }
 
 export default function AnalysisGeneralSelector({
-  onAnalyze,
   analyzing,
   analyzed,
 }: GeneralSelectorProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("")
-  const [file, setFile] = useState<File | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
+  const { register, control, watch, setValue } =
+    useFormContext<AnalysisFormValues>()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // 클릭 시 파일 선택창 열기
-  const onUploadClick = () => fileInputRef.current?.click()
+  const logoFile = watch("logoFile")
 
-  // 파일 선택 완료 시 상태 저장
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) setFile(selectedFile)
-  }
-
-  // 드래그 앤 드롭 로직
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const onDragLeave = () => setIsDragging(false)
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const droppedFile = e.dataTransfer.files?.[0]
-    if (droppedFile) setFile(droppedFile)
+    const file = e.target.files?.[0]
+    if (file) {
+      setValue("logoFile", file)
+      setValue("brandId", null)
+    }
   }
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-6">
       <div className="space-y-2.5">
-        {/* 상호명 입력 */}
-        <Label htmlFor="both-name" className="text-sm font-medium">
-          상호명
-        </Label>
+        <Label htmlFor="brandName">상호명</Label>
         <Input
-          id="both-name"
+          {...register("brandName")}
+          id="brandName"
           placeholder="분석할 상호명을 입력하세요"
           className="h-11 text-base"
         />
       </div>
 
-      {/* 로고 이미지 입력 */}
-      <div className="space-y-2.5">
+      <div className="text-center space-y-2.5">
         <Label>로고 이미지</Label>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-          accept="image/*"
-        />
-
         <div
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          onClick={onUploadClick}
-          className={`
-            flex items-center justify-center rounded-xl border-2 border-dashed p-12 transition-all cursor-pointer
-            ${isDragging ? "border-primary bg-primary/5" : "bg-secondary/20 border-slate-200 hover:border-primary/60 hover:bg-secondary/40"}
-          `}
+          onClick={() => fileInputRef.current?.click()}
+          className={cn(
+            "group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all py-8",
+            logoFile
+              ? "border-primary bg-primary/5"
+              : "border-slate-200 hover:border-primary hover:bg-slate-50"
+          )}
         >
-          <div className="text-center space-y-3">
-            {file ? (
-              // 파일이 선택되었을 때의 UI
-              <div className="flex flex-col items-center">
-                <div className="p-3 bg-primary/10 rounded-full mb-2">
-                  <FileText className="w-8 h-8 text-primary" />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  {file.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mt-2 text-red-500 hover:text-red-600 h-8"
-                  onClick={(e) => {
-                    e.stopPropagation() // 클릭 이벤트 전파 방지
-                    setFile(null)
-                  }}
-                >
-                  <X className="w-3 h-3 mr-1" /> 삭제
-                </Button>
+          {logoFile ? (
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative h-16 w-16 overflow-hidden rounded-lg border">
+                <img
+                  src={URL.createObjectURL(logoFile)}
+                  alt="preview"
+                  className="h-full w-full object-cover"
+                />
               </div>
-            ) : (
-              // 파일이 없을 때의 UI
-              <>
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 ring-4 ring-primary/5">
-                  <Upload className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    로고 파일을 드래그하거나 클릭하여 업로드
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    PNG, JPG, SVG (최대 5MB)
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
+              <p className="text-sm font-medium text-primary">
+                {logoFile.name}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-slate-400"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setValue("logoFile", null)
+                }}
+              >
+                <X className="mr-1 h-3 w-3" /> 삭제
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 group-hover:bg-primary/10">
+                <Upload className="h-6 w-6 text-slate-400 group-hover:text-primary" />
+              </div>
+              <p className="text-sm font-medium text-slate-600">
+                이미지 업로드 또는 드래그
+              </p>
+            </>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
         </div>
       </div>
 
-      {/* 카테고리 분류 */}
       <div className="space-y-2.5">
-        <Label htmlFor="both-category" className="text-sm font-medium">
-          업종 분류
-        </Label>
-        <CategoryFilter
-          selectedId={selectedCategory}
-          onSelect={setSelectedCategory}
-          className="h-11 text-base w-full sm:w-full"
+        <Label>업종 분류</Label>
+        <Controller
+          control={control}
+          name="category"
+          render={({ field }) => (
+            <CategoryFilter
+              selectedId={field.value}
+              onSelect={field.onChange}
+              className="h-11 w-full"
+            />
+          )}
         />
       </div>
 
-      <div className="flex gap-4 items-center pt-2">
-        <Button onClick={onAnalyze} className="w-full sm:w-auto">
+      <div className="flex gap-4">
+        <Button type="submit" disabled={analyzing} className="w-full sm:w-auto">
           <Sparkles className="mr-2 h-4 w-4" />
           {analyzing ? "분석 중..." : "상표 분석"}
         </Button>
@@ -151,6 +127,7 @@ export default function AnalysisGeneralSelector({
             className="flex-1 sm:flex-none"
           >
             <Button
+              type="button"
               variant="outline"
               className="w-full border-primary text-primary hover:bg-primary/5 shadow-sm"
               onClick={() => {
