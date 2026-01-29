@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.royalty.backend.TradeMark.TradeMapper.DhTradeMapper">
+<mapper namespace="com.royalty.backend.Analysis.TradeMapper.DhTradeMapper">
 
-    <insert id="insertBrand" parameterType="com.royalty.backend.TradeMark.TradeDTO.DhTrademarkSearchResponseDto" 
+    <insert id="insertBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto" 
             useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
         INSERT INTO brand (
             user_id,
@@ -17,7 +17,7 @@
             #{aiSummary}  )
     </insert>
 
-    <insert id="saveMyBrand" parameterType="com.royalty.backend.TradeMark.TradeDTO.DhTrademarkSearchResponseDto">
+    <insert id="saveMyBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         INSERT INTO brand_logo_history (
             brand_id,
             version,
@@ -35,7 +35,7 @@
         )
     </insert>
     
-<insert id="insertBrandLogo" parameterType="com.royalty.backend.TradeMark.TradeDTO.DhTrademarkSearchResponseDto">
+<insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
     INSERT INTO brand_logo (
         brand_id,
         image_path,  created_at
@@ -46,7 +46,7 @@
 </insert>
 	
 
-    <select id="searchSimilarTextTrademarks" resultType="com.royalty.backend.TradeMark.TradeDTO.DhTrademarkSearchResponseDto">
+    <select id="searchSimilarTextTrademarks" resultType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         SELECT
             patent_id AS patentId,
             trademark_name AS trademarkName,
