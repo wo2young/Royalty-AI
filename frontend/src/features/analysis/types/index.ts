@@ -1,15 +1,16 @@
 export interface Analysis {
-  trademark_name: string
-  imageUrl: string
+  brandName?: string
+  logoFile?: File | null
+  logoUrl?: string
   category: string
+  brandId?: number | null
 }
 
 export interface AnalysisResult {
   id: number
   trademark_name: string
   brandId: number
-  userId: number
-  appllicant: string
+  applicant: string
   category: string
   imageUrl: string
   textSimilarity: number
