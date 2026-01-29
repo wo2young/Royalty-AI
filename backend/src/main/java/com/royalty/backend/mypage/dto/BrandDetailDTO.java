@@ -2,6 +2,7 @@ package com.royalty.backend.mypage.dto;
 
 import lombok.Data;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 public class BrandDetailDTO {

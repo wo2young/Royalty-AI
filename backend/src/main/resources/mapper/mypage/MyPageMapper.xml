@@ -110,4 +110,32 @@
         ORDER BY b.created_at DESC
     </select>
 
+    <select id="countBrandLogo" resultType="int">
+        SELECT COUNT(*)
+        FROM brand
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectCurrentLogoPath" resultType="string">
+        SELECT l.image_path
+        FROM brand b
+        JOIN brand_logo l ON b.brand_id = l.brand_id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insertBrandHistory">
+        INSERT INTO brand_logo_history (
+            brand_id, 
+            image_path, 
+            version, 
+            created_at
+        ) VALUES (
+            #{brandId}, 
+            #{imagePath}, 
+            #{description},  NOW()
+        )
+    </insert>
+
 </mapper>
