@@ -25,6 +25,7 @@
             b.category,
             b.description,
             b.is_notification_enabled,
+            b.created_at,
             l.image_path AS currentLogoPath
         FROM brand b
         LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
