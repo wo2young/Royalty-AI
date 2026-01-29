@@ -10,7 +10,7 @@ import ErrorPage from "@/shared/page/ErrorPage"
 import { BookmarksPage } from "@/features/bookmark/page/BookmarkPage"
 import KakaoCallbackPage from "@/features/auth/page/KakaoCallbackPage"
 import RequireAuth from "@/shared/auth/RequireAuth"
-import { BrandDetailPage, BrandsPage } from "@/features/brand"
+import { BrandDetailPage, BrandsPage } from "@/features/brands"
 
 export const router = createBrowserRouter([
   // ✅ 메인 레이아웃

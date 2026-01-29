@@ -3,33 +3,34 @@
 import { ArrowLeft, Bookmark } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BookmarkSearch } from "../components/BookmarkSearch"
+import { SearchBar } from "../../../shared/components/search-bar/SearchBar"
 import { BookmarkCard } from "../components/BookmarkCard"
 import { useBookmarks } from "../api/bookmark.queries"
 import { Pagination } from "@/shared/components/pagination/Pagination"
 
 export function BookmarksPage() {
-  const { data, isLoading, isError } = useBookmarks()
+  const { data: BookmarkData, isLoading, isError } = useBookmarks()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("ALL")
   const [currentPage, setCurrentPage] = useState(1)
   const ITEMS_PER_PAGE = 12 // 한 페이지에 표시할 카드 개수
 
   const filteredBrands = useMemo(() => {
-    if (!data?.bookmarks) return []
+    if (!BookmarkData) return []
 
-    return data.bookmarks.filter((brand) => {
+    return BookmarkData.filter((brand) => {
       const matchesSearch =
-        brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        brand.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        brand.trademarkName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         brand.category.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesCategory =
-        selectedCategory === "ALL" || brand.category === selectedCategory
+        selectedCategory === "ALL" ||
+        (selectedCategory === "IT" && brand.category === "IT") ||
+        (selectedCategory === "OTHERS" && brand.category !== "IT")
 
       return matchesSearch && matchesCategory
     })
-  }, [data, searchQuery, selectedCategory])
+  }, [BookmarkData, searchQuery, selectedCategory])
 
   const paginatedBrands = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
@@ -72,9 +73,9 @@ export function BookmarksPage() {
         <div className="mb-8">
           <Link
             to="/mypage"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            className="group mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             마이페이지로 돌아가기
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -98,7 +99,7 @@ export function BookmarksPage() {
         </div>
 
         {/* 검색, 필터 부분 */}
-        <BookmarkSearch
+        <SearchBar
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           category={selectedCategory}
