@@ -99,7 +99,7 @@ export default function BrandDetailPage() {
             >
               {activeTab === "summary" && (
                 <BrandSummaryTab
-                  report={brandData.reportList[0]}
+                  report={brandData.reportList?.[0] || null}
                   historyData={formattedHistory}
                   identityPayload={biData?.identityPayload}
                   hasAI={hasAI}
@@ -116,7 +116,7 @@ export default function BrandDetailPage() {
               )}
 
               {activeTab === "ai" && (
-                <BrandAITab reportList={brandData.reportList} />
+                <BrandAITab reportList={brandData?.reportList || []} />
               )}
 
               {activeTab === "bi" && (
