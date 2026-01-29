@@ -11,6 +11,7 @@
     <resultMap id="IdentityResultMap"
                type="com.royalty.backend.identity.domain.IdentityVO">
         <id property="brandId" column="brandId"/>
+        <result property="userId" column="userId"/>
         <result property="logoId" column="logoId"/>
         <result property="logoImagePath" column="logoImagePath"/>
         <result property="brandName" column="brandName"/>
@@ -29,6 +30,7 @@
             resultMap="IdentityResultMap">
         SELECT
             b.brand_id           AS brandId,
+            b.user_id			 AS userId,
             bl.logo_id           AS logoId,
             bl.image_path        AS logoImagePath,
             b.brand_name         AS brandName,
