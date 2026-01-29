@@ -1,21 +1,28 @@
-import { Fingerprint } from "lucide-react"
 import { useParams } from "react-router-dom"
-import { BrandDetailTabs } from "@/features/brand/components/brand-detail/BrandDetailTabs"
+import { BrandDetailTabs } from "@/features/brands/components/brand-detail/BrandDetailTabs"
 import { AnimatePresence, motion } from "framer-motion"
 import { useState } from "react"
-import { TabEmptyState } from "../components/brand-detail/TabEmptyState"
 import { BrandDetailHeader } from "../components/brand-detail/BrandDetailHeader"
 import { BrandHistoryTab } from "../components/brand-detail/BrandHistoryTab"
 import { BrandAITab } from "../components/brand-detail/BrandAITab"
 import { BrandSummaryTab } from "../components/brand-detail/BrandSummaryTab"
-import { useBrandDetail, useToggleNotification } from "../api/brand.queries"
+import {
+  useBrandDetail,
+  useBrandIdentity,
+  useToggleNotification,
+  useUpdateBrand,
+} from "../api/brand.queries"
+import { BrandBITab } from "../components/brand-detail/BrandBITab"
 
 export default function BrandDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState("history")
   const { mutate: toggleNotify } = useToggleNotification()
+  const brandId = Number(id)
 
   const { data: brandData, isLoading, isError } = useBrandDetail(Number(id))
+  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
+  const { data: biData, isLoading: isBiLoading } = useBrandIdentity(brandId)
 
   if (isLoading)
     return <div className="p-20 text-center">브랜드 정보를 불러오는 중...</div>
@@ -32,19 +39,37 @@ export default function BrandDetailPage() {
       ?.map((item) => ({
         historyId: item.historyId,
         version: item.version,
+        fullTimestamp: item.createdAt,
         createdAt: item.createdAt.split("T")[0].replace(/-/g, "."), // "2026-01-22" -> "2026.01.22"
         imageSimilarity: item.imageSimilarity,
         textSimilarity: item.textSimilarity,
+        imagePath: item.imagePath,
       }))
-      .reverse() || []
+      .sort(
+        (a, b) =>
+          new Date(a.fullTimestamp).getTime() -
+          new Date(b.fullTimestamp).getTime()
+      ) || []
 
   // 데이터 존재 여부 확인 (실제 API 연동 시 이 부분을 데이터 유무로 체크하세요)
   const hasHistory = formattedHistory.length > 0
   const hasAI = (brandData?.reportList?.length ?? 0) > 0
-  const hasBI = false // 현재 데이터가 없으므로 false
+  const hasBI = !!biData?.identityPayload
 
   const handleToggleNotify = (brandId: number, enabled: boolean) => {
     toggleNotify({ brandId, enabled })
+  }
+
+  const handleEditSubmit = (formData: FormData) => {
+    updateBrand(
+      { brandId, formData },
+      {
+        onSuccess: () => {
+          console.log("수정 완료")
+        },
+        onError: () => alert("수정 중 오류가 발생했습니다."),
+      }
+    )
   }
 
   if (!brandData) {
@@ -57,6 +82,8 @@ export default function BrandDetailPage() {
         brand={brandData}
         hasHistory={hasHistory}
         onToggleNotify={handleToggleNotify}
+        onEditSubmit={handleEditSubmit}
+        isUpdatePending={isUpdatePending}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-10">
@@ -72,8 +99,9 @@ export default function BrandDetailPage() {
             >
               {activeTab === "summary" && (
                 <BrandSummaryTab
-                  report={brandData.reportList[0]}
+                  report={brandData.reportList?.[0] || null}
                   historyData={formattedHistory}
+                  identityPayload={biData?.identityPayload}
                   hasAI={hasAI}
                   hasHistory={hasHistory}
                   hasBI={hasBI}
@@ -88,16 +116,14 @@ export default function BrandDetailPage() {
               )}
 
               {activeTab === "ai" && (
-                <BrandAITab reportList={brandData.reportList} />
+                <BrandAITab reportList={brandData?.reportList || []} />
               )}
 
               {activeTab === "bi" && (
-                <TabEmptyState
-                  icon={Fingerprint}
-                  title="BI 분석 정보가 없습니다"
-                  description="브랜드 정체성을 분석하세요."
-                  actionLabel="BI 분석 시작"
-                  onAction={() => {}}
+                <BrandBITab
+                  brandId={brandId}
+                  data={biData}
+                  isLoading={isBiLoading}
                 />
               )}
             </motion.div>

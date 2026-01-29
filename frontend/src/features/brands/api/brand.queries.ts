@@ -44,6 +44,25 @@ export const useCreateBrand = () => {
   })
 }
 
+// 브랜드 수정
+export const useUpdateBrand = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      brandId,
+      formData,
+    }: {
+      brandId: number
+      formData: FormData
+    }) => brandApi.updateBrand(brandId, formData),
+    onSuccess: (_, { brandId }) => {
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: brandKeys.detail(brandId) })
+    },
+  })
+}
+
 // 브랜드 삭제
 export const useDeleteBrand = () => {
   const queryClient = useQueryClient()
@@ -54,6 +73,28 @@ export const useDeleteBrand = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
       navigate("/mypage/brand") // 삭제 후 목록으로 이동
+    },
+  })
+}
+
+// BI 조회
+export const useBrandIdentity = (brandId: number) => {
+  return useQuery({
+    queryKey: brandKeys.identity(brandId),
+    queryFn: () => brandApi.fetchBrandIdentity(brandId),
+    enabled: !!brandId,
+  })
+}
+
+// BI 분석 실행
+export const useAnalyzeIdentity = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (brandId: number) => brandApi.analyzeBrandIdentity(brandId),
+    onSuccess: (data, brandId) => {
+      queryClient.setQueryData(brandKeys.identity(brandId), data)
+      queryClient.invalidateQueries({ queryKey: brandKeys.detail(brandId) })
     },
   })
 }

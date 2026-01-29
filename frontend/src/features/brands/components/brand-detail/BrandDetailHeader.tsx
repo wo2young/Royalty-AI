@@ -17,13 +17,17 @@ interface BrandDetailHeaderProps {
     notificationEnabled: boolean
   }
   hasHistory: boolean
+  onEditSubmit: (formData: FormData) => void
   onToggleNotify?: (id: number, enabled: boolean) => void
+  isUpdatePending: boolean
 }
 
 export function BrandDetailHeader({
   brand,
   hasHistory,
   onToggleNotify,
+  onEditSubmit,
+  isUpdatePending,
 }: BrandDetailHeaderProps) {
   const [showBadge, setShowBadge] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
@@ -130,8 +134,10 @@ export function BrandDetailHeader({
                 onOpenChange={setIsEditOpen}
                 brand={brand}
                 onEdit={(formData) => {
-                  console.log(formData)
+                  onEditSubmit(formData)
+                  setIsEditOpen(false)
                 }}
+                isPending={isUpdatePending}
               />
             )}
           </div>

@@ -1,20 +1,20 @@
-import { CategoryFilter } from "@/shared/components/category-filter/CategoryFilter"
+import { CategoryFilter } from "@/shared/components/search-bar/CategoryFilter"
 import { Input } from "@/shared/components/ui/input"
 import { Search } from "lucide-react"
 
-interface BookmarkSearchProps {
+interface SearchProps {
   searchQuery: string
   onSearchChange: (value: string) => void
   category: string
   onCategoryChange: (value: string) => void
 }
 
-export function BookmarkSearch({
+export function SearchBar({
   searchQuery,
   onSearchChange,
   category,
   onCategoryChange,
-}: BookmarkSearchProps) {
+}: SearchProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-center py-6">
       <div className="relative w-full">

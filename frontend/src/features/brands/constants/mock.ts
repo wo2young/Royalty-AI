@@ -96,8 +96,10 @@ export const MOCK_BRAND_DETAILS = [
         historyId: 10,
         version: "v2",
         imageSimilarity: 12.5,
-        textSimilarity: 5.0,
+        textSimilarity: 85.0,
         createdAt: "2026-01-22T14:30:00",
+        imagePath:
+          "https://cdn.pixabay.com/photo/2017/11/24/21/49/bali-2975787_1280.jpg",
       },
       {
         historyId: 5,
@@ -105,6 +107,35 @@ export const MOCK_BRAND_DETAILS = [
         imageSimilarity: 45.8,
         textSimilarity: 10.2,
         createdAt: "2026-01-10T10:00:00",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
+      },
+      {
+        historyId: 4,
+        version: "v3",
+        imageSimilarity: 72.8,
+        textSimilarity: 5.2,
+        createdAt: "2026-01-24T10:00:00",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
+      },
+      {
+        historyId: 1,
+        version: "v4",
+        imageSimilarity: 62.8,
+        textSimilarity: 27.2,
+        createdAt: "2026-01-24T12:00:00",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
+      },
+      {
+        historyId: 1201,
+        version: "v5",
+        imageSimilarity: 22.8,
+        textSimilarity: 17.2,
+        createdAt: "2026-01-24T12:00:01",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
       },
     ],
     reportList: [
@@ -146,9 +177,18 @@ export const MOCK_BRAND_DETAILS = [
       {
         historyId: 11,
         version: "v1",
-        imageSimilarity: 88.2,
-        textSimilarity: 95.0,
+        imageSimilarity: 95.0,
         createdAt: "2025-12-20T09:00:00",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
+      },
+      {
+        historyId: 12,
+        version: "v2",
+        imageSimilarity: 42.0,
+        createdAt: "2025-12-20T10:00:00",
+        imagePath:
+          "https://media.istockphoto.com/id/1419410282/ko/%EC%82%AC%EC%A7%84/%EC%95%84%EB%A6%84-%EB%8B%A4%EC%9A%B4-%EB%B0%9D%EC%9D%80-%ED%83%9C%EC%96%91-%EA%B4%91%EC%84%A0%EC%9C%BC%EB%A1%9C-%EB%B4%84%EC%97%90%EC%84%9C-%EC%82%AC%EC%9D%BC%EB%9F%B0%ED%8A%B8-%EC%88%B2.jpg?s=1024x1024&w=is&k=20&c=lCk-jQ1gwuwMW2t36QRuNipt7ectlltg1POgWrXKvrw=",
       },
     ],
     reportList: [
@@ -162,5 +202,46 @@ export const MOCK_BRAND_DETAILS = [
         createdAt: "2025-12-25T11:00:00",
       },
     ],
+  },
+]
+
+export const BrandBiData = [
+  {
+    brandId: 1,
+    brandName: "삼성",
+    identityPayload: {
+      core: {
+        kr: "삼성은 현대적이고 복잡한 상징형 로고를 가지고 있습니다.",
+        en: "Samsung has a modern, complex symbolic logo.",
+      },
+      language: {
+        kr: "한국어",
+        en: "English",
+      },
+      brandKeywords: {
+        kr: ["복잡한", "현대적인", "상징", "높은 대칭", "밝은 색조"],
+        en: [
+          "complex",
+          "modern",
+          "symbol",
+          "high symmetry",
+          "light color tone",
+        ],
+      },
+      copyExamples: {
+        kr: [
+          "삼성의 로고는 현대적인 디자인과 복잡함이 돋보입니다.",
+          "이 로고는 밝고 대칭적인 구조로 이루어져 있습니다.",
+        ],
+        en: [
+          "Samsung's logo stands out with its modern design and complexity.",
+          "This logo features a bright and symmetrical structure.",
+        ],
+      },
+    },
+    lastBrandName: "삼성",
+    lastLogoId: 1,
+    logoId: 1,
+    logoImagePath: null,
   },
 ]

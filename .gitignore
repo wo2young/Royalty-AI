@@ -5,10 +5,10 @@
 Thumbs.db
 
 ############################
-# Python
+Python
 ############################
-__pycache__/
-*.py[cod]
+pycache/
+.py[cod]
 venv/
 .env
 .ipynb_checkpoints/
@@ -24,7 +24,7 @@ models/
 *.pkl
 
 ############################
-# Node.js (Frontend)
+Node.js (Frontend)
 ############################
 node_modules/
 build/
@@ -35,41 +35,15 @@ yarn-debug.log*
 yarn-error.log*
 .env.*
 
-# ==========================================
-# Database & Archives
-# ==========================================
-*.sql
-*.tar
-*.gz
-
-# ==========================================
-# Java / Maven (Backend)
-# ==========================================
-**/target/
-**/*.class
-**/.settings/
-**/.classpath
-**/.project
-**/.factorypath
-
-# ==========================================
-# IDE (STS4, IntelliJ, VS Code)
-# ==========================================
-.metadata/
-.recommenders/
-**/bin/
-**/*.iml
-.idea/
-.vscode/
 ############################
-# Java / Spring Boot
+Java / Spring Boot
 ############################
 target/
-*.log
-hs_err_pid*
+.log
+hs_err_pid
 
 ############################
-# AI Data / Models (절대 업로드 금지)
+AI Data / Models (절대 업로드 금지)
 ############################
 ai_model/data/
 *.npy
@@ -84,15 +58,14 @@ firebase-service-account.json
 *.ckpt
 
 ############################
-# Eclipse / STS (🔥 핵심)
+Eclipse / STS (🔥 핵심)
 ############################
 .metadata/
 backend/.metadata/
-# =========================
-# IDE / Editor metadata
-# =========================
-
-# Eclipse / STS
+=========================
+IDE / Editor metadata
+=========================
+Eclipse / STS
 .metadata/
 .recommenders/
 .settings/
@@ -103,23 +76,23 @@ backend/.metadata/
 *.launch
 
 ############################
-# IntelliJ IDEA
+IntelliJ IDEA
 ############################
 .idea/
 *.iml
 
 ############################
-# VS Code
+VS Code
 ############################
 .vscode/
 
 ############################
-# Docker (로컬 전용일 경우)
+Docker (로컬 전용일 경우)
 ############################
 docker-data/
 
 ############################
-# Secrets / Keys
+Secrets / Keys
 ############################
 *.pem
 *.key
@@ -129,14 +102,14 @@ application-*.properties
 application.yml
 application-*.yml
 
-# VS Code
+VS Code
 .vscode/
 
-# IntelliJ
+IntelliJ
 .idea/
 *.iml
 
-# OS
+OS
 .DS_Store
 Thumbs.db
 

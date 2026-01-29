@@ -2,14 +2,15 @@ import { Building2, ArrowLeft, Plus } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
-import { BookmarkSearch } from "@/features/bookmark/components/BookmarkSearch"
+import { SearchBar } from "@/shared/components/search-bar/SearchBar"
 import { BrandList } from "../components/BrandList"
-import { useBrands } from "../api/brand.queries"
+import { useBrands, useUpdateBrand } from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
 import { AddBrandModal } from "../components/modal/AddBrandModal"
 import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
 import type { Brand } from "../types"
 import { EditBrandModal } from "../components/modal/EditBrandModal"
+import { BrandSkeleton } from "../components/skeleons/BrandSkeleton"
 
 const ITEMS_PER_PAGE = 5
 
@@ -25,13 +26,16 @@ export default function BrandsPage() {
   const [currentPage, setCurrentPage] = useState(1)
 
   const { data: brands = [], isLoading, isError } = useBrands()
+  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
 
   const filteredBrands = brands.filter((brand) => {
     const matchesSearch =
       brand.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brand.category.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory =
-      selectedCategory === "ALL" || brand.category === selectedCategory
+      selectedCategory === "ALL" ||
+      (selectedCategory === "IT" && brand.category === "IT") ||
+      (selectedCategory === "OTHERS" && brand.category !== "IT")
 
     return matchesSearch && matchesCategory
   })
@@ -48,8 +52,18 @@ export default function BrandsPage() {
   }
 
   const handleEditSubmit = (formData: FormData) => {
-    console.log("수정 제출:", Object.fromEntries(formData))
-    setEditTarget(null)
+    if (!editTarget) return
+
+    updateBrand(
+      { brandId: editTarget.brandId, formData },
+      {
+        onSuccess: () => {
+          setEditTarget(null)
+          // TODO: Toast알림
+        },
+        onError: () => alert("브랜드 수정 중 오류가 발생했습니다."),
+      }
+    )
   }
 
   const handleSearchChange = (query: string) => {
@@ -62,7 +76,6 @@ export default function BrandsPage() {
     setCurrentPage(1) // 카테고리 변경 시 페이지 리셋
   }
 
-  if (isLoading) return <div>로딩 중...</div>
   if (isError) return <div>데이터를 불러오지 못했습니다.</div>
 
   return (
@@ -72,9 +85,9 @@ export default function BrandsPage() {
         <div className="mb-8">
           <Link
             to="/mypage"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
+            className="group mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             마이페이지로 돌아가기
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -98,7 +111,7 @@ export default function BrandsPage() {
         </div>
 
         {/* 검색 및 카테고리 필터 */}
-        <BookmarkSearch
+        <SearchBar
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           category={selectedCategory}
@@ -106,14 +119,26 @@ export default function BrandsPage() {
         />
 
         {/* 나의 브랜드 리스트 */}
-        <BrandList
-          brands={paginatedBrands}
-          onDelete={(id, name) => setDeleteTarget({ id, name })}
-          onEdit={handleEditClick}
-        />
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            {[...Array(5)].map((_, i) => (
+              <BrandSkeleton key={i} />
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="py-20 text-center border rounded-xl">
+            데이터 로드 실패
+          </div>
+        ) : (
+          <BrandList
+            brands={paginatedBrands}
+            onDelete={(id, name) => setDeleteTarget({ id, name })}
+            onEdit={handleEditClick}
+          />
+        )}
 
         {/* 페이지네이션 */}
-        {filteredBrands.length > 0 && (
+        {!isLoading && filteredBrands.length > 0 && (
           <div className="mt-12">
             <Pagination
               currentPage={currentPage}
@@ -134,11 +159,12 @@ export default function BrandsPage() {
       />
       {editTarget && (
         <EditBrandModal
-          key={editTarget.brandId} // 중요: 브랜드가 바뀔 때마다 폼을 새로고침
+          key={editTarget.brandId}
           open={!!editTarget}
           onOpenChange={(open) => !open && setEditTarget(null)}
           brand={editTarget}
           onEdit={handleEditSubmit}
+          isPending={isUpdatePending} // 처리 중 로딩 상태 전달
         />
       )}
     </div>

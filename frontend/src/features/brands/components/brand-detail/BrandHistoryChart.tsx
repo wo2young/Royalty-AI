@@ -16,6 +16,51 @@ interface BrandHistoryProps {
   data: HistoryData[]
 }
 
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: HistoryData
+  }>
+}
+
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+  if (!active || !payload || !payload.length) return null
+
+  const data = payload[0].payload
+
+  return (
+    <div className="bg-white/96 rounded-xl shadow-lg border-none p-3 min-w-50">
+      {data.imagePath && (
+        <div className="mb-3 rounded-lg overflow-hidden border border-gray-200">
+          <img
+            src={data.imagePath}
+            alt="Brand logo"
+            className="w-full h-24 object-contain bg-gray-50"
+          />
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-gray-900">{data.createdAt}</p>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-gray-600">로고 유사도</span>
+            <span className="text-xs font-semibold text-[#162556]">
+              {data.imageSimilarity}%
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-gray-600">상호 유사도</span>
+            <span className="text-xs font-semibold text-[#6366f1]">
+              {data.textSimilarity}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function BrandHistoryChart({ data }: BrandHistoryProps) {
   const colors = {
     primary: "#162556",
@@ -44,10 +89,13 @@ export function BrandHistoryChart({ data }: BrandHistoryProps) {
             />
 
             <XAxis
-              dataKey="createdAt"
+              dataKey="fullTimestamp"
+              tickFormatter={(value) => {
+                return value.split("T")[0].replace(/-/g, ".")
+              }}
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 12, fill: colors.text, fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: colors.text }}
               dy={10}
             />
             <YAxis
@@ -59,13 +107,7 @@ export function BrandHistoryChart({ data }: BrandHistoryProps) {
             />
 
             <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.96)",
-                border: "none",
-                borderRadius: "12px",
-                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                padding: "12px",
-              }}
+              content={<CustomTooltip />}
               cursor={{
                 stroke: colors.primary,
                 strokeWidth: 1,
@@ -87,7 +129,7 @@ export function BrandHistoryChart({ data }: BrandHistoryProps) {
 
             <Area
               name="로고 유사도"
-              type="monotone"
+              type="linear"
               dataKey="imageSimilarity"
               stroke={colors.primary}
               strokeWidth={2.5}
@@ -103,7 +145,7 @@ export function BrandHistoryChart({ data }: BrandHistoryProps) {
             />
             <Area
               name="상호 유사도"
-              type="monotone"
+              type="linear"
               dataKey="textSimilarity"
               stroke={colors.secondary}
               strokeWidth={2.5}
