@@ -10,6 +10,23 @@ import { getFcmToken } from "@/shared/auth/firebase/messaging"
 
 
 export function AppLayout() {
+  // 🔥 [추가] 앱 시작 시 Service Worker 1회 등록
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then(() => {
+          console.log("✅ firebase-messaging-sw 등록 완료")
+        })
+        .catch((err) => {
+          console.error("❌ firebase-messaging-sw 등록 실패", err)
+        })
+    }
+  }, [])
+
+
+
+     
    const {
     isLoggedIn,
     needNotificationPermission,
@@ -41,7 +58,23 @@ export function AppLayout() {
  const handleGranted = async () => {
   console.log("🔔 알림 허용 → FCM 토큰 발급 시작")
 
+  setNeedNotificationPermission(false)
+  setOpen(false)
+
   try {
+    // 🔥 1️⃣ 알림 권한 확정 보장
+    if (Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission()
+      if (permission !== "granted") {
+        console.warn("❌ 알림 권한 미허용")
+        return
+      }
+    }
+
+    // 🔥 2️⃣ 브라우저 권한 sync 대기 (중요)
+    await new Promise((r) => setTimeout(r, 300))
+
+    // 🔥 3️⃣ 이제 FCM 토큰 발급
     const fcmToken = await getFcmToken()
     console.log("📱 FCM Token:", fcmToken)
 
@@ -55,10 +88,10 @@ export function AppLayout() {
   } catch (e) {
     console.error("❌ FCM 토큰 발급 실패", e)
   } finally {
-    setNeedNotificationPermission(false)
-    setOpen(false)
+
   }
 }
+
 
 
 

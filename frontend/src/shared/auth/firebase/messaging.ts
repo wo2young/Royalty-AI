@@ -12,6 +12,16 @@ export const getFcmToken = async (): Promise<string | null> => {
   if (!supported) return null
 
   try {
+    // ✅ 핵심 추가 시작
+    if ("serviceWorker" in navigator) {
+      const registration =
+        (await navigator.serviceWorker.getRegistration()) ??
+        (await navigator.serviceWorker.register("/firebase-messaging-sw.js"))
+
+      await navigator.serviceWorker.ready
+    }
+
+    
     const messaging = getMessaging(firebaseApp)
 
     const token = await getToken(messaging, {
