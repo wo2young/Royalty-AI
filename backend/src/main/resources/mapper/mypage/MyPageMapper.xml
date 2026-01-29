@@ -112,17 +112,14 @@
 
     <select id="countBrandLogo" resultType="int">
         SELECT COUNT(*)
-        FROM brand
-        WHERE user_id = #{userId}
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
     </select>
 
     <select id="selectCurrentLogoPath" resultType="string">
-        SELECT l.image_path
-        FROM brand b
-        JOIN brand_logo l ON b.brand_id = l.brand_id
-        WHERE b.user_id = #{userId}
-        ORDER BY b.created_at DESC
-        LIMIT 1
+        SELECT image_path
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
     </select>
 
     <insert id="insertBrandHistory">
@@ -134,7 +131,8 @@
         ) VALUES (
             #{brandId}, 
             #{imagePath}, 
-            #{description},  NOW()
+            #{description}, 
+            NOW()
         )
     </insert>
 

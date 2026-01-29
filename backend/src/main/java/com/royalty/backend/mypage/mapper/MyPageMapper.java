@@ -39,17 +39,15 @@ public interface MyPageMapper {
     void deleteBrand(@Param("userId") Long userId, @Param("brandId") Long brandId);
 
     // 브랜드 로고 개수 조회 (에러 로그: countBrandLogo)
-    int countBrandLogo(Long userId);
+    int countBrandLogo(@Param("brandId") Long brandId);
 
     // 현재 로고 경로 조회 (에러 로그: selectCurrentLogoPath)
-    String selectCurrentLogoPath(Long userId);
-
+    String selectCurrentLogoPath(@Param("brandId") Long brandId);
     // 브랜드 히스토리 저장 (에러 로그: insertBrandHistory)
     // 파라미터 순서: Long, String, String
     void insertBrandHistory(@Param("brandId") Long brandId, 
                             @Param("imagePath") String imagePath, 
                             @Param("description") String description);
-
 
     // ==========================================
     // 2. 상세 화면 서브 데이터 (History & Report)
