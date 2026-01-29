@@ -91,7 +91,6 @@ public class MyPageService {
             throw new IllegalArgumentException("존재하지 않거나 권한이 없는 브랜드입니다.");
         }
         detail.setHistoryList(myPageMapper.selectBrandHistory(brandId));
-//        detail.setReportList(myPageMapper.selectBrandReports(brandId));
 
         return detail;
     }
@@ -112,7 +111,7 @@ public class MyPageService {
         myPageMapper.insertBrand(brandDTO); // 여기서 brandId가 생성됨
 
         // 2. 이미지가 "있을 때만" S3 업로드 & DB 저장
-        String imagePath = null;
+        String imagePath = "";
         
         if (logoImage != null && !logoImage.isEmpty()) {
             // (1) S3에 파일 업로드하고 URL 받아오기
@@ -145,7 +144,7 @@ public class MyPageService {
 
         // 2. 이미지 처리 (새로운 이미지가 들어왔을 때!)
         boolean isImageUpdated = false;
-        String finalImagePath = null; // 히스토리에 넣을 최종 주소
+        String finalImagePath = "";
 
         if (file != null && !file.isEmpty()) {
             // (1) S3에 업로드하고 새 주소(URL) 받기
