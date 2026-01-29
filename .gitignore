@@ -1,20 +1,142 @@
+# ==========================================
 # OS generated files
+# ==========================================
 .DS_Store
 Thumbs.db
 
-# Python
-__pycache__/
-*.py[cod]
+############################
+Python
+############################
+pycache/
+.py[cod]
 venv/
 .env
+.ipynb_checkpoints/
 
-# Node.js (Frontend)
+# AI Data & Models (용량 큰 파일들)
+ai_model/data/
+ai_model/models/
+models/
+*.npy
+*.h5
+*.pth
+*.bin
+*.pkl
+
+############################
+Node.js (Frontend)
+############################
 node_modules/
 build/
 dist/
 .npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env.*
 
-# AI Data (데이터는 깃에 올리지 마세요! 용량 터집니다)
+############################
+Java / Spring Boot
+############################
+target/
+.log
+hs_err_pid
+
+############################
+AI Data / Models (절대 업로드 금지)
+############################
 ai_model/data/
 *.npy
 *.h5
+
+#firebase key
+backend/src/main/resources/firebase/
+firebase-service-account.json
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+############################
+Eclipse / STS (🔥 핵심)
+############################
+.metadata/
+backend/.metadata/
+=========================
+IDE / Editor metadata
+=========================
+Eclipse / STS
+.metadata/
+.recommenders/
+.settings/
+.classpath
+.project
+.factorypath
+*.prefs
+*.launch
+
+############################
+IntelliJ IDEA
+############################
+.idea/
+*.iml
+
+############################
+VS Code
+############################
+.vscode/
+
+############################
+Docker (로컬 전용일 경우)
+############################
+docker-data/
+
+############################
+Secrets / Keys
+############################
+*.pem
+*.key
+*.crt
+application.properties
+application-*.properties
+application.yml
+application-*.yml
+
+VS Code
+.vscode/
+
+IntelliJ
+.idea/
+*.iml
+
+OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# ===== secrets =====
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+.env
+# --- [긴급 추가] 로컬 DB 세션 및 AI 모델 파일 무시 ---
+
+# DBeaver 등 DB 세션 파일
+*.session
+
+# SQL 덤프 파일 (로컬 테스트용이면 무시)
+final_deploy.sql
+
+# AI 모델 가중치 파일 (용량 큼)
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# AI 모델 관련 설정 파일 (프로젝트 소스코드가 아니라면 무시)
+adapter_config.json
+added_tokens.json
+chat_template.jinja
+tokenizer_config.json
+special_tokens_map.json
