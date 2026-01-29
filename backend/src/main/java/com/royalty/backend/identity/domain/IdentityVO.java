@@ -2,7 +2,6 @@ package com.royalty.backend.identity.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.Map;
 
 @Getter
@@ -32,4 +31,6 @@ public class IdentityVO {
 
     // 마지막 BI 생성에 사용된 상호명
     private String lastBrandName;
+    
+    private Map<String, Object> logoFeatures;
 }
