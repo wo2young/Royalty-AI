@@ -53,7 +53,7 @@ public class DhTradeService {
     /**
      * [기능 1] 유사 상표 검색
      */
-    public List<DhTrademarkSearchResponseDto> search(String keyword, MultipartFile logo) {
+    public List<DhTrademarkSearchResponseDto> search(String keyword, MultipartFile logo, String logoUrl) {
         String aiUrl = "http://localhost:8000/api/v1/search/hybrid";
 
         boolean hasText = keyword != null && !keyword.isBlank();

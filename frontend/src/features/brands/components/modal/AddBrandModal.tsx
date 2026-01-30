@@ -77,7 +77,7 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
     const formData = new FormData()
     formData.append("brandName", data.brandName)
     formData.append("category", data.category)
-    if (data.description) formData.append("description", data.description)
+    formData.append("description", data.description || "")
 
     if (data.logoImage) {
       formData.append("logoImage", data.logoImage)

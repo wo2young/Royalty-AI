@@ -26,12 +26,13 @@ public class IdentityServiceImpl implements IdentityService {
     @Override
     @Transactional(readOnly = true)
     public IdentityVO getCurrent(Long brandId, Long userId) {
-    	IdentityVO current = identityMapper.findByBrandId(brandId);
+
+        IdentityVO current = identityMapper.findByBrandId(brandId);
         if (current == null) {
             throw new IllegalStateException("브랜드 정보가 존재하지 않습니다.");
         }
 
-        
+        // brand.user_id 기준 권한 체크
         if (!current.getUserId().equals(userId)) {
             throw new SecurityException("접근 권한이 없습니다.");
         }
@@ -42,18 +43,18 @@ public class IdentityServiceImpl implements IdentityService {
     @Override
     public IdentityVO analyze(Long brandId, Long userId) {
 
-        // 1️ 현재 브랜드 + BI 조회
-    	IdentityVO current = identityMapper.findByBrandId(brandId);
+        // 1. 브랜드 + BI 조회
+        IdentityVO current = identityMapper.findByBrandId(brandId);
         if (current == null) {
             throw new IllegalStateException("브랜드 정보가 존재하지 않습니다.");
         }
 
-        // 🔒 소유자 검증 (가장 중요)
+        // 2. 권한 체크 (중요)
         if (!current.getUserId().equals(userId)) {
             throw new SecurityException("접근 권한이 없습니다.");
         }
 
-        // 2️ 입력 변경 여부 체크
+        // 3. 변경 여부 체크
         boolean unchanged =
                 current.getLastLogoId() != null
                 && current.getLastBrandName() != null
@@ -64,7 +65,7 @@ public class IdentityServiceImpl implements IdentityService {
             return current;
         }
 
-        // 3️ 로고 이미지 경로 조회
+        // 4. 로고 이미지 경로 조회
         String imagePath =
                 identityMapper.findLogoImagePathByLogoId(current.getLogoId());
 
@@ -72,19 +73,11 @@ public class IdentityServiceImpl implements IdentityService {
             throw new IllegalStateException("로고 이미지 경로를 찾을 수 없습니다.");
         }
 
-        // 4️ 로고 이미지 기반 특징 추출
+        // 5. 로고 특징 추출
         Map<String, Object> logoFeatures =
                 logoFeatureExtractor.extract(imagePath);
 
-        // 5️ 로고 특징 JSON 변환
-        String logoFeatureJson;
-        try {
-            logoFeatureJson = objectMapper.writeValueAsString(logoFeatures);
-        } catch (Exception e) {
-            throw new IllegalStateException("로고 특징 JSON 변환 실패", e);
-        }
-
-        // 6️ GPT 프롬프트
+        // 6. GPT 프롬프트
         String prompt = """
             너는 API 서버의 JSON 생성기다.
 
@@ -108,37 +101,35 @@ public class IdentityServiceImpl implements IdentityService {
             %s
             """.formatted(
                 current.getBrandName(),
-                logoFeatureJson
+                logoFeatures
         );
 
         String gptResponse = gptClient.call(prompt);
 
-        // 7️ GPT 응답에서 JSON만 추출 + 파싱
+        // 7. GPT 응답 JSON 파싱
         Map<String, Object> payload;
         try {
-            String pureJson = extractJsonOnly(gptResponse);
-
             payload = objectMapper.readValue(
-                    pureJson,
-                    new TypeReference<Map<String, Object>>() {}
+                    extractJsonOnly(gptResponse),
+                    new TypeReference<>() {}
             );
-
             validatePayload(payload);
-
         } catch (Exception e) {
             throw new IllegalStateException("GPT 응답 JSON 파싱 실패", e);
         }
+        
 
-        // 8️ 저장 VO 구성
+        // 8. 저장 VO 구성
         IdentityVO saveVO = new IdentityVO();
         saveVO.setBrandId(brandId);
         saveVO.setLogoId(current.getLogoId());
         saveVO.setBrandName(current.getBrandName());
+        saveVO.setLogoFeatures(logoFeatures);
         saveVO.setIdentityPayload(payload);
         saveVO.setLastLogoId(current.getLogoId());
         saveVO.setLastBrandName(current.getBrandName());
 
-        // 9️⃣ INSERT or UPDATE
+        // 9. INSERT or UPDATE
         if (current.getLastLogoId() == null && current.getLastBrandName() == null) {
             identityMapper.insert(saveVO);
         } else {
@@ -155,11 +146,9 @@ public class IdentityServiceImpl implements IdentityService {
     private String extractJsonOnly(String response) {
         int start = response.indexOf("{");
         int end = response.lastIndexOf("}");
-
         if (start == -1 || end == -1 || start >= end) {
             throw new IllegalStateException("GPT 응답에 JSON이 없습니다.");
         }
-
         return response.substring(start, end + 1);
     }
 

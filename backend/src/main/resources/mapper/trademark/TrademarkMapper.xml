@@ -13,7 +13,9 @@
             applicant          AS applicant,
             category           AS category,
             application_date   AS applicationDate,
-            registration_date    AS registrationdate
+            
+            registered_date  AS registeredDate
+            
         FROM patent
         WHERE 1=1
         <if test="category != null and category != ''">
@@ -36,43 +38,6 @@
         </if>
     </select>
 
-<!--    <select id="selectExpiringTrademarks" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
-        SELECT 
-            patent_id          AS patentId,
-            application_number AS applicationNumber,
-            trademark_name     AS trademarkName,
-            image_url          AS imageUrl,
-            applicant          AS applicant,
-            category           AS category,
-            application_date   AS applicationDate,
-            registered_date    AS registeredDate,
-            
-            (COALESCE(registered_date, application_date) + 
-                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
-            )::date AS expirationDate,
-            
-            EXTRACT(DAY FROM (
-                (COALESCE(registered_date, application_date) + 
-                    (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
-                ) - CURRENT_DATE
-            )) AS daysLeft
-            
-        FROM patent
-        WHERE COALESCE(registered_date, application_date) IS NOT NULL
-          AND (COALESCE(registered_date, application_date) + 
-                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
-            ) &gt; CURRENT_DATE  ORDER BY daysLeft ASC
-        LIMIT #{size} OFFSET #{offset}
-    </select>
-
-	<select id="countExpiringTrademarks" resultType="int">
-        SELECT count(*) FROM patent
-        WHERE COALESCE(registered_date, application_date) IS NOT NULL
-          AND (COALESCE(registered_date, application_date) + 
-                (CAST(EXTRACT(YEAR FROM AGE(CURRENT_DATE, COALESCE(registered_date, application_date))) AS int) / 10 + 1) * INTERVAL '10 years'
-            ) &gt; CURRENT_DATE 
-    </select>-->
-
     <select id="selectTrademarkById" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
         SELECT 
             patent_id          AS patentId,
@@ -82,26 +47,33 @@
             applicant          AS applicant,
             category           AS category,
             application_date   AS applicationDate,
-            registration_date    AS registrationdate
+            
+            registered_date    AS registeredDate
+            
         FROM patent
         WHERE patent_id = #{id}
     </select>
 
-	<select id="existsBookmark" resultType="int">
-	    SELECT count(*) 
-	    FROM bookmark 
-	    WHERE user_id = #{userId} AND patent_id = #{patentId}
-	</select>
-	
-	<insert id="insertBookmark">
-	    INSERT INTO bookmark (user_id, patent_id, created_at)
-	    VALUES (#{userId}, #{patentId}, NOW())
-	    ON CONFLICT (user_id, patent_id) DO NOTHING
-	</insert>
-	
-	<delete id="deleteBookmark">
-	    DELETE FROM bookmark 
-	    WHERE user_id = #{userId} AND patent_id = #{patentId}
-	</delete>
+    <select id="existsBookmark" resultType="int">
+        SELECT count(*) 
+        FROM bookmark 
+        WHERE user_id = #{userId} 
+          AND patent_id = #{patentId}
+          AND is_bookmarked = true  </select>
+    
+    <insert id="insertBookmark">
+        INSERT INTO bookmark (user_id, patent_id, created_at, is_bookmarked)
+        VALUES (#{userId}, #{patentId}, NOW(), true)
+        ON CONFLICT (user_id, patent_id) 
+        DO UPDATE SET 
+            is_bookmarked = true, 
+            created_at = NOW() -- 재등록 시간 갱신 (선택사항)
+    </insert>
+    
+    <update id="deleteBookmark">  UPDATE bookmark 
+        SET is_bookmarked = false
+        WHERE user_id = #{userId} 
+          AND patent_id = #{patentId}
+    </update>
 
 </mapper>

@@ -51,16 +51,17 @@ public class MyPageController {
         return ResponseEntity.ok(myPageService.getBrandDetail(userId, brandId));
     }
 
-    // 등록 (이미지 업로드 필수)
+   // 등록 (브랜드명 필수, 이미지는 선택)
     @PostMapping(value = "/brand", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createBrand(
             @AuthenticationPrincipal Long userId,
-            @RequestParam(value = "brandName", required = false) String brandName,
-            @RequestParam("category") String category,
-            @RequestParam("description") String description,
-            @RequestParam("logoImage") MultipartFile logoImage) {
+            @RequestParam("brandName") String brandName, // 👈 얘는 필수(NOT NULL)
+            @RequestParam(value = "category", required = false, defaultValue = "기타") String category,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            // 👇 [중요] 이미지는 이제 필수가 아님!
+            @RequestParam(value = "logoImage", required = false) MultipartFile logoImage) {
         
-        log.info("브랜드 등록 요청 (TEST): UserID={}, Name={}", userId, brandName);
+        log.info("브랜드 등록 요청: UserID={}, Name={}, HasImage={}", userId, brandName, (logoImage != null && !logoImage.isEmpty()));
         
         myPageService.createBrand(userId, brandName, category, description, logoImage);
         return ResponseEntity.ok("브랜드가 성공적으로 등록되었습니다.");
@@ -127,11 +128,8 @@ public class MyPageController {
     // ==========================================
     @GetMapping("/brand/{brandId}/report")
     public ResponseEntity<byte[]> downloadReport(
-            // @AuthenticationPrincipal Long userId, // 로그인 연동 후 주석 해제
-            @PathVariable Long brandId) {
-        
-        // [테스트용] 로그인 없이도 동작하도록 1번 유저로 고정
-        Long userId = 1L; 
+            @AuthenticationPrincipal Long userId, // 로그인 연동 후 주석 해제
+            @PathVariable Long brandId) { 
         
         log.info("리포트 다운로드 요청: BrandId={}", brandId);
 

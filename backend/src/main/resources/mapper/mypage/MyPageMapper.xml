@@ -25,6 +25,7 @@
             b.category,
             b.description,
             b.is_notification_enabled,
+            b.created_at,
             l.image_path AS currentLogoPath
         FROM brand b
         LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
@@ -99,14 +100,47 @@
 <!--        ORDER BY created_at DESC-->
 <!--    </select>-->
 
-    <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
-        SELECT 
-            b.bookmark_id, p.patent_id, p.trademark_name, p.image_url, 
-            p.application_number, p.category, p.applicant, p.status , b.created_at
-        FROM bookmark b
-        JOIN patent p ON b.patent_id = p.patent_id
-        WHERE b.user_id = #{userId}
-        ORDER BY b.created_at DESC
+	<select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
+	    SELECT 
+	        b.bookmark_id, 
+	        p.patent_id, 
+	        p.trademark_name, 
+	        p.image_url, 
+	        p.application_number, 
+	        p.category, 
+	        p.applicant, 
+	        p.status, 
+	        b.created_at
+	    FROM bookmark b
+	    JOIN patent p ON b.patent_id = p.patent_id
+	    WHERE b.user_id = #{userId}
+	      AND b.is_bookmarked = true  ORDER BY b.created_at DESC
+	</select>
+
+    <select id="countBrandLogo" resultType="int">
+        SELECT COUNT(*)
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
     </select>
+
+    <select id="selectCurrentLogoPath" resultType="string">
+        SELECT image_path
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <insert id="insertBrandHistory">
+        INSERT INTO brand_logo_history (
+            brand_id, 
+            image_path, 
+            version, 
+            created_at
+        ) VALUES (
+            #{brandId}, 
+            #{imagePath}, 
+            #{description}, 
+            NOW()
+        )
+    </insert>
 
 </mapper>

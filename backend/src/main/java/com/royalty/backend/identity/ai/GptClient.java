@@ -1,15 +1,18 @@
 package com.royalty.backend.identity.ai;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import jakarta.annotation.PostConstruct;
-
-
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor

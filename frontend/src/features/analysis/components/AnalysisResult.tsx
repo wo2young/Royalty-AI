@@ -82,26 +82,16 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
       {
         onSuccess: (data) => {
           console.log("AI 분석 서버 응답:", data)
-      const formattedReport = {
-        reportId: trademark.id,
-        title: `${trademark.trademark_name} 상세 분석`,
-        applicant: trademark.applicant,
-        // 💡 데이터 매핑 수정: 서버 응답(data)에 담긴 새 키값으로 연결
-        riskScore: data.riskScore || trademark.combinedSimilarity || 85, 
-        summary: data.summary, // data.aiAnalysisSummary (X) -> data.summary (O)
-        suggestions: data.suggestions || [], // data.aiSolution (X) -> data.suggestions (O)
-        createdAt: data.createdAt || new Date().toISOString(),
-      }
-          // const formattedReport = {
-          //   reportId: trademark.id,
-          //   title: `${trademark.trademark_name} 상세 분석`,
-          //   riskScore: data.combinedSimilarity || 85,
-          //   summary: data.aiAnalysisSummary,
-          //   suggestions: data.aiSolution || [
-          //     "유사 상표가 존재하므로 로고 디자인 수정을 권장합니다.",
-          //   ],
-          //   createdAt: new Date().toISOString(),
-          // }
+          const formattedReport = {
+            reportId: trademark.id,
+            title: `${trademark.trademark_name} 상세 분석`,
+            riskScore: data.combinedSimilarity || 85,
+            summary: data.aiAnalysisSummary,
+            suggestions: data.aiSolution || [
+              "유사 상표가 존재하므로 로고 디자인 수정을 권장합니다.",
+            ],
+            createdAt: new Date().toISOString(),
+          }
           console.log("가공된 리포트 데이터:", formattedReport)
           setReportData(formattedReport)
         },

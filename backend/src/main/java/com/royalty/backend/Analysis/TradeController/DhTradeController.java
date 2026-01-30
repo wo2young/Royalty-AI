@@ -30,35 +30,39 @@ public class DhTradeController {
     @PostMapping("/run")
     // 리턴 타입을 DTO 리스트로 변경하여 데이터 구조를 명확히 합니다.
     public List<DhTrademarkSearchResponseDto> runAnalysis(
-            @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestPart(value = "logo", required = false) MultipartFile logo) {
+            @RequestParam(value = "brandName", required = false) String brandName,
+            @RequestParam(value = "logoUrl", required = false) String logoUrl,
+            @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
         
-        System.out.println("분석 요청 수신 - 키워드: " + keyword + ", 로고 유무: " + (logo != null));
+        System.out.println("분석 요청 수신 - 키워드: " + brandName + ", 로고 유무: " + (logoFile != null));
+        System.out.println("====== 분석 요청 수신 ======");
+        System.out.println("1. 상호명(brandName): " + brandName);
+        System.out.println("2. 로고파일(logoFile) 존재 여부: " + (logoFile != null && !logoFile.isEmpty()));
+        System.out.println("3. 로고URL(logoUrl) 주소: " + logoUrl);
 
         // 서비스가 이제 DTO 리스트를 반환하므로 타입 불일치가 해결됩니다.
-        return tradeService.search(keyword, logo); 
+        return tradeService.search(brandName, logoFile, logoUrl); 
     }
  // 2. AI 상세 분석 (6개 리스트를 받아 GPT가 1개 선정 및 분석)
-    @PostMapping("/analyze")
-    public Map<String, Object> getAiDetailAnalysis( // 1. 리턴 타입을 Map<String, Object>로 변경
+@PostMapping("/analyze")
+    public Map<String, Object> getAiDetailAnalysis(
             @RequestParam("brandName") String brandName,
             @AuthenticationPrincipal Long userId,     
-            @RequestParam(value = "logoPath", required = false) String logoPath, 
-            @RequestParam(value = "brandId", required = false, defaultValue = "0") int brandId, 
+            @RequestParam("logoPath") String logoPath,
+            @RequestParam("brandId") int brandId,
             @RequestBody DhTrademarkSearchResponseDto selectedTrademark) { 
         
-        System.out.println("개별 AI 상세 분석 시작 - 상표명: " + brandName + ", 대상: " + selectedTrademark.getTrademarkName());
+        System.out.println("AI 상세 분석 시작 - 상표명: " + brandName);
         
-        // 2. 서비스가 이제 Map을 반환하므로 그대로 return 합니다.
+        // 서비스에 정의된 메서드 이름(analyzeSingleResult)과 인자 5개에 맞춤
         return tradeService.analyzeSingleResult(
-            brandName, 
-            selectedTrademark, 
-            userId, 
-            logoPath, 
-            brandId
+            brandName,          // 1. keyword (String)
+            selectedTrademark,  // 2. target (Dto)
+            userId,             // 3. userId (Long)
+            logoPath,           // 4. logoPath (String)
+            brandId             // 5. brandId (int)
         );
     }
-
     @PostMapping("/save-basic")
     public ResponseEntity<?> saveBrand(
             @RequestParam String logoPath, 
