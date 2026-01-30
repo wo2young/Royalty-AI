@@ -1,8 +1,10 @@
 package com.royalty.backend.Analysis.TradeController;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,18 +40,18 @@ public class DhTradeController {
     }
  // 2. AI 상세 분석 (6개 리스트를 받아 GPT가 1개 선정 및 분석)
     @PostMapping("/analyze")
-    public DhTrademarkSearchResponseDto getAiDetailAnalysis(
-            @RequestParam("keyword") String keyword,
-            @RequestParam("userId") Long userId,      
-            @RequestParam("logoPath") String logoPath, // 서비스에서 logoPath를 사용하므로 추가 확인
-            @RequestParam("brandId") int brandId,      // 서비스에서 brandId를 사용하므로 추가 확인
+    public Map<String, Object> getAiDetailAnalysis( // 1. 리턴 타입을 Map<String, Object>로 변경
+            @RequestParam("brandName") String brandName,
+            @AuthenticationPrincipal Long userId,     
+            @RequestParam(value = "logoPath", required = false) String logoPath, 
+            @RequestParam(value = "brandId", required = false, defaultValue = "0") int brandId, 
             @RequestBody DhTrademarkSearchResponseDto selectedTrademark) { 
         
-        System.out.println("개별 AI 상세 분석 시작 - 브랜드ID: " + brandId + ", 대상: " + selectedTrademark.getTrademarkName());
+        System.out.println("개별 AI 상세 분석 시작 - 상표명: " + brandName + ", 대상: " + selectedTrademark.getTrademarkName());
         
-        // [수정 핵심] 서비스의 파라미터 순서(keyword, target, userId, logoPath, brandId)에 맞춰서 호출
-        return tradeService.analyzeSingleResultAndSave(
-            keyword, 
+        // 2. 서비스가 이제 Map을 반환하므로 그대로 return 합니다.
+        return tradeService.analyzeSingleResult(
+            brandName, 
             selectedTrademark, 
             userId, 
             logoPath, 
@@ -74,7 +76,15 @@ public class DhTradeController {
             return ResponseEntity.status(500).body("저장 중 오류 발생: " + e.getMessage());
         }
     }
-    
+    @PostMapping("/save-analysis")
+    public ResponseEntity<String> saveAnalysis(@RequestBody DhTrademarkSearchResponseDto historyDto) {
+        boolean isSaved = tradeService.saveAiAnalysis(historyDto);
+        if (isSaved) {
+            return ResponseEntity.ok("성공적으로 저장되었습니다.");
+        } else {
+            return ResponseEntity.status(500).body("저장에 실패했습니다.");
+        }
+    }
     
     
     
