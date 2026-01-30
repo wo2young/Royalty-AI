@@ -100,7 +100,6 @@
 <!--        ORDER BY created_at DESC-->
 <!--    </select>-->
 
-<<<<<<< HEAD
     <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
         SELECT 
             b.bookmark_id        AS bookmarkId, 
@@ -118,24 +117,6 @@
         WHERE b.user_id = #{userId}
         ORDER BY b.created_at DESC
     </select>
-=======
-	<select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
-	    SELECT 
-	        b.bookmark_id, 
-	        p.patent_id, 
-	        p.trademark_name, 
-	        p.image_url, 
-	        p.application_number, 
-	        p.category, 
-	        p.applicant, 
-	        p.status, 
-	        b.created_at
-	    FROM bookmark b
-	    JOIN patent p ON b.patent_id = p.patent_id
-	    WHERE b.user_id = #{userId}
-	      AND b.is_bookmarked = true  ORDER BY b.created_at DESC
-	</select>
->>>>>>> develop
 
     <select id="countBrandLogo" resultType="int">
         SELECT COUNT(*)
