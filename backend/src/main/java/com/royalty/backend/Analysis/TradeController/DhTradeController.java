@@ -3,6 +3,7 @@ package com.royalty.backend.Analysis.TradeController;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,19 +29,24 @@ public class DhTradeController {
     @PostMapping("/run")
     // 리턴 타입을 DTO 리스트로 변경하여 데이터 구조를 명확히 합니다.
     public List<DhTrademarkSearchResponseDto> runAnalysis(
-            @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestPart(value = "logo", required = false) MultipartFile logo) {
+            @RequestParam(value = "brandName", required = false) String brandName,
+            @RequestParam(value = "logoUrl", required = false) String logoUrl,
+            @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
         
-        System.out.println("분석 요청 수신 - 키워드: " + keyword + ", 로고 유무: " + (logo != null));
+        System.out.println("분석 요청 수신 - 키워드: " + brandName + ", 로고 유무: " + (logoFile != null));
+        System.out.println("====== 분석 요청 수신 ======");
+        System.out.println("1. 상호명(brandName): " + brandName);
+        System.out.println("2. 로고파일(logoFile) 존재 여부: " + (logoFile != null && !logoFile.isEmpty()));
+        System.out.println("3. 로고URL(logoUrl) 주소: " + logoUrl);
 
         // 서비스가 이제 DTO 리스트를 반환하므로 타입 불일치가 해결됩니다.
-        return tradeService.search(keyword, logo); 
+        return tradeService.search(brandName, logoFile, logoUrl); 
     }
  // 2. AI 상세 분석 (6개 리스트를 받아 GPT가 1개 선정 및 분석)
     @PostMapping("/analyze")
     public DhTrademarkSearchResponseDto getAiDetailAnalysis(
-            @RequestParam("keyword") String keyword,
-            @RequestParam("userId") Long userId,      
+            @RequestParam("brandName") String brandName,
+            @AuthenticationPrincipal Long userId,     
             @RequestParam("logoPath") String logoPath, // 서비스에서 logoPath를 사용하므로 추가 확인
             @RequestParam("brandId") int brandId,      // 서비스에서 brandId를 사용하므로 추가 확인
             @RequestBody DhTrademarkSearchResponseDto selectedTrademark) { 
@@ -49,7 +55,7 @@ public class DhTradeController {
         
         // [수정 핵심] 서비스의 파라미터 순서(keyword, target, userId, logoPath, brandId)에 맞춰서 호출
         return tradeService.analyzeSingleResultAndSave(
-            keyword, 
+            brandName, 
             selectedTrademark, 
             userId, 
             logoPath, 
