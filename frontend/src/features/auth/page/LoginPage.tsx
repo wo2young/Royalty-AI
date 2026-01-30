@@ -1,12 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent } from "@/shared/components/ui/card"
 import { useAuth } from "@/shared/auth/AuthContext"
 import axiosInstance from "@/shared/api/axios"
 import { useNavigate } from "react-router-dom"
 import { useSearchParams } from "react-router-dom"
-import { useEffect } from "react"
-import { getFcmToken } from "@/shared/auth/firebase/messaging"
+import { AnimatePresence, motion } from "framer-motion"
 
 
 // 🔴 Mode 확장
@@ -72,7 +71,31 @@ const toggleAllTerms = (checked: boolean) => {
 const [usernameChecked, setUsernameChecked] = useState(false)
 const [usernameCheckMessage, setUsernameCheckMessage] = useState<string | null>(null)
 
+const handleCheckUsername = async () => {
+  if (signupUsername.length < 3 || signupUsername.length > 12) {
+    alert("아이디는 6자 이상 12자 이하로 입력해주세요.")
+    return
+  }
 
+  try {
+    const res = await axiosInstance.get(
+      "/api/auth/username/check",
+      {
+        params: { username: signupUsername },
+      }
+    )
+
+    if (res.data.available) {
+      alert("사용 가능한 아이디입니다.")
+      setUsernameChecked(true)
+    } else {
+      alert("이미 가입된 아이디입니다.")
+      setUsernameChecked(false)
+    }
+  } catch {
+    alert("아이디 중복 확인에 실패했습니다.")
+  }
+}
 
 
   /* =========================
@@ -93,6 +116,7 @@ const [uiMessage, setUiMessage] = useState<string | null>(null)
   const [signupPassword, setSignupPassword] = useState("")
   const [signupPasswordConfirm, setSignupPasswordConfirm] = useState("")
   
+  
 
   /* 🔴 아이디 / 비밀번호 찾기 */
   const [findEmail, setFindEmail] = useState("")
@@ -106,6 +130,19 @@ const [uiMessage, setUiMessage] = useState<string | null>(null)
    ========================= */
 const [emailAuthCode, setEmailAuthCode] = useState("")
 const [emailCodeSent, setEmailCodeSent] = useState(false)
+
+
+// ⏱ 이메일 인증 타이머 (10분)
+const [emailTimer, setEmailTimer] = useState<number | null>(null)
+const emailTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+// 인증 완료 여부
+const [emailVerified, setEmailVerified] = useState(false)
+
+// 인증 메시지
+const [emailVerifyMessage, setEmailVerifyMessage] = useState<string | null>(null)
+
+
 
   // 🔴 입력값 초기화
  // 🔴 입력값 + 인증 상태 초기화
@@ -292,6 +329,26 @@ const handleTogglePush = async () => {
   setPushAllowed(true)
 }
 
+const startEmailTimer = () => {
+  if (emailTimerRef.current) {
+    clearInterval(emailTimerRef.current)
+  }
+
+  setEmailTimer(600) // 10분
+
+
+  emailTimerRef.current = setInterval(() => {
+    setEmailTimer((prev) => {
+      if (!prev || prev <= 1) {
+        clearInterval(emailTimerRef.current!)
+        emailTimerRef.current = null
+        return null
+      }
+      return prev - 1
+    })
+  }, 1000)
+}
+
 
 
 
@@ -309,8 +366,12 @@ const handleSendEmailAuthCode = async () => {
     await axiosInstance.post("/api/auth/email/send", {
       email: signupEmail,
     })
-    setUiMessage("인증번호를 이메일로 전송했습니다.")
-    setEmailCodeSent(true)
+
+   setUiMessage("인증번호를 이메일로 전송했습니다.")
+      setEmailVerifyMessage(null)
+      setEmailCodeSent(true)
+      setEmailVerified(false)
+    startEmailTimer()
   } catch (err: any) {
     setUiMessage(
       err?.response?.data?.message || "인증번호 발송 실패"
@@ -318,6 +379,34 @@ const handleSendEmailAuthCode = async () => {
   }
 }
 
+const handleVerifyEmailAuthCode = async () => {
+  if (!emailAuthCode) {
+    setEmailVerifyMessage("인증번호를 입력하세요.")
+    return
+  }
+
+  try {
+   await axiosInstance.post("/api/auth/email/verify", {
+       email: signupEmail,
+  emailAuthCode: emailAuthCode, // ✅ 수정
+    })
+
+    setEmailVerified(true)
+    setEmailVerifyMessage(null)
+    setUiMessage(null)
+
+    // ⏱ 타이머 정지
+    if (emailTimerRef.current) {
+      clearInterval(emailTimerRef.current)
+      emailTimerRef.current = null
+    }
+    setEmailTimer(null)
+  } catch (err: any) {
+    setEmailVerifyMessage(
+      err?.response?.data?.message || "인증번호가 올바르지 않습니다."
+    )
+  }
+}
 
 
    
@@ -404,6 +493,9 @@ const handleFindPassword = async () => {
 }
 
 
+
+
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <Card className="relative w-full max-w-4xl h-[560px] overflow-hidden py-0">
@@ -483,32 +575,46 @@ const handleFindPassword = async () => {
                     </p>
                   )}
 
-                  <Button
+                <Button
+                    asChild
                     type="button"
                     size="lg"
                     className="w-full"
                     onClick={handleLogin}
                   >
-                    Royalty Login
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    >
+                      Royalty Login
+                    </motion.button>
                   </Button>
 
-                    <Button
-                    type="button"
-                    size="lg"
-                    onClick={handleKakaoLogin}
-                    className="
-                      w-full
-                      bg-[#FEE500]
-                      text-black
-                      font-medium
-                      hover:bg-[#E6D200]
-                      active:bg-[#D4C100]
-                      flex items-center justify-center gap-2
-                    "
-                  >
-                    <KakaoIcon />
-                    <span>Login with Kakao</span>
-                  </Button>
+                   <Button
+  asChild
+  type="button"
+  size="lg"
+  className="
+    w-full
+    bg-[#FEE500]
+    text-black
+    font-medium
+    hover:bg-[#E6D200]
+    active:bg-[#D4C100]
+    flex items-center justify-center gap-2
+  "
+>
+  <motion.button
+    onClick={handleKakaoLogin}
+    whileHover={{ scale: 1.03 }}
+    whileTap={{ scale: 0.95 }}
+    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+  >
+    <KakaoIcon />
+    <span>Login with Kakao</span>
+  </motion.button>
+</Button>
 
                     </div>
 
@@ -660,42 +766,138 @@ const handleFindPassword = async () => {
                 </p>
 
                 <div className="space-y-4">
-                  <input
-          className="w-full rounded-md border px-3 py-2 text-sm"
-          placeholder="아이디"
-          value={signupUsername}
-          onChange={(e) => {
-            setSignupUsername(e.target.value)
-            setUsernameChecked(false)
-            setUsernameCheckMessage(null)
-          }}
-        />
-
           <div className="flex items-center gap-2">
-            <input
-              className="flex-1 rounded-md border px-3 py-2 text-sm"
-              placeholder="이메일"
-              value={signupEmail}
-              onChange={(e) => setSignupEmail(e.target.value)}
-            />
-            <Button
-              type="button"
-              size="sm"
-              className="px-3 text-xs whitespace-nowrap"
-              onClick={handleSendEmailAuthCode}
-            >
-              인증번호 받기
-            </Button>
-          </div>
+          <input
+            className="flex-1 rounded-md border px-3 py-2 text-sm"
+            placeholder="아이디"
+            value={signupUsername}
+            onChange={(e) => {
+              setSignupUsername(e.target.value)
+              setUsernameChecked(false) // 아이디 바꾸면 다시 중복확인 필요
+            }}
+          />
 
-          {emailCodeSent && (
-            <input
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              placeholder="이메일 인증번호"
-              value={emailAuthCode}
-              onChange={(e) => setEmailAuthCode(e.target.value)}
-            />
-          )}
+  <Button
+  asChild
+  type="button"
+  size="sm"
+  onClick={handleCheckUsername}
+  className="px-3 text-xs whitespace-nowrap min-w-[96px]"
+>
+  <motion.button
+    whileTap={{ scale: 0.94 }}
+    whileHover={{ scale: 1.03 }}
+    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+  >
+    중복 확인
+  </motion.button>
+</Button>
+</div>
+                 
+
+       <div className="flex items-center gap-2">
+  <input
+    className="flex-1 rounded-md border px-3 py-2 text-sm"
+    placeholder="이메일"
+    value={signupEmail}
+    onChange={(e) => setSignupEmail(e.target.value)}
+  />
+
+ <Button
+  asChild
+  type="button"
+  size="sm"
+  onClick={handleSendEmailAuthCode}
+  disabled={emailVerified}
+  className="px-3 text-xs whitespace-nowrap min-w-[96px]"
+>
+  <motion.button
+    whileTap={{ scale: 0.94 }}
+    whileHover={{ scale: 1.03 }}
+    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+    disabled={emailVerified}
+  >
+    {emailCodeSent ? "다시 보내기" : "인증번호 받기"}
+  </motion.button>
+</Button>
+</div>
+ {emailCodeSent && (
+  <div className="flex items-center gap-2">
+    <div className="relative flex-1">
+      <input
+        className="w-full rounded-md border px-3 py-2 pr-14 text-sm"
+        placeholder="이메일 인증번호"
+        value={emailAuthCode}
+       onChange={(e) => {
+  setEmailAuthCode(e.target.value)
+  setEmailVerified(false)        // 🔥 핵심
+  //   // 메시지도 초기화
+}}
+        disabled={emailVerified}
+      />
+
+      {emailTimer !== null && (
+        <span
+          className="
+            absolute right-3 top-1/2 -translate-y-1/2
+            text-xs font-medium text-[#142a5c]
+            pointer-events-none
+          "
+        >
+          {String(Math.floor(emailTimer / 60)).padStart(2, "0")}:
+          {String(emailTimer % 60).padStart(2, "0")}
+        </span>
+      )}
+    
+
+    </div>
+
+  <Button
+  type="button"
+  size="sm"
+  onClick={emailVerified ? undefined : handleVerifyEmailAuthCode}
+  className={`
+    px-3 text-xs whitespace-nowrap min-w-[96px]
+    transition-all duration-200
+    ${
+      emailVerified
+        ? "bg-green-500 hover:bg-green-500 text-white cursor-default pointer-events-none shadow-md"
+        : ""
+    }
+  `}
+>
+  <AnimatePresence mode="wait">
+    {emailVerified ? (
+      <motion.span
+        key="checked"
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1.2, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 20,
+        }}
+        className="inline-flex items-center justify-center"
+      >
+        ✓
+      </motion.span>
+    ) : (
+      <motion.span
+        key="text"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+      >
+        인증번호 확인
+      </motion.span>
+    )}
+  </AnimatePresence>
+</Button>
+  </div>
+)}
+
 
           <input
             type="password"
@@ -715,11 +917,19 @@ const handleFindPassword = async () => {
             }
           />
 
-          {uiMessage && (
-            <p className="text-sm text-red-500 mt-1">
-              {uiMessage}
-            </p>
-          )}
+   {/* 이메일 인증 에러 (최우선) */}
+{emailVerifyMessage && !emailVerified && (
+  <p className="text-sm mt-1 text-red-500">
+    {emailVerifyMessage}
+  </p>
+)}
+
+{/* 일반 메시지 (이메일 인증 에러 없을 때만) */}
+{!emailVerifyMessage && uiMessage && (
+  <p className="text-sm mt-1 text-red-500">
+    {uiMessage}
+  </p>
+)}
 
           {/* 🔔 알림 허용 토글 (필수) */}
 <div className="flex items-center justify-between rounded-md border px-3 py-2">
@@ -745,12 +955,20 @@ const handleFindPassword = async () => {
 </div>
 
 <Button
+  asChild
   size="lg"
   className="w-full mt-3"
   disabled={!pushAllowed}
   onClick={handleSignup}
 >
-  회원가입
+  <motion.button
+    whileTap={!pushAllowed ? {} : { scale: 0.96 }}
+    whileHover={!pushAllowed ? {} : { scale: 1.02 }}
+    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+    disabled={!pushAllowed}
+  >
+    회원가입
+  </motion.button>
 </Button>
 
 
@@ -786,9 +1004,16 @@ const handleFindPassword = async () => {
       <p className="text-sm text-red-500 mb-3">{uiMessage}</p>
     )}
 
-    <Button size="lg" className="w-full" onClick={handleFindId}>
-      아이디 찾기
-    </Button>
+   <Button asChild size="lg" className="w-full">
+  <motion.button
+    onClick={handleFindId}
+    whileHover={{ scale: 1.03 }}
+    whileTap={{ scale: 0.95 }}
+    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+  >
+    아이디 찾기
+  </motion.button>
+</Button>
 
     <p className="mt-6 text-center text-sm">
       <button
@@ -824,9 +1049,16 @@ const handleFindPassword = async () => {
       <p className="text-sm text-red-500 mb-3">{uiMessage}</p>
     )}
 
-    <Button size="lg" className="w-full" onClick={handleFindPassword}>
-      비밀번호 재설정
-    </Button>
+    <Button asChild size="lg" className="w-full">
+  <motion.button
+    onClick={handleFindPassword}
+    whileHover={{ scale: 1.03 }}
+    whileTap={{ scale: 0.95 }}
+    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+  >
+    비밀번호 재설정
+  </motion.button>
+</Button>
 
     <p className="mt-6 text-center text-sm text-muted-foreground">
       <button
