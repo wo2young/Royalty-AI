@@ -50,8 +50,9 @@ export const brandApi = {
   ): Promise<{ brandId: number; notificationEnabled: boolean }> => {
     const { data } = await axiosInstance.patch(
       `/mypage/brand/${brandId}/notification`,
+      null,
       {
-        notificationEnabled: enabled,
+        params: { enabled },
       }
     )
     return data
