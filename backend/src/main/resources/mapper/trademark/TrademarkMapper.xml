@@ -57,18 +57,23 @@
     <select id="existsBookmark" resultType="int">
         SELECT count(*) 
         FROM bookmark 
-        WHERE user_id = #{userId} AND patent_id = #{patentId}
-    </select>
+        WHERE user_id = #{userId} 
+          AND patent_id = #{patentId}
+          AND is_bookmarked = true  </select>
     
     <insert id="insertBookmark">
-        INSERT INTO bookmark (user_id, patent_id, created_at)
-        VALUES (#{userId}, #{patentId}, NOW())
-        ON CONFLICT (user_id, patent_id) DO NOTHING
+        INSERT INTO bookmark (user_id, patent_id, created_at, is_bookmarked)
+        VALUES (#{userId}, #{patentId}, NOW(), true)
+        ON CONFLICT (user_id, patent_id) 
+        DO UPDATE SET 
+            is_bookmarked = true, 
+            created_at = NOW() -- 재등록 시간 갱신 (선택사항)
     </insert>
     
-    <delete id="deleteBookmark">
-        DELETE FROM bookmark 
-        WHERE user_id = #{userId} AND patent_id = #{patentId}
-    </delete>
+    <update id="deleteBookmark">  UPDATE bookmark 
+        SET is_bookmarked = false
+        WHERE user_id = #{userId} 
+          AND patent_id = #{patentId}
+    </update>
 
 </mapper>

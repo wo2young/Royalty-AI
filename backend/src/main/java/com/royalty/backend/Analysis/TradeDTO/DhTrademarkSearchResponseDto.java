@@ -16,6 +16,8 @@ public class DhTrademarkSearchResponseDto {
     private String trademarkName;
     
     private String brandName; // 내 브랜드 이름
+    
+    @JsonProperty("applicant")
     private String applicant; 
     private String category;
     private String imageUrl;  // 타 상표 이미지 URL
@@ -47,7 +49,8 @@ public class DhTrademarkSearchResponseDto {
     private String aiDetailedReport;
     
     private String analysisDetail; // DB 매핑용 (analysis_detail)
-    private String aiSolution;
+    @JsonProperty("aiSolution")
+    private Object aiSolution;
 
     // 5. 검색 필터 및 추가 파라미터
     private String keyword;
