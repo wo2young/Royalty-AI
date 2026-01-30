@@ -11,7 +11,7 @@ interface BookmarkCardProps {
 export function BookmarkCard({ brand }: BookmarkCardProps) {
   const { mutate, isPending } = useToggleBookmark()
 
-  const isBookmarked = !!brand.isBookmarked
+  const isBookmarked = !!brand.bookmarked
 
   const handleToggle = () => {
     mutate({
