@@ -1,5 +1,6 @@
 package com.royalty.backend.Analysis.TradeService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -78,6 +79,25 @@ public class DhTradeService {
 
             if (results == null) return dtoList;
 
+//            for (Map<String, Object> m : results) {
+//                String name = (String) m.get("name");
+//                if (name == null) name = (String) m.get("trademark_name");
+//                
+//                if (seenNames.contains(name)) continue;
+//                seenNames.add(name);
+//
+//                DhTrademarkSearchResponseDto dto = new DhTrademarkSearchResponseDto();
+//                dto.setTrademarkName(name);
+//                
+//                int pId = m.get("id") != null ? ((Number) m.get("id")).intValue() : 0;
+//                dto.setPatentId(pId);
+//
+//                // 2. [추가] 이 ID를 들고 직접 DB에 가서 출원인(applicant)을 가져옵니다.
+//                String realApplicant = tradeMapper.getApplicantByPatentId(pId);
+//
+//                // 3. 가져온 진짜 이름을 세팅합니다. (없으면 "출원인 정보 누락" 출력)
+//                dto.setApplicant(realApplicant != null ? realApplicant : "출원인 정보 누락");
+                
             for (Map<String, Object> m : results) {
                 String name = (String) m.get("name");
                 if (name == null) name = (String) m.get("trademark_name");
@@ -87,12 +107,22 @@ public class DhTradeService {
 
                 DhTrademarkSearchResponseDto dto = new DhTrademarkSearchResponseDto();
                 dto.setTrademarkName(name);
-                dto.setPatentId(m.get("id") != null ? ((Number) m.get("id")).intValue() : 0);
+                
+                // 1. ID 세팅
+                int pId = m.get("id") != null ? ((Number) m.get("id")).intValue() : 0;
+                dto.setPatentId(pId);
+
+                // 2. DB에서 진짜 출원인(applicant) 가져오기 (단 한 번만!)
+                String realApplicant = tradeMapper.getApplicantByPatentId(pId);
+                dto.setApplicant(realApplicant != null ? realApplicant : "출원인 정보 없음");
+
+                // 3. 나머지 정보 세팅
                 dto.setCategory(convertCategoryCodeToName((String) m.get("category")));
                 dto.setImageUrl((String) m.get("image_url"));
-                dto.setApplicant(m.get("applicant") != null ? (String) m.get("applicant") : "데이터 없음");
 
+                // 이제 중복 없이 바로 점수 계산으로 넘어갑니다.
                 double tScore = 0.0, vScore = 0.0, sScore = 0.0;
+
                 Map<String, Object> details = (Map<String, Object>) m.get("details");
                 if (details != null) {
                     if (details.get("t") != null) tScore = ((Number) details.get("t")).doubleValue() * 100.0;
@@ -150,7 +180,7 @@ public class DhTradeService {
                     gptHeaders.setBearerAuth(apiKey);
 
                     Map<String, Object> gptRequest = new HashMap<>();
-                    gptRequest.put("model", "gpt-4-turbo-preview");
+                    gptRequest.put("model", "gpt-4o");
                     gptRequest.put("messages", List.of(
                         Map.of("role", "system", "content", "너는 상표권 전문 변리사야. 한국어로 짧고 명확하게 요약해줘."),
                         Map.of("role", "user", "content", gptContext.toString())
@@ -208,7 +238,7 @@ public class DhTradeService {
      * 역할: GPT 리포트를 생성하고 '분석 전용 테이블'에 저장
      */
     @Transactional
-    public DhTrademarkSearchResponseDto analyzeSingleResultAndSave(
+    public Map<String, Object> analyzeSingleResult(
             String keyword, 
             DhTrademarkSearchResponseDto target, 
             Long userId, 
@@ -228,7 +258,7 @@ public class DhTradeService {
         	    "{\n" +
         	    "  \"aiAnalysisSummary\": \"상표 전체 분석 요약 내용\",\n" +
         	    "  \"aiDetailedReport\": \"법적 관점의 상세 분석 리포트\",\n" +
-        	    "  \"aiSolution\": \"권장 대응 방안\",\n" +
+        	    "  \"aiSolution\": [\"권장 대응 방안 1\", \"권장 대응 방안 2\", \"권장 대응 방안 3\"],\n" + // <-- 여기를 배열 형식으로 변경
         	    "  \"riskLevel\": \"높음 | 중간 | 낮음\"\n" +
         	    "}\n\n" +
 
@@ -237,15 +267,14 @@ public class DhTradeService {
         	    target.getPatentId(),
         	    target.getTrademarkName(),
         	    target.getCombinedSimilarity()
-        	);
-        
+        	);        
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
 
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "gpt-4-turbo-preview");
+            requestBody.put("model", "gpt-4o");
             requestBody.put("messages", List.of(
             	    Map.of("role", "system", "content", 
             	           "너는 상표권 전문 변리사야. 모든 분석 내용(summary, report, solution 등)은 반드시 **한국어**로 작성해야 해. 응답은 JSON 형식을 지켜줘."),
@@ -261,32 +290,34 @@ public class DhTradeService {
             String jsonContent = (String) ((Map<String, Object>) choices.get(0).get("message")).get("content");
             Map<String, Object> aiResult = objectMapper.readValue(jsonContent, Map.class);
 
-            // [수정] brand_analysis 대신 brand_logo_history용 DTO를 사용합니다.
-            DhTrademarkSearchResponseDto historyDto = new DhTrademarkSearchResponseDto();
-            historyDto.setBrandId(brandId);
-            historyDto.setLogoPath(logoPath); // 분석 당시의 로고 경로
-            historyDto.setPatentId(target.getPatentId()); // 비교 대상 ID
-            historyDto.setAiSummary((String) aiResult.get("aiAnalysisSummary")); // GPT 요약
-            historyDto.setAnalysisDetail(jsonContent); // GPT 상세 리포트
-            
-            tradeMapper.saveMyBrand(historyDto);
-            
-            target.setRiskLevel(convertRiskLevel((String) aiResult.get("riskLevel")));
-            target.setAiAnalysisSummary((String) aiResult.get("aiAnalysisSummary"));
-            target.setAiDetailedReport(
-            	    objectMapper.writeValueAsString(aiResult.get("aiDetailedReport"))
-            	);
-            target.setAiSolution(
-            	    objectMapper.writeValueAsString(aiResult.get("aiSolution"))
-            	);
-            
-            
-            return target;
+            // [핵심 수정] 프론트엔드 BrandReport 타입에 1:1로 매칭되는 Map 생성
+            Map<String, Object> finalResponse = new HashMap<>();
+
+         // 프론트엔드 BrandAIReportCard가 쓰는 이름으로 Key를 설정하세요.
+         finalResponse.put("title", target.getTrademarkName() + " 상세 분석");
+         finalResponse.put("riskScore", (int)target.getCombinedSimilarity());
+         finalResponse.put("createdAt", LocalDateTime.now().toString());
+         finalResponse.put("applicant", target.getApplicant());
+
+         // [핵심] aiAnalysisSummary 대신 'summary'라는 이름을 사용해야 함
+         finalResponse.put("summary", aiResult.get("aiAnalysisSummary")); 
+
+         // [핵심] aiSolution 대신 'suggestions'라는 이름을 사용해야 함
+         Object solution = aiResult.get("aiSolution");
+         if (solution instanceof List) {
+             finalResponse.put("suggestions", solution); // 진짜 리스트(배열)로 전달
+         } else {
+             finalResponse.put("suggestions", List.of(solution.toString()));
+         }
+
+         return finalResponse;
+
         } catch (Exception e) {
-            System.err.println("AI 분석 저장 에러: " + e.getMessage());
-            return target;
+            System.err.println("AI 분석 에러: " + e.getMessage());
+            return null;
         }
     }
+    
     /**
      * GPT 위험도(High/Medium/Low) → 한글 위험도 변환
      */
@@ -302,6 +333,25 @@ public class DhTradeService {
                 return "안전";
             default:
                 return "주의";
+        }
+    }
+    
+    @Transactional
+    public boolean saveAiAnalysis(DhTrademarkSearchResponseDto historyDto) {
+        try {
+            // 1. aiSolution 리스트가 있다면 DB 저장을 위해 String(JSON)으로 변환
+            if (historyDto.getAiSolution() != null) {
+                historyDto.setAiSolution(objectMapper.writeValueAsString(historyDto.getAiSolution()));
+            }
+            
+            // 2. 중요! 매퍼 인터페이스에 정의된 이름인 saveMyBrand를 호출해야 합니다.
+            // (saveBrandAnalysis라는 이름은 인터페이스에 없어서 에러가 난 것입니다)
+            tradeMapper.saveMyBrand(historyDto); 
+            
+            return true; 
+        } catch (Exception e) {
+            System.err.println("DB 저장 에러: " + e.getMessage());
+            return false;
         }
     }
     

@@ -54,6 +54,8 @@ public class SecurityConfig {
                             "/api/auth/kakao/**",
                             "/oauth/**",
                             "/api/auth/email/send",
+                            "/api/auth/email/verify",
+                            "/api/auth/username/check", 
                             "/api/auth/password/**",  
                             "/auth/**",
                             "/api/auth/find-username",
