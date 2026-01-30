@@ -1,13 +1,21 @@
+<<<<<<< HEAD
 
 
 import { ChevronLeft, ChevronRight } from "lucide-react"
 // 👇 [수정] 경로를 프로젝트 환경(@/shared/...)에 맞췄습니다. 빨간 줄 뜨면 본인 경로로 수정하세요!
 import { Button } from "@/shared/components/ui/button" 
+=======
+"use client"
+
+import { Button } from "@/shared/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065
 
 interface PaginationProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
+<<<<<<< HEAD
   className?: string
 }
 
@@ -99,9 +107,46 @@ export function Pagination({
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="bg-transparent h-8 w-8 p-0"
+=======
+}
+
+export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <Button
+        variant="outline"
+        size="icon"
+        className="w-8 h-8 bg-transparent"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </Button>
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        <Button
+          key={page}
+          variant={currentPage === page ? "default" : "outline"}
+          size="icon"
+          className="w-8 h-8"
+          onClick={() => onPageChange(page)}
+        >
+          {page}
+        </Button>
+      ))}
+      <Button
+        variant="outline"
+        size="icon"
+        className="w-8 h-8 bg-transparent"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065
       >
         <ChevronRight className="w-4 h-4" />
       </Button>
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065

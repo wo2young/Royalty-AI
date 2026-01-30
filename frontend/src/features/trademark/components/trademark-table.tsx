@@ -21,6 +21,10 @@ export function TrademarkTable({ trademarks, onToggleBookmark }: TrademarkTableP
             <tr className="bg-muted/50 border-b border-border">
               <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">로고</th>
               <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm">상표명 / 출원번호</th>
+<<<<<<< HEAD
+=======
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-24">상태</th>
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065
               <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-48">출원인</th>
               <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">북마크</th>
             </tr>
@@ -44,7 +48,16 @@ export function TrademarkTable({ trademarks, onToggleBookmark }: TrademarkTableP
                     </span>
                   </div>
                 </td>
+<<<<<<< HEAD
                 <td className="py-3 px-4 text-muted-foreground text-sm">{trademark.applicant}</td>
+=======
+                <td className="py-3 px-4">
+                  <Badge variant={trademark.status === "거절" ? "destructive" : "secondary"}>
+                    {trademark.status}
+                  </Badge>
+                </td>
+                <td className="py-3 px-4 text-muted-foreground text-sm">{trademark.applicantName}</td>
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065
                 <td className="py-3 px-4">
                   <button
                     type="button"
@@ -93,7 +106,14 @@ export function TrademarkTable({ trademarks, onToggleBookmark }: TrademarkTableP
             </div>
             <div className="w-full">
               <h3 className="font-semibold text-xs truncate">{trademark.trademarkName}</h3>
+<<<<<<< HEAD
               <p className="text-[10px] text-muted-foreground truncate">{trademark.applicant}</p>
+=======
+              <p className="text-[10px] text-muted-foreground truncate">{trademark.applicantName}</p>
+              <div className="mt-2">
+                <Badge className="text-[9px] px-1.5 py-0">{trademark.status}</Badge>
+              </div>
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065
             </div>
           </div>
         ))}

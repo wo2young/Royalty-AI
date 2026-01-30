@@ -15,6 +15,17 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- ==========================================
 -- 1. 사용자 (Users)
 -- ==========================================
+<<<<<<< HEAD
+CREATE TABLE users (
+    user_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    email VARCHAR(100),
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
+    provider VARCHAR(20),
+    provider_id VARCHAR(100),
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+=======
 CREATE TABLE IF NOT EXISTS users (
     user_id      BIGSERIAL PRIMARY KEY,
     username     VARCHAR(50) NOT NULL UNIQUE,
@@ -24,7 +35,11 @@ CREATE TABLE IF NOT EXISTS users (
     provider         VARCHAR(20),
     provider_id      VARCHAR(100),
     created_at   TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+<<<<<<< HEAD
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+=======
+>>>>>>> 2786e71d56077fec6d62df977e5a7eee95f5e167
+>>>>>>> d665537d5bed2ec8d133052f1d4db78a27085065
 );
 
 -- ==========================================
@@ -83,15 +98,20 @@ CREATE TABLE IF NOT EXISTS brand_analysis (
 -- ==========================================
 CREATE TABLE IF NOT EXISTS patent (
     patent_id           BIGSERIAL PRIMARY KEY,
+<<<<<<< HEAD
+    application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)
+    trademark_name      TEXT NOT NULL, -- 상표명
+    image_url           TEXT,          -- 이미지 URL 
+=======
     application_number  VARCHAR(100) NOT NULL UNIQUE, -- 출원번호 (고유키)  
     trademark_name      TEXT NOT NULL, -- 상표명
     image_url           TEXT,          -- 이미지 URL
+>>>>>>> 2786e71d56077fec6d62df977e5a7eee95f5e167
     applicant           TEXT,          -- 출원인
     application_date    VARCHAR(20),   -- 출원일
     registration_date   VARCHAR(20),   -- 등록일
     status              VARCHAR(50),   -- 법적 상태 (등록, 거절 등)
     category            TEXT,          -- 지정상품 분류
-    
     -- [AI 벡터 데이터]
     image_vector        vector(1280),  -- MobileNetV3 (1280차원)
     text_vector         vector(768),   -- SBERT (768차원)
@@ -182,6 +202,18 @@ CREATE TABLE IF NOT EXISTS report (
 );
 
 -- ==========================================
+<<<<<<< HEAD
+-- 11. 토큰 관리 (refresh_token)
+-- ==========================================
+CREATE TABLE refresh_token (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    refresh_token VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+=======
 -- 11. 토큰 관리 
 -- ==========================================
 CREATE TABLE IF NOT EXISTS trademark_expiration (
@@ -202,4 +234,5 @@ CREATE TABLE IF NOT EXISTS fcm_token (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, token)
+>>>>>>> 2786e71d56077fec6d62df977e5a7eee95f5e167
 );

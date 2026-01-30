@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    # [핵심 수정] 일반 postgres:15 대신 벡터 기능이 포함된 이미지를 사용해야 합니다!
+    image: ankane/pgvector:latest
+    container_name: royalty-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: royalty
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # [경로 수정] docker-compose.yml 파일 옆에 init_sql 폴더가 있다면 이렇게 쓰는 게 맞습니다.
+      - ./backend/init_sql:/docker-entrypoint-initdb.d
+    restart: always
+
+volumes:
+  postgres_data:
