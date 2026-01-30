@@ -16,4 +16,7 @@ public interface RefreshTokenService {
 
     /* 로그아웃 */
     void delete(String refreshToken);
+    
+    /* 🔥 유저 기준 전체 토큰 삭제 (추가) */
+    void deleteByUserId(Long userId);
 }

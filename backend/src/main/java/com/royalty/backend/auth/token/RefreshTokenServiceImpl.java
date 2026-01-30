@@ -59,4 +59,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void delete(String refreshToken) {
         refreshTokenMapper.deleteByToken(refreshToken);
     }
+    // 비밀번호 수정 토큰삭제 
+    @Override
+    public void deleteByUserId(Long userId) {
+        refreshTokenMapper.deleteByUserId(userId);
+    }
 }
