@@ -13,7 +13,7 @@ export function TrademarkTable({
   return (
     <div className="w-full">
       {/* PC 뷰 */}
-      <div className="hidden md:block border border-border rounded-lg overflow-hidden">
+      <div className="hidden md:block border border-border rounded-lg overflow-hidden bg-background">
         <table className="w-full">
           <thead>
             <tr className="bg-muted/50 border-b border-border">
@@ -38,14 +38,21 @@ export function TrademarkTable({
                 className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors"
               >
                 <td className="py-3 px-4">
-                  {/* API에 로고 이미지가 없으므로 이름의 첫 글자를 따서 보여줌 */}
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium bg-muted text-foreground border border-border">
-                    {trademark.trademarkName.charAt(0)}
-                  </div>
+                  {trademark.imageUrl ? (
+                    <img
+                      src={trademark.imageUrl}
+                      alt={trademark.trademarkName}
+                      className="w-10 h-10 rounded-lg object-cover border border-border"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium bg-muted text-foreground border border-border">
+                      {trademark.trademarkName.charAt(0)}
+                    </div>
+                  )}
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex flex-col">
-                    <span className="text-blue-600 hover:underline cursor-pointer font-medium text-sm">
+                    <span className="text-primary hover:underline cursor-pointer font-medium text-sm">
                       {trademark.trademarkName}
                     </span>
                     <span className="text-xs text-muted-foreground mt-1">
