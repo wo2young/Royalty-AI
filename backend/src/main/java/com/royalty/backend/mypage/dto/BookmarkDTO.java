@@ -16,4 +16,5 @@ public class BookmarkDTO {
     private String status;      // (추후 데이터 생기면 주석 해제)
     
     private LocalDateTime createdAt; // 북마크한 시간
+    private boolean isBookmarked;
 }

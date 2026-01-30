@@ -11,6 +11,8 @@ public class TrademarkSearchReq {
     // 페이징 (기본값 설정: 1페이지, 10개씩)
     private int page = 1;
     private int size = 10;
+
+    private Long userId;
     
     // MyBatis에서 사용할 Offset 계산 메서드
     public int getOffset() {

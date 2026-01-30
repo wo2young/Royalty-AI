@@ -6,25 +6,28 @@
 
     <select id="selectTrademarkList" resultType="com.royalty.backend.trademark.dto.TrademarkDto">
         SELECT 
-            patent_id          AS patentId,
-            application_number AS applicationNumber,
-            trademark_name     AS trademarkName,
-            image_url          AS imageUrl,
-            applicant          AS applicant,
-            category           AS category,
-            application_date   AS applicationDate,
+            p.patent_id          AS patentId,
+            p.application_number AS applicationNumber,
+            p.trademark_name     AS trademarkName,
+            p.image_url          AS imageUrl,
+            p.applicant          AS applicant,
+            p.category           AS category,
+            p.application_date   AS applicationDate,
+            p.registered_date    AS registeredDate,
             
-            registered_date  AS registeredDate
+            CASE WHEN b.user_id IS NOT NULL THEN 1 ELSE 0 END AS isBookmarked
             
-        FROM patent
-        WHERE 1=1
+        FROM patent p
+        LEFT JOIN bookmark b 
+            ON p.patent_id = b.patent_id 
+            AND b.user_id = #{userId}  WHERE 1=1
         <if test="category != null and category != ''">
-            AND category = #{category}
+            AND p.category = #{category}
         </if>
         <if test="keyword != null and keyword != ''">
-            AND trademark_name LIKE CONCAT('%', #{keyword}, '%')
+            AND p.trademark_name LIKE CONCAT('%', #{keyword}, '%')
         </if>
-        ORDER BY application_date DESC
+        ORDER BY p.application_date DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
     

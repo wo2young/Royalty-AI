@@ -9,7 +9,7 @@ public class BookmarkDto {
     // 1. Bookmark 테이블 고유 정보
     private Long bookmarkId;         // bookmark_id
     private Long userId;             // user_id
-    private String application_number;           // patent_id
+    private Long patentId;
     private LocalDateTime createdAt; // created_at
 
     // 2. Patent 테이블 정보 (화면 표시용)
