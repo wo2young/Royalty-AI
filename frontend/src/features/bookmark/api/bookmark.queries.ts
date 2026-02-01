@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { bookmarkApi } from "./bookmark.api"
 import { bookmarkKeys } from "./bookmark.keys"
+import { trademarkKeys } from "@/features/trademark/api/trademark.keys"
 
 // 북마크 목록 조회
 export const useBookmarks = () => {
@@ -29,7 +30,7 @@ export const useToggleBookmark = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bookmarkKeys.all })
       queryClient.invalidateQueries({
-        queryKey: ["trademarks"],
+        queryKey: trademarkKeys.all,
         exact: false,
       })
 

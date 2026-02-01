@@ -85,7 +85,7 @@ export function TrademarkTable({
             className="relative border border-border rounded-lg p-3 bg-card flex flex-col items-center text-center gap-2"
           >
             <BookmarkButton
-              isBookmarked={trademark.bookmarked} // ✅ DB에서 계산되어 온 값 사용
+              isBookmarked={trademark.bookmarked}
               onToggle={() =>
                 onToggleBookmark(trademark.patentId, trademark.bookmarked)
               }

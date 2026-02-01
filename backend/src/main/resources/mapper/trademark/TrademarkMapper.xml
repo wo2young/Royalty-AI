@@ -73,10 +73,10 @@
             created_at = NOW() -- 재등록 시간 갱신 (선택사항)
     </insert>
     
-    <update id="deleteBookmark">  UPDATE bookmark 
-        SET is_bookmarked = false
-        WHERE user_id = #{userId} 
-          AND patent_id = #{patentId}
-    </update>
+    <delete id="deleteBookmark">
+        DELETE FROM bookmark 
+            WHERE user_id = #{userId} 
+            AND patent_id = #{patentId}
+    </delete>
 
 </mapper>
