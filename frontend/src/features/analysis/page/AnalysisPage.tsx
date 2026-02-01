@@ -6,7 +6,7 @@ import { MyBrandSelector } from "../components/AnalysisBrandSelector"
 import { AnalysisResults } from "../components/AnalysisResult"
 import AnalysisGeneralSelector from "../components/AnalysisGeneralSelector"
 import { FormProvider, useForm } from "react-hook-form"
-import { useAnalysisQueries } from "../api/analysis.queries" // [중요] 쿼리 훅 가져오기
+import { useAnalysisQueries } from "../api/analysis.queries"
 import type { AnalysisResult } from "../types"
 import { useAuth } from "@/shared/auth/AuthContext"
 
@@ -27,16 +27,10 @@ export default function TrademarkAnalysisPage() {
   const [activeTab, setActiveTab] = useState("both")
   const [analyzed, setAnalyzed] = useState(false)
   const [results, setResults] = useState<AnalysisResult[]>([])
-  
   const { user } = useAuth()
 
-  // 1. 분석 훅
-  const { mutate: runAnalysis, isPending: analyzing } =
-    useAnalysisQueries.useRunAnalysis()
-
-  // [수정] 2. 저장 훅 교체 (useCreateBrand -> useSaveMyBrand)
-  const { mutate: saveBrand, isPending: isCreating } = 
-    useAnalysisQueries.useSaveMyBrand()
+  const { mutate: runAnalysis, isPending: analyzing } = useAnalysisQueries.useRunAnalysis()
+  const { mutate: saveBrand, isPending: isCreating } = useAnalysisQueries.useSaveMyBrand()
 
   const methods = useForm<AnalysisFormValues>({
     defaultValues: {
@@ -44,35 +38,38 @@ export default function TrademarkAnalysisPage() {
       category: "ALL",
       logoFile: null,
       brandId: null,
+      logoUrl: "",
     },
   })
 
-  // [수정] 3. 저장 핸들러 로직 변경
   const handleRegisterBrand = () => {
     if (!user) {
-        alert("로그인이 필요한 기능입니다.")
-        return
+      alert("로그인이 필요한 기능입니다.")
+      return
     }
 
     const brandName = methods.getValues("brandName")
     const category = methods.getValues("category")
     const logoFile = methods.getValues("logoFile")
+    const logoUrl = methods.getValues("logoUrl")
 
     if (!brandName) {
       alert("브랜드 이름을 입력해주세요.")
       return
     }
 
-    // useSaveMyBrand 호출 (FormData 변환은 API 함수가 알아서 함)
     saveBrand(
+      { brandName, category, logoFile, logoUrl },
       {
-        brandName,
-        category,
-        logoFile,
-      },
-      {
-        onSuccess: () => {
-          alert("내 브랜드로 등록되었습니다! 마이페이지에서 확인하세요.")
+        onSuccess: (res: any) => {
+          // 백엔드가 brandId를 반환하도록 맞춘 전제
+          const returnedBrandId = res?.brandId ?? res?.data?.brandId ?? null
+
+          if (returnedBrandId) {
+            methods.setValue("brandId", returnedBrandId)
+          }
+
+          alert("내 브랜드로 등록되었습니다! (brandId가 저장됨)")
         },
         onError: (error) => {
           console.error("브랜드 생성 실패:", error)
@@ -104,12 +101,8 @@ export default function TrademarkAnalysisPage() {
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 lg:px-6 py-8 md:py-12 max-w-5xl">
         <div className="mb-10">
-          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            상표 분석
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            유사 상표를 분석하여 등록 가능성을 확인하세요
-          </p>
+          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">상표 분석</h1>
+          <p className="text-lg text-muted-foreground">유사 상표를 분석하여 등록 가능성을 확인하세요</p>
         </div>
 
         <FormProvider {...methods}>
@@ -134,10 +127,7 @@ export default function TrademarkAnalysisPage() {
                       )}
                     >
                       {activeTab === tab.id && (
-                        <motion.div
-                          layoutId="active-pill"
-                          className="absolute inset-0 bg-primary rounded-lg shadow-sm"
-                        />
+                        <motion.div layoutId="active-pill" className="absolute inset-0 bg-primary rounded-lg shadow-sm" />
                       )}
                       <span className="relative z-20">{tab.label}</span>
                     </button>
@@ -156,7 +146,7 @@ export default function TrademarkAnalysisPage() {
                       <AnalysisGeneralSelector
                         analyzing={analyzing}
                         analyzed={analyzed}
-                        onRegister={handleRegisterBrand} // 수정된 핸들러 연결
+                        onRegister={handleRegisterBrand}
                         isCreating={isCreating}
                       />
                     ) : (
@@ -166,6 +156,7 @@ export default function TrademarkAnalysisPage() {
                 </AnimatePresence>
               </div>
             </Card>
+
             {analyzed && <AnalysisResults results={results} />}
           </form>
         </FormProvider>

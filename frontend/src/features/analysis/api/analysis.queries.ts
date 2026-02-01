@@ -13,7 +13,7 @@ export const useAnalysisQueries = {
     })
   },
 
-  // 2. AI 상세 분석
+  // 2. AI 상세 분석 (분석-only)
   useAnalyzeDetail: () => {
     return useMutation({
       mutationFn: (
@@ -26,21 +26,16 @@ export const useAnalysisQueries = {
     })
   },
 
-  // [수정] 3. 내 브랜드 저장 (useSaveBasic -> useSaveMyBrand)
+  // 3. 내 브랜드 기본 저장 (/save-basic) → brandId 반환
   useSaveMyBrand: () => {
     return useMutation({
       mutationFn: (data: {
         brandName: string
         category: string
         logoFile: File | null
-        patentId?: number
+        logoUrl?: string
+        brandId?: number
         aiSummary?: string
-        aiDetailedReport?: string
-        aiSolution?: string
-        riskLevel?: string
-        analysisDetail?: string
-        textSimilarity?: number
-        imageSimilarity?: number
       }) => analysisApi.saveMyBrand(data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: brandKeys.all })
@@ -48,11 +43,10 @@ export const useAnalysisQueries = {
     })
   },
 
-  // 4. 최종 AI 저장
+  // 4. 분석 결과 저장 (/save)
   useSaveFinal: () => {
     return useMutation({
-      mutationFn: (data: SaveAnalysisRequest) =>
-        analysisApi.saveFinalAnalysis(data),
+      mutationFn: (data: SaveAnalysisRequest) => analysisApi.saveFinalAnalysis(data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: analysisKeys.lists() })
         queryClient.invalidateQueries({ queryKey: brandKeys.all })
