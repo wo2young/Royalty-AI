@@ -6,7 +6,11 @@ import { Label } from "@/shared/components/ui/label"
 import { passwordSchema, type PasswordFormValues } from "../types"
 import { useUpdatePassword } from "../api/user.queries"
 
-export function PasswordEditForm() {
+interface PasswordEditFormProps {
+  onClose: () => void
+}
+
+export function PasswordEditForm({ onClose }: PasswordEditFormProps) {
   const { mutate: updatePassword, isPending } = useUpdatePassword()
   const {
     register,
@@ -17,7 +21,11 @@ export function PasswordEditForm() {
   })
 
   const onSubmit = async (data: PasswordFormValues) => {
-    updatePassword(data.newPassword)
+    updatePassword(data.newPassword, {
+      onSuccess: () => {
+        onClose()
+      },
+    })
   }
 
   return (
