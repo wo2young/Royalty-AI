@@ -117,10 +117,9 @@ public class MyPageController {
     
     // 목록 조회 (전체)
     @GetMapping("/bookmark")
-    public ResponseEntity<List<BookmarkDTO>> getBookmarkList(
-            @AuthenticationPrincipal Long userId
-    ) {
-        return ResponseEntity.ok(myPageService.getBookmarks(userId));
+    public ResponseEntity<List<BookmarkDTO>> getMyBookmarks(@AuthenticationPrincipal Long userId) {
+        // userId를 서비스로 전달
+        return ResponseEntity.ok(myPageService.getBookmarkList(userId));
     }
     
     // ==========================================

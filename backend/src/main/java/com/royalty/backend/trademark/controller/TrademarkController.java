@@ -1,5 +1,6 @@
 package com.royalty.backend.trademark.controller;
 
+import com.royalty.backend.auth.domain.CustomUserDetails;
 import com.royalty.backend.trademark.dto.TrademarkDto;
 import com.royalty.backend.trademark.dto.TrademarkSearchReq;
 import com.royalty.backend.trademark.service.TrademarkService;
@@ -21,12 +22,20 @@ public class TrademarkController {
     // 1. 조회 API (Read)
     // ==========================================
 
-    // 1-1. 상표 리스트 조회 (검색/필터/페이징) - 비회원도 가능하면 그대로 둠
+    // 1-1. 상표 리스트 조회 (검색/필터/페이징)
     // GET /trademark/list
     @GetMapping("/list")
-    public ResponseEntity<?> getList(@ModelAttribute TrademarkSearchReq request) {
-        Map<String, Object> result = trademarkService.getTrademarkList(request);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> getTrademarkList(
+        TrademarkSearchReq searchReq,
+        @AuthenticationPrincipal Long userId  // 이미 userId가 Long 타입인 경우
+    ) {
+        if (userId != null) {
+            // userId 자체가 숫자이므로 바로 넣어줍니다.
+            searchReq.setUserId(userId); 
+            System.out.println("로그인 유저 ID: " + userId); 
+        }
+
+        return ResponseEntity.ok(trademarkService.getTrademarkList(searchReq));
     }
 
     // 1-3. 상표 상세 조회

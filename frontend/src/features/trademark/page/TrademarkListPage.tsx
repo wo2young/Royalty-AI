@@ -1,7 +1,3 @@
-// trademark.zip/trademark/page/TrademarkListPage.tsx
-
-"use client"
-
 import { useState } from "react"
 import { Search } from "lucide-react"
 
@@ -9,16 +5,17 @@ import { TrademarkTable } from "../components/trademark-table"
 import { Pagination } from "../components/pagination"
 import { categories } from "../lib/trademark-data"
 
-import { trademarkApi } from "../api/trademark.api"
 import { useTrademarks } from "../api/trademark.queries"
+import { useToggleBookmark } from "@/features/bookmark/api/bookmark.queries"
 
 export default function TrademarkListPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("전체 카테고리")
   const [currentPage, setCurrentPage] = useState(1)
 
-  // React Query 훅 사용
-  const { data: response, isLoading, refetch } = useTrademarks({
+  const { mutate: toggleBookmark } = useToggleBookmark()
+
+  const { data: response, isLoading } = useTrademarks({
     page: currentPage,
     query: searchQuery,
     category: selectedCategory,
@@ -29,6 +26,8 @@ export default function TrademarkListPage() {
   const totalCount = response?.totalCount || 0
   const itemsPerPage = 10
   const totalPages = Math.ceil(totalCount / itemsPerPage) || 1
+
+  console.log(response)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -41,17 +40,11 @@ export default function TrademarkListPage() {
   }
 
   // 북마크 등록/해제 핸들러
-  const handleToggleBookmark = async (id: number, currentStatus: boolean) => {
-    try {
-      if (currentStatus) {
-        await trademarkApi.removeBookmark(id) // DELETE
-      } else {
-        await trademarkApi.addBookmark(id)    // POST
-      }
-      refetch() // 목록 새로고침
-    } catch (error) {
-      console.error("북마크 변경 실패", error)
-    }
+  const handleToggleBookmark = (id: number, currentStatus: boolean) => {
+    toggleBookmark({
+      id: String(id),
+      isBookmarked: currentStatus,
+    })
   }
 
   return (
@@ -81,11 +74,11 @@ export default function TrademarkListPage() {
             onChange={handleCategoryChange}
             className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none cursor-pointer appearance-none"
             style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: "right 0.5rem center",
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "1.5em 1.5em",
-                paddingRight: "2.5rem"
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: "right 0.5rem center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "1.5em 1.5em",
+              paddingRight: "2.5rem",
             }}
           >
             {categories.map((category) => (
@@ -99,12 +92,15 @@ export default function TrademarkListPage() {
 
       <div className="flex items-center justify-between gap-4 mt-8 mb-4">
         <p className="text-muted-foreground">
-          총 <span className="text-foreground font-medium">{totalCount}개</span>의 상표
+          총 <span className="text-foreground font-medium">{totalCount}개</span>
+          의 상표
         </p>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-20 text-muted-foreground">데이터를 불러오는 중...</div>
+        <div className="text-center py-20 text-muted-foreground">
+          데이터를 불러오는 중...
+        </div>
       ) : (
         <>
           <TrademarkTable
@@ -114,11 +110,11 @@ export default function TrademarkListPage() {
 
           {trademarks.length > 0 ? (
             <div className="mt-8">
-                <Pagination
+              <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
-                />
+              />
             </div>
           ) : (
             <div className="text-center py-10 text-muted-foreground">

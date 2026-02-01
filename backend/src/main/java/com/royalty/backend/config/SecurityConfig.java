@@ -54,6 +54,8 @@ public class SecurityConfig {
                             "/api/auth/kakao/**",
                             "/oauth/**",
                             "/api/auth/email/send",
+                            "/api/auth/email/verify",
+                            "/api/auth/username/check", 
                             "/api/auth/password/**",  
                             "/auth/**",
                             "/api/auth/find-username",
@@ -101,7 +103,7 @@ public class SecurityConfig {
         ));
 
         config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+                "GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS"
         ));
 
         config.setAllowedHeaders(List.of("*"));

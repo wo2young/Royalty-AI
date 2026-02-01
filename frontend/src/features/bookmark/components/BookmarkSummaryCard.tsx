@@ -9,11 +9,14 @@ import {
 } from "@/shared/components/ui/card"
 import { useBookmarks } from "../api/bookmark.queries"
 import { BookmarkSummarySkeleton } from "./skeletons/BookmarkSummarySkeleton"
+import { useMemo } from "react"
 
 export function BookmarkSummaryCard() {
   const { data: BookmarkData = [], isLoading, isError } = useBookmarks()
 
-  const summaryData = [...BookmarkData].slice(0, 6)
+  const summaryData = useMemo(() => {
+    return BookmarkData.filter((brand) => brand.bookmarked).slice(0, 6)
+  }, [BookmarkData])
 
   if (isError) return <div>데이터를 불러오지 못했습니다.</div>
 

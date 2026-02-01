@@ -14,7 +14,7 @@ export interface BookmarkedTrademark {
   category: string
   createdAt: string
   imageUrl?: string
-  isBookmarked: boolean
+  bookmarked: boolean
 }
 
 export interface BookmarkToggleRequest {
@@ -22,7 +22,7 @@ export interface BookmarkToggleRequest {
 }
 
 export interface BookmarkToggleResponse {
-  isBookmarked: boolean
+  bookmarked: boolean
   bookmark?: Bookmark
 }
 

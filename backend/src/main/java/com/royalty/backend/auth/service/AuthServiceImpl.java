@@ -70,17 +70,7 @@ public class AuthServiceImpl implements AuthService {
          throw new AuthException("이미 가입된 이메일입니다.");
      }
 
-     // 4️⃣ 이메일 인증번호 검증 (10분 유효)
-     boolean verified =
-             mailService.verifySignupAuthCode(
-                     request.getEmail(),
-                     request.getEmailAuthCode()
-             );
-
-     if (!verified) {
-         throw new AuthException("이메일 인증번호가 올바르지 않거나 만료되었습니다.");
-     }
-
+  
      // 5️⃣ 사용자 생성
      User user = User.builder()
              .username(request.getUsername())

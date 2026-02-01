@@ -194,6 +194,11 @@ public class MyPageService {
         return myPageMapper.selectBookmarks(userId);
     }
 
+    public List<BookmarkDTO> getBookmarkList(Long userId) {
+        // 매퍼에서 이미 JOIN과 AS를 통해 BookmarkDTO가 완성되어 나옵니다.
+        return myPageMapper.selectBookmarks(userId);
+    }
+
     // ==========================================
     // 4. 📄 상표 분석 리포트 PDF 생성
     // ==========================================

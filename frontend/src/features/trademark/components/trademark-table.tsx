@@ -1,42 +1,58 @@
-// trademark.zip/trademark/components/trademark-table.tsx
-
-"use client"
-
-import { Bookmark } from "lucide-react"
-import type { Trademark } from "../lib/trademark-data"
-import { Badge } from "@/shared/components/ui/badge"
+import type { Trademark } from "../types"
+import BookmarkButton from "@/features/bookmark/components/BookmarkButton"
 
 interface TrademarkTableProps {
   trademarks: Trademark[]
   onToggleBookmark: (id: number, currentStatus: boolean) => void
 }
 
-export function TrademarkTable({ trademarks, onToggleBookmark }: TrademarkTableProps) {
+export function TrademarkTable({
+  trademarks,
+  onToggleBookmark,
+}: TrademarkTableProps) {
   return (
     <div className="w-full">
       {/* PC 뷰 */}
-      <div className="hidden md:block border border-border rounded-lg overflow-hidden">
+      <div className="hidden md:block border border-border rounded-lg overflow-hidden bg-background">
         <table className="w-full">
           <thead>
             <tr className="bg-muted/50 border-b border-border">
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">로고</th>
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm">상표명 / 출원번호</th>
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-48">출원인</th>
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">북마크</th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">
+                로고
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm">
+                상표명 / 출원번호
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-48">
+                출원인
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">
+                북마크
+              </th>
             </tr>
           </thead>
           <tbody>
             {trademarks.map((trademark) => (
-              <tr key={trademark.patentId} className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors">
+              <tr
+                key={trademark.patentId}
+                className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors"
+              >
                 <td className="py-3 px-4">
-                  {/* API에 로고 이미지가 없으므로 이름의 첫 글자를 따서 보여줌 */}
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium bg-muted text-foreground border border-border">
-                    {trademark.trademarkName.charAt(0)}
-                  </div>
+                  {trademark.imageUrl ? (
+                    <img
+                      src={trademark.imageUrl}
+                      alt={trademark.trademarkName}
+                      className="w-10 h-10 rounded-lg object-cover border border-border"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium bg-muted text-foreground border border-border">
+                      {trademark.trademarkName.charAt(0)}
+                    </div>
+                  )}
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex flex-col">
-                    <span className="text-blue-600 hover:underline cursor-pointer font-medium text-sm">
+                    <span className="text-primary hover:underline cursor-pointer font-medium text-sm">
                       {trademark.trademarkName}
                     </span>
                     <span className="text-xs text-muted-foreground mt-1">
@@ -44,24 +60,16 @@ export function TrademarkTable({ trademarks, onToggleBookmark }: TrademarkTableP
                     </span>
                   </div>
                 </td>
-                <td className="py-3 px-4 text-muted-foreground text-sm">{trademark.applicant}</td>
+                <td className="py-3 px-4 text-muted-foreground text-sm">
+                  {trademark.applicant}
+                </td>
                 <td className="py-3 px-4">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onToggleBookmark(trademark.patentId, trademark.isBookmarked)
-                    }}
-                    className="p-2 hover:bg-muted rounded-full transition-colors cursor-pointer group"
-                  >
-                    <Bookmark
-                      className={`w-5 h-5 transition-colors ${
-                        trademark.isBookmarked
-                          ? "fill-foreground text-foreground"
-                          : "text-muted-foreground group-hover:text-foreground"
-                      }`}
-                    />
-                  </button>
+                  <BookmarkButton
+                    isBookmarked={trademark.bookmarked} // ✅ DB에서 계산되어 온 값 사용
+                    onToggle={() =>
+                      onToggleBookmark(trademark.patentId, trademark.bookmarked)
+                    }
+                  />
                 </td>
               </tr>
             ))}
@@ -76,24 +84,22 @@ export function TrademarkTable({ trademarks, onToggleBookmark }: TrademarkTableP
             key={trademark.patentId}
             className="relative border border-border rounded-lg p-3 bg-card flex flex-col items-center text-center gap-2"
           >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onToggleBookmark(trademark.patentId, trademark.isBookmarked)
-              }}
-              className="absolute top-2 right-2 p-2 rounded-full z-10"
-            >
-              <Bookmark
-                className={`w-4 h-4 ${trademark.isBookmarked ? "fill-foreground" : "text-muted-foreground"}`}
-              />
-            </button>
+            <BookmarkButton
+              isBookmarked={trademark.bookmarked}
+              onToggle={() =>
+                onToggleBookmark(trademark.patentId, trademark.bookmarked)
+              }
+            />
             <div className="w-10 h-10 rounded-lg flex items-center justify-center font-medium bg-muted border border-border">
               {trademark.trademarkName.charAt(0)}
             </div>
             <div className="w-full">
-              <h3 className="font-semibold text-xs truncate">{trademark.trademarkName}</h3>
-              <p className="text-[10px] text-muted-foreground truncate">{trademark.applicant}</p>
+              <h3 className="font-semibold text-xs truncate">
+                {trademark.trademarkName}
+              </h3>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {trademark.applicant}
+              </p>
             </div>
           </div>
         ))}

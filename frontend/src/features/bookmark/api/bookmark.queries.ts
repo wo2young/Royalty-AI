@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { bookmarkApi } from "./bookmark.api"
 import { bookmarkKeys } from "./bookmark.keys"
-import type { AxiosError } from "axios"
+import { trademarkKeys } from "@/features/trademark/api/trademark.keys"
 
 // 북마크 목록 조회
 export const useBookmarks = () => {
@@ -23,17 +23,22 @@ export const useToggleBookmark = () => {
       id: string
       isBookmarked: boolean
     }) => {
-      // 현재 상태가 북마크된 상태라면 제거(DELETE), 아니라면 추가(POST) 호출
       return isBookmarked
         ? bookmarkApi.removeBookmark(id)
         : bookmarkApi.addBookmark(id)
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bookmarkKeys.all })
-      console.log(`${data} 성공`)
+      queryClient.invalidateQueries({
+        queryKey: trademarkKeys.all,
+        exact: false,
+      })
+
+      console.log("DB 반영 성공 및 화면 갱신 완료")
     },
-    onError: (error: AxiosError<{ message: string }>) => {
-      console.error(`${error}가 발생했습니다`)
+    onError: (error) => {
+      console.error("북마크 처리 중 오류 발생:", error)
+      alert("북마크 처리에 실패했습니다.")
     },
   })
 }

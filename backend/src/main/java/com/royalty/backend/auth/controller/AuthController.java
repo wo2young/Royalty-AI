@@ -11,6 +11,9 @@ import com.royalty.backend.config.Aes256Util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,6 +54,18 @@ public class AuthController {
     ) {
         return ResponseEntity.ok(authService.signup(request));
     }
+    @GetMapping("/username/check")
+    public ResponseEntity<?> checkUsername(
+            @RequestParam String username
+    ) {
+        boolean exists = userMapper.existsByUsername(username) > 0;
+
+        return ResponseEntity.ok(
+                Map.of("available", !exists)
+        );
+    }
+    
+    
     
     /* =========================
     회원가입 이메일 인증번호 발송
@@ -73,7 +88,21 @@ public class AuthController {
         mailService.sendSignupAuthCode(email);
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/email/verify")
+    public ResponseEntity<Void> verifySignupAuthCode(
+            @RequestBody SignupRequestDTO request
+    ) {
+        boolean verified = mailService.verifySignupAuthCode(
+                request.getEmail(),
+                request.getEmailAuthCode()
+        );
 
+        if (!verified) {
+            throw new AuthException("인증번호가 올바르지 않거나 만료되었습니다.");
+        }
+
+        return ResponseEntity.ok().build();
+    }
 
 
     /* =========================
