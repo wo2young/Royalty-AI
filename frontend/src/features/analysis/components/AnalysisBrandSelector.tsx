@@ -18,7 +18,6 @@ export function MyBrandSelector({ analyzing }: { analyzing: boolean }) {
     setValue("brandName", brand.brandName)
     setValue("logoUrl", brand.logoPath || undefined)
     setValue("category", brand.category)
-    // 내 브랜드를 선택하면 직접 업로드한 파일은 초기화
     setValue("logoFile", null)
   }
 
