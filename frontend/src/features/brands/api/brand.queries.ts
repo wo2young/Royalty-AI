@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { brandApi } from "./brand.api"
 import { brandKeys } from "./brand.keys"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 export const useBrands = () => {
   return useQuery({
@@ -40,6 +41,10 @@ export const useCreateBrand = () => {
     mutationFn: (brandData: FormData) => brandApi.createBrand(brandData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
+      toast.success("새로운 브랜드가 등록되었습니다.")
+    },
+    onError: () => {
+      toast.error("브랜드 등록에 실패했습니다. 다시 시도해주세요.")
     },
   })
 }
@@ -59,6 +64,10 @@ export const useUpdateBrand = () => {
     onSuccess: (_, { brandId }) => {
       queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
       queryClient.invalidateQueries({ queryKey: brandKeys.detail(brandId) })
+      toast.success("브랜드 정보가 수정되었습니다.")
+    },
+    onError: () => {
+      toast.error("정보 수정 중 오류가 발생했습니다.")
     },
   })
 }
@@ -72,7 +81,11 @@ export const useDeleteBrand = () => {
     mutationFn: (brandId: number) => brandApi.deleteBrand(brandId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: brandKeys.lists() })
+      toast.success("브랜드가 삭제되었습니다.")
       navigate("/mypage/brand") // 삭제 후 목록으로 이동
+    },
+    onError: () => {
+      toast.error("브랜드 삭제에 실패했습니다.")
     },
   })
 }
