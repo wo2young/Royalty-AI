@@ -13,7 +13,7 @@ from pydantic import BaseModel
 # 만든 모듈 임포트
 from analyzer import BrandAnalyzer
 from db_search import DBSearchEngine
-from scheduler import TrademarkScheduler  
+from scheduler import TrademarkScheduler
 from dotenv import load_dotenv
 
 # .env 로드
@@ -110,7 +110,7 @@ async def insert_test_data(data: TestDataReq):
         # patent 테이블 구조에 맞춰 INSERT
         cur.execute("""
             INSERT INTO patent (application_number, trademark_name, applicant, status, text_vector, image_url)
-            VALUES (%s, %s, %s, %s, %s::vector, 'http://dummy.image/test.jpg')
+            VALUES (%s, %s, %s, %s, %s::vector, 'http://dummy.image/test.jpg')  
             RETURNING patent_id
         """, (
             data.application_number, 
