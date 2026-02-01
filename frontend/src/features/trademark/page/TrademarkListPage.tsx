@@ -1,19 +1,14 @@
 import { useState } from "react"
 import { Search } from "lucide-react"
-
 import { TrademarkTable } from "../components/trademark-table"
 import { Pagination } from "../components/pagination"
 import { categories } from "../lib/trademark-data"
-
 import { useTrademarks } from "../api/trademark.queries"
-import { useToggleBookmark } from "@/features/bookmark/api/bookmark.queries"
 
 export default function TrademarkListPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("전체 카테고리")
   const [currentPage, setCurrentPage] = useState(1)
-
-  const { mutate: toggleBookmark } = useToggleBookmark()
 
   const { data: response, isLoading } = useTrademarks({
     page: currentPage,
@@ -21,7 +16,6 @@ export default function TrademarkListPage() {
     category: selectedCategory,
   })
 
-  // API 응답 구조: { totalCount, currentPage, list }
   const trademarks = response?.list || []
   const totalCount = response?.totalCount || 0
   const itemsPerPage = 10
@@ -37,14 +31,6 @@ export default function TrademarkListPage() {
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value)
     setCurrentPage(1)
-  }
-
-  // 북마크 등록/해제 핸들러
-  const handleToggleBookmark = (id: number, currentStatus: boolean) => {
-    toggleBookmark({
-      id: String(id),
-      isBookmarked: currentStatus,
-    })
   }
 
   return (
@@ -103,10 +89,7 @@ export default function TrademarkListPage() {
         </div>
       ) : (
         <>
-          <TrademarkTable
-            trademarks={trademarks}
-            onToggleBookmark={handleToggleBookmark}
-          />
+          <TrademarkTable trademarks={trademarks} />
 
           {trademarks.length > 0 ? (
             <div className="mt-8">
