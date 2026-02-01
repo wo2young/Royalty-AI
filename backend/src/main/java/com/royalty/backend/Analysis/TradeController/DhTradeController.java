@@ -7,7 +7,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ModelAttribute; // [중요] 이거 꼭 필요함
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.royalty.backend.Analysis.TradeDTO.DhBrandSaveRequestDto; // [중요] DTO import
-import com.royalty.backend.Analysis.TradeDTO.DhTradeSearchRequestDto;
+import com.royalty.backend.Analysis.TradeDTO.DhBrandSaveRequestDto;
 import com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto;
 import com.royalty.backend.Analysis.TradeService.DhTradeService;
 
@@ -28,61 +26,94 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/analysis")
 public class DhTradeController {
-    
+
     private final DhTradeService tradeService;
-    
- // 1. 유사 상표 검색 (확실한 @RequestParam 방식으로 변경)
+
+    // 1. 유사 상표 검색
     @PostMapping("/run")
     public List<DhTrademarkSearchResponseDto> runAnalysis(
-            // required = false로 설정해 null 에러 방지 후 내부에서 체크
             @RequestParam(value = "brandName", required = false) String brandName,
             @RequestParam(value = "logoUrl", required = false) String logoUrl,
-            @RequestParam(value = "logoFile", required = false) MultipartFile logoFile 
+            @RequestParam(value = "logoFile", required = false) MultipartFile logoFile
     ) {
-        // 1. 로그 확인
         System.out.println(">>> 요청 수신됨");
         System.out.println("brandName: " + brandName);
         System.out.println("logoFile: " + (logoFile != null ? logoFile.getOriginalFilename() : "없음"));
 
-        // 2. 서비스 호출
-        return tradeService.search(brandName, logoFile); 
+        return tradeService.search(brandName, logoFile);
     }
 
-    // 2. AI 상세 분석 (기존 유지)
+    // 2. AI 상세 분석 (분석-only: DB 저장 금지)
     @PostMapping("/analyze")
     public DhTrademarkSearchResponseDto getAiDetailAnalysis(
             @RequestParam("brandName") String brandName,
-            @AuthenticationPrincipal Long userId, 
+            @AuthenticationPrincipal Long userId,
             @RequestParam("logoPath") String logoPath,
             @RequestParam("brandId") int brandId,
-            @RequestBody DhTrademarkSearchResponseDto selectedTrademark) { 
-        
+            @RequestBody DhTrademarkSearchResponseDto selectedTrademark
+    ) {
         if (userId == null) throw new RuntimeException("로그인이 필요합니다.");
+        if (selectedTrademark == null) throw new RuntimeException("분석 대상 상표 정보가 없습니다.");
 
-        return tradeService.analyzeSingleResultAndSave(
-            brandName, selectedTrademark, userId, logoPath, brandId
+        // A안: /analyze에서는 저장하지 않고 분석 결과만 반환
+        return tradeService.analyzeSingleResult(
+                brandName,
+                selectedTrademark,
+                userId,
+                logoPath,
+                brandId
         );
     }
-    
+
+    // 3. 브랜드 기본 저장 (Brand + Brand_Logo만 저장) + brandId 반환
     @PostMapping(value = "/save-basic", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> saveBrand(
             @RequestPart("requestDto") DhBrandSaveRequestDto requestDto,
             @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
             @AuthenticationPrincipal Long userId
     ) {
-        if (userId == null) return ResponseEntity.status(401).body(Map.of("status", "error", "message", "로그인 필요"));
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("status", "error", "message", "로그인 필요"));
+        }
 
         try {
-            // 파일 세팅 (이미 서비스에서 처리하고 있으나 컨트롤러 명시성 유지)
             requestDto.setLogoFile(logoFile);
-            
-            // 서비스 호출: 이제 이 안에서 Brand와 Brand_Logo 테이블만 저장됨
-            tradeService.saveMyBrandBasic(requestDto, userId);
-            
-            return ResponseEntity.ok(Map.of("status", "success", "message", "브랜드 등록 성공"));
+
+            int brandId = tradeService.saveMyBrandBasic(requestDto, userId);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "status", "success",
+                            "message", "브랜드 등록 성공",
+                            "brandId", brandId
+                    )
+            );
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("status", "error", "message", "서버 오류: " + e.getMessage()));
         }
     }
+
+    // 4. 분석 결과 저장 (저장-only: 버튼 눌렀을 때만 저장)
+    @PostMapping("/save")
+    public ResponseEntity<?> saveAnalysis(
+            @RequestBody DhTrademarkSearchResponseDto dto,
+            @AuthenticationPrincipal Long userId
+    ) {
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("status", "error", "message", "로그인 필요"));
+        }
+
+        tradeService.saveAnalysisResult(dto, userId);
+
+        return ResponseEntity.ok(Map.of("status", "success", "message", "분석 결과 저장 완료"));
+    }
 }
+
+/*
+[전체 정리]
+- /analyze: 분석-only (DB 저장 금지)
+- /save-basic: brand + brand_logo만 저장하고 brandId를 응답으로 반환
+- /save: 저장-only (brand_logo_history + brand_analysis + brand.description 업데이트)
+- 실무 중요: /analyze에서 저장이 발생하면 사용자가 저장 버튼을 누르기 전에도 기록이 쌓여 UX/데이터가 꼬인다
+*/

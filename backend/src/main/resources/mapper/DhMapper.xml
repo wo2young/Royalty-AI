@@ -3,16 +3,16 @@
 
 <mapper namespace="com.royalty.backend.Analysis.TradeMapper.DhTradeMapper">
 
-    <insert id="insertBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto" 
-        useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
+    <insert id="insertBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto"
+            useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
         INSERT INTO brand (
             user_id,
             brand_name,
             category,
             description
         ) VALUES (
-            #{userId}, 
-            #{trademarkName}, 
+            #{userId},
+            #{trademarkName},
             #{category},
             #{aiSummary}
         )
@@ -20,13 +20,13 @@
 
     <update id="updateBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         UPDATE brand
-        SET 
+        SET
             brand_name = #{trademarkName},
             category = #{category},
             description = #{aiSummary}
         WHERE brand_id = #{brandId}
     </update>
-    
+
     <insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         INSERT INTO brand_logo (
             brand_id,
@@ -41,7 +41,7 @@
 
     <update id="updateBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         UPDATE brand_logo
-        SET 
+        SET
             image_path = #{logoPath},
             created_at = CURRENT_TIMESTAMP
         WHERE brand_id = #{brandId}
@@ -50,7 +50,6 @@
     <insert id="saveMyBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         INSERT INTO brand_logo_history (
             brand_id,
-            version,
             image_path,
             patent_id,
             ai_summary,
@@ -59,16 +58,38 @@
             image_similarity
         ) VALUES (
             #{brandId},
-            'v1.0',
-            #{logoPath, jdbcType=VARCHAR},
+            #{logoPath},
             <choose>
                 <when test="patentId == 0">NULL</when>
                 <otherwise>#{patentId}</otherwise>
             </choose>,
-            #{aiSummary, jdbcType=VARCHAR},
-            #{analysisDetail, jdbcType=VARCHAR},
+            #{aiSummary},
+            #{analysisDetail},
             #{textSimilarity},
             #{imageSimilarity}
+        )
+    </insert>
+
+    <update id="updateBrandDescription">
+        UPDATE brand
+        SET description = #{aiSummary}
+        WHERE brand_id = #{brandId}
+    </update>
+
+    <!-- 신규: brand_analysis insert -->
+    <insert id="insertBrandAnalysis" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        INSERT INTO brand_analysis (
+            brand_id,
+            image_score,
+            text_score,
+            risk_level,
+            created_at
+        ) VALUES (
+            #{brandId},
+            #{imageSimilarity},
+            #{textSimilarity},
+            #{riskLevel},
+            CURRENT_TIMESTAMP
         )
     </insert>
 
@@ -84,9 +105,15 @@
             category,
             registered_date AS registeredDate,
             (1 - (text_vector <![CDATA[ <=> ]]> #{inputVector}::vector)) * 100 AS textSimilarity
-        FROM patent 
+        FROM patent
         ORDER BY text_vector <![CDATA[ <=> ]]> #{inputVector}::vector ASC
         LIMIT 10
     </select>
 
 </mapper>
+
+<!--
+[전체 정리]
+- insertBrandAnalysis 추가: /save에서 brand_analysis 테이블에 점수와 risk_level 저장
+- /analyze에서 저장하지 않으므로, brand_logo_history/brand_analysis는 /save에서만 생성됨
+-->
