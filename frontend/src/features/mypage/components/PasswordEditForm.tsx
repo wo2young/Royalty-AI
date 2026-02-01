@@ -57,7 +57,7 @@ export function PasswordEditForm() {
         className="w-full h-12 mt-auto"
         disabled={isPending} // 로딩 중 버튼 비활성화
       >
-        {isPending ? "변경 중..." : "비밀번호 변경 저장"}
+        {isPending ? "변경 중..." : "비밀번호 변경하기"}
       </Button>
     </form>
   )
