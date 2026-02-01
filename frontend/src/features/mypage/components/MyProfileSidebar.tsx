@@ -30,7 +30,6 @@ export default function MyProfileSidebar() {
       <ProfileEditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        currentEmail="hong@example.com"
       />
     </aside>
   )
