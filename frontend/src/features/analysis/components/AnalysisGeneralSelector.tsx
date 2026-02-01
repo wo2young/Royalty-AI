@@ -2,7 +2,7 @@ import { CategoryFilter } from "@/shared/components/search-bar/CategoryFilter"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import { PlusCircle, Sparkles, Upload, X } from "lucide-react"
+import { Loader2, PlusCircle, Sparkles, Upload, X } from "lucide-react"
 import { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import type { AnalysisFormValues } from "../page/AnalysisPage"
@@ -12,16 +12,21 @@ import { motion } from "framer-motion"
 interface GeneralSelectorProps {
   analyzing: boolean
   analyzed: boolean
+  onRegister: () => void
+  isCreating: boolean
 }
 
 export default function AnalysisGeneralSelector({
   analyzing,
   analyzed,
+  onRegister,
+  isCreating,
 }: GeneralSelectorProps) {
   const { register, control, watch, setValue } =
     useFormContext<AnalysisFormValues>()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const brandId = watch("brandId")
   const logoFile = watch("logoFile")
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,11 +135,15 @@ export default function AnalysisGeneralSelector({
               type="button"
               variant="outline"
               className="w-full border-primary text-primary hover:bg-primary/5 shadow-sm"
-              onClick={() => {
-                console.log("브랜드 등록 페이지로 이동")
-              }}
+              onClick={onRegister}
+              disabled={isCreating || !!brandId}
             >
-              <PlusCircle className="mr-2 h-4 w-4" />내 브랜드 등록하기
+              {isCreating ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <PlusCircle className="mr-2 h-4 w-4" />
+              )}
+              {brandId ? "내 브랜드 등록 완료" : "내 브랜드 등록하기"}
             </Button>
           </motion.div>
         )}

@@ -6,8 +6,9 @@ import { MyBrandSelector } from "../components/AnalysisBrandSelector"
 import { AnalysisResults } from "../components/AnalysisResult"
 import AnalysisGeneralSelector from "../components/AnalysisGeneralSelector"
 import { FormProvider, useForm } from "react-hook-form"
-import { useAnalysisQueries } from "../api/analysis.queries"
+import { useAnalysisQueries } from "../api/analysis.queries" // [중요] 쿼리 훅 가져오기
 import type { AnalysisResult } from "../types"
+import { useAuth } from "@/shared/auth/AuthContext"
 
 export interface AnalysisFormValues {
   brandName: string
@@ -26,9 +27,16 @@ export default function TrademarkAnalysisPage() {
   const [activeTab, setActiveTab] = useState("both")
   const [analyzed, setAnalyzed] = useState(false)
   const [results, setResults] = useState<AnalysisResult[]>([])
+  
+  const { user } = useAuth()
 
+  // 1. 분석 훅
   const { mutate: runAnalysis, isPending: analyzing } =
     useAnalysisQueries.useRunAnalysis()
+
+  // [수정] 2. 저장 훅 교체 (useCreateBrand -> useSaveMyBrand)
+  const { mutate: saveBrand, isPending: isCreating } = 
+    useAnalysisQueries.useSaveMyBrand()
 
   const methods = useForm<AnalysisFormValues>({
     defaultValues: {
@@ -39,19 +47,51 @@ export default function TrademarkAnalysisPage() {
     },
   })
 
+  // [수정] 3. 저장 핸들러 로직 변경
+  const handleRegisterBrand = () => {
+    if (!user) {
+        alert("로그인이 필요한 기능입니다.")
+        return
+    }
+
+    const brandName = methods.getValues("brandName")
+    const category = methods.getValues("category")
+    const logoFile = methods.getValues("logoFile")
+
+    if (!brandName) {
+      alert("브랜드 이름을 입력해주세요.")
+      return
+    }
+
+    // useSaveMyBrand 호출 (FormData 변환은 API 함수가 알아서 함)
+    saveBrand(
+      {
+        brandName,
+        category,
+        logoFile,
+      },
+      {
+        onSuccess: () => {
+          alert("내 브랜드로 등록되었습니다! 마이페이지에서 확인하세요.")
+        },
+        onError: (error) => {
+          console.error("브랜드 생성 실패:", error)
+          alert("브랜드 등록 중 오류가 발생했습니다.")
+        },
+      }
+    )
+  }
+
   const onSubmit = (data: AnalysisFormValues) => {
-    // 유효성 검사: 상호명이나 로고 파일 중 하나는 반드시 있어야 함
     if (!data.brandName.trim() && !data.logoFile && !data.brandId) {
       alert("상호명을 입력하거나 분석할 브랜드를 선택해주세요.")
       return
     }
 
-    // API 호출 (내부적으로 FormData로 변환되어 전송됨)
     runAnalysis(data, {
       onSuccess: (response) => {
-        setResults(response) // 결과 저장
-        setAnalyzed(true) // 결과 화면 활성화
-        console.log(data)
+        setResults(response)
+        setAnalyzed(true)
       },
       onError: (error) => {
         console.error("분석 실패:", error)
@@ -76,16 +116,15 @@ export default function TrademarkAnalysisPage() {
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <Card className="mb-10 shadow-sm overflow-hidden">
               <div className="p-4 md:px-8">
-                {/* 탭 영역 */}
                 <div className="relative flex w-full p-1 bg-secondary/60 rounded-xl mb-8">
                   {TABS.map((tab) => (
                     <button
                       key={tab.id}
-                      type="button" // submit 방지
+                      type="button"
                       onClick={() => {
                         setActiveTab(tab.id)
                         setAnalyzed(false)
-                        methods.reset() // 탭 전환 시 초기화
+                        methods.reset()
                       }}
                       className={cn(
                         "relative z-10 flex-1 py-2.5 text-sm font-medium transition-colors duration-200",
@@ -117,6 +156,8 @@ export default function TrademarkAnalysisPage() {
                       <AnalysisGeneralSelector
                         analyzing={analyzing}
                         analyzed={analyzed}
+                        onRegister={handleRegisterBrand} // 수정된 핸들러 연결
+                        isCreating={isCreating}
                       />
                     ) : (
                       <MyBrandSelector analyzing={analyzing} />
@@ -125,10 +166,9 @@ export default function TrademarkAnalysisPage() {
                 </AnimatePresence>
               </div>
             </Card>
+            {analyzed && <AnalysisResults results={results} />}
           </form>
         </FormProvider>
-
-        {analyzed && <AnalysisResults results={results} />}
       </main>
     </div>
   )

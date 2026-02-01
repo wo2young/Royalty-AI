@@ -4,7 +4,7 @@
 <mapper namespace="com.royalty.backend.Analysis.TradeMapper.DhTradeMapper">
 
     <insert id="insertBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto" 
-            useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
+        useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
         INSERT INTO brand (
             user_id,
             brand_name,
@@ -14,8 +14,38 @@
             #{userId}, 
             #{trademarkName}, 
             #{category},
-            #{aiSummary}  )
+            #{aiSummary}
+        )
     </insert>
+
+    <update id="updateBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        UPDATE brand
+        SET 
+            brand_name = #{trademarkName},
+            category = #{category},
+            description = #{aiSummary}
+        WHERE brand_id = #{brandId}
+    </update>
+    
+    <insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        INSERT INTO brand_logo (
+            brand_id,
+            image_path,
+            created_at
+        ) VALUES (
+            #{brandId},
+            #{logoPath},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        UPDATE brand_logo
+        SET 
+            image_path = #{logoPath},
+            created_at = CURRENT_TIMESTAMP
+        WHERE brand_id = #{brandId}
+    </update>
 
     <insert id="saveMyBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         INSERT INTO brand_logo_history (
@@ -24,45 +54,39 @@
             image_path,
             patent_id,
             ai_summary,
-            analysis_detail
+            analysis_detail,
+            text_similarity,
+            image_similarity
         ) VALUES (
             #{brandId},
             'v1.0',
-            #{logoPath},
-            #{patentId},
-            #{aiSummary},
-            #{analysisDetail}
+            #{logoPath, jdbcType=VARCHAR},
+            <choose>
+                <when test="patentId == 0">NULL</when>
+                <otherwise>#{patentId}</otherwise>
+            </choose>,
+            #{aiSummary, jdbcType=VARCHAR},
+            #{analysisDetail, jdbcType=VARCHAR},
+            #{textSimilarity},
+            #{imageSimilarity}
         )
     </insert>
-    
-<insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
-    INSERT INTO brand_logo (
-        brand_id,
-        image_path,  created_at
-    ) VALUES (
-        #{brandId},
-        #{logoPath},   CURRENT_TIMESTAMP
-    )
-</insert>
-	
-<select id="getApplicantByPatentId" resultType="string">
-    SELECT applicant 
-    FROM patent 
-    WHERE patent_id = #{patentId}
-</select>
 
+    <select id="getApplicantByPatentId" resultType="string">
+        SELECT applicant FROM patent WHERE patent_id = #{patentId}
+    </select>
 
-	<select id="searchSimilarTextTrademarks" resultType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
-    SELECT
-        patent_id AS patentId,
-        trademark_name AS trademarkName,
-        applicant AS applicant,  category,
-        registered_date AS registeredDate,
-        (1 - (text_vector <![CDATA[ <=> ]]> #{textVector}::vector)) * 100 AS textSimilarity
-    FROM patent 
-    ORDER BY text_vector <![CDATA[ <=> ]]> #{textVector}::vector ASC
-    LIMIT 10
-</select>
-
+    <select id="searchSimilarTrademarks" resultType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        SELECT
+            patent_id AS patentId,
+            trademark_name AS trademarkName,
+            applicant AS applicant,
+            category,
+            registered_date AS registeredDate,
+            (1 - (text_vector <![CDATA[ <=> ]]> #{inputVector}::vector)) * 100 AS textSimilarity
+        FROM patent 
+        ORDER BY text_vector <![CDATA[ <=> ]]> #{inputVector}::vector ASC
+        LIMIT 10
+    </select>
 
 </mapper>
