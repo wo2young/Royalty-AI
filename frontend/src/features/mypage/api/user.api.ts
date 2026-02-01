@@ -1,14 +1,10 @@
 import axiosInstance from "@/shared/api/axios"
-import type { PasswordFormValues } from "../types"
 
 export const userApi = {
   // PUT /api/userh/password (비밀번호 변경)
-  updatePassword: async (
-    data: Omit<PasswordFormValues, "confirmPassword">
-  ): Promise<void> => {
+  updatePassword: async (newPassword: string): Promise<void> => {
     await axiosInstance.put("/api/userh/password", {
-      oldPassword: data.oldPassword,
-      newPassword: data.newPassword,
+      newPassword: newPassword, // 이제 newPassword만 필드로 보냅니다.
     })
   },
 
