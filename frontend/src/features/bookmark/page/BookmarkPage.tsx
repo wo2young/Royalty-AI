@@ -15,10 +15,14 @@ export function BookmarksPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const ITEMS_PER_PAGE = 12 // 한 페이지에 표시할 카드 개수
 
+  console.log(BookmarkData)
+
   const filteredBrands = useMemo(() => {
     if (!BookmarkData) return []
 
     return BookmarkData.filter((brand) => {
+      if (!brand.bookmarked) return false
+
       const matchesSearch =
         brand.trademarkName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         brand.category.toLowerCase().includes(searchQuery.toLowerCase())

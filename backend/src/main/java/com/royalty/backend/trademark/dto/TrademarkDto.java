@@ -12,11 +12,11 @@ public class TrademarkDto {
     private String imageUrl;          // image_url
     private String applicant;         // applicant
     private String category;          // category
-    private String applicationDate;// application_date
+    private LocalDate applicationDate;// application_date
     private LocalDate registeredDate; // registered_date
 
-    // 2. 프론트엔드 표기용 추가 필드 (DB엔 없음)
-    private boolean isBookmarked;     // 북마크 여부 (true/false)
+    // 2. 프론트엔드 표기용 추가 필드
+    private boolean isBookmarked;     // boolean 필드는 Jackson 변환 시 주의
     
 //    private LocalDate expirationDate; // 만료 예정일 (등록일 + 10년)
 //    private long daysLeft;            // 소멸까지 남은 일수 (D-Day)

@@ -6,12 +6,12 @@
 
     <select id="selectMyBrands" resultType="com.royalty.backend.mypage.dto.BrandDTO">
         SELECT 
-            b.brand_id, 
-            b.brand_name, 
+            b.brand_id                AS brandId, 
+            b.brand_name              AS brandName, 
             b.category,
-            b.is_notification_enabled,
-            b.created_at,
-            l.image_path AS logoPath
+            b.is_notification_enabled AS isNotificationEnabled,
+            b.created_at              AS createdAt,
+            l.image_path              AS logoPath
         FROM brand b
         LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
         WHERE b.user_id = #{userId}
@@ -100,22 +100,23 @@
 <!--        ORDER BY created_at DESC-->
 <!--    </select>-->
 
-	<select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
-	    SELECT 
-	        b.bookmark_id, 
-	        p.patent_id, 
-	        p.trademark_name, 
-	        p.image_url, 
-	        p.application_number, 
-	        p.category, 
-	        p.applicant, 
-	        p.status, 
-	        b.created_at
-	    FROM bookmark b
-	    JOIN patent p ON b.patent_id = p.patent_id
-	    WHERE b.user_id = #{userId}
-	      AND b.is_bookmarked = true  ORDER BY b.created_at DESC
-	</select>
+    <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
+        SELECT 
+            b.bookmark_id        AS bookmarkId, 
+            p.patent_id          AS patentId, 
+            p.trademark_name     AS trademarkName, 
+            p.image_url          AS imageUrl, 
+            p.application_number AS applicationNumber, 
+            p.category, 
+            p.applicant, 
+            p.status, 
+            b.created_at         AS createdAt,
+            b.is_bookmarked         AS isBookmarked
+        FROM bookmark b
+        JOIN patent p ON b.patent_id = p.patent_id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+    </select>
 
     <select id="countBrandLogo" resultType="int">
         SELECT COUNT(*)

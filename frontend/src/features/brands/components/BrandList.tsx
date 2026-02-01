@@ -6,9 +6,15 @@ interface BrandListProps {
   brands: Brand[]
   onDelete: (id: number, name: string) => void
   onEdit: (id: number) => void
+  onToggleNotify: (id: number, enabled: boolean) => void
 }
 
-export function BrandList({ brands, onDelete, onEdit }: BrandListProps) {
+export function BrandList({
+  brands,
+  onDelete,
+  onEdit,
+  onToggleNotify,
+}: BrandListProps) {
   const navigate = useNavigate()
 
   const handleView = (id: number) => {
@@ -32,6 +38,7 @@ export function BrandList({ brands, onDelete, onEdit }: BrandListProps) {
           onView={handleView}
           onDelete={() => onDelete(brand.brandId, brand.brandName)}
           onEdit={onEdit}
+          onToggleNotify={onToggleNotify}
         />
       ))}
     </div>

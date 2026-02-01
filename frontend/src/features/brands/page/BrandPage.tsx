@@ -4,7 +4,11 @@ import { useState } from "react"
 import { Pagination } from "@/shared/components/pagination/Pagination"
 import { SearchBar } from "@/shared/components/search-bar/SearchBar"
 import { BrandList } from "../components/BrandList"
-import { useBrands, useUpdateBrand } from "../api/brand.queries"
+import {
+  useBrands,
+  useToggleNotification,
+  useUpdateBrand,
+} from "../api/brand.queries"
 import { Button } from "@/shared/components/ui/button"
 import { AddBrandModal } from "../components/modal/AddBrandModal"
 import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
@@ -27,6 +31,7 @@ export default function BrandsPage() {
 
   const { data: brands = [], isLoading, isError } = useBrands()
   const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
+  const { mutate: toggleNotify } = useToggleNotification()
 
   const filteredBrands = brands.filter((brand) => {
     const matchesSearch =
@@ -74,6 +79,10 @@ export default function BrandsPage() {
   const handleCategoryChange = (cat: string) => {
     setSelectedCategory(cat)
     setCurrentPage(1) // 카테고리 변경 시 페이지 리셋
+  }
+
+  const handleToggleNotify = (brandId: number, enabled: boolean) => {
+    toggleNotify({ brandId, enabled })
   }
 
   if (isError) return <div>데이터를 불러오지 못했습니다.</div>
@@ -134,6 +143,7 @@ export default function BrandsPage() {
             brands={paginatedBrands}
             onDelete={(id, name) => setDeleteTarget({ id, name })}
             onEdit={handleEditClick}
+            onToggleNotify={handleToggleNotify}
           />
         )}
 

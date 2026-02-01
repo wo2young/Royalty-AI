@@ -24,11 +24,10 @@ public class TrademarkService {
 
     // 1-1. 기본 상표 리스트 조회 (검색 + 페이징)
     public Map<String, Object> getTrademarkList(TrademarkSearchReq request) {
-        return getPagedResult(
-            trademarkMapper.selectTrademarkList(request),
-            trademarkMapper.countTrademarkList(request),
-            request
-        );
+        List<TrademarkDto> list = trademarkMapper.selectTrademarkList(request);
+        int totalCount = trademarkMapper.countTrademarkList(request);
+        
+        return getPagedResult(list, totalCount, request);
     }
 
     // 1-2. 소멸 예정 상표 리스트 조회 (선점 기회 + 페이징)
