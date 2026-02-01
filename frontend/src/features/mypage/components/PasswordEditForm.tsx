@@ -7,46 +7,27 @@ import { passwordSchema, type PasswordFormValues } from "../types"
 import { useUpdatePassword } from "../api/user.queries"
 
 export function PasswordEditForm() {
-  const { mutate: updatePassword } = useUpdatePassword()
+  const { mutate: updatePassword, isPending } = useUpdatePassword()
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
   })
 
   const onSubmit = async (data: PasswordFormValues) => {
-    updatePassword({
-      oldPassword: data.oldPassword,
-      newPassword: data.newPassword,
-    })
+    updatePassword(data.newPassword)
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
       <div className="space-y-4 flex-1 overflow-y-auto pr-1 pb-2">
         <div className="space-y-1">
-          <Label className="text-xs ml-1">현재 비밀번호</Label>
-          <Input
-            {...register("oldPassword")}
-            type="password"
-            underline-none
-            className="h-11 bg-secondary/20"
-          />
-          {errors.oldPassword && (
-            <p className="text-[10px] text-destructive ml-1">
-              {errors.oldPassword.message}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1">
           <Label className="text-xs ml-1">새 비밀번호</Label>
           <Input
             {...register("newPassword")}
             type="password"
-            underline-none
             className="h-11 bg-secondary/20"
           />
           {errors.newPassword && (
@@ -61,7 +42,6 @@ export function PasswordEditForm() {
           <Input
             {...register("confirmPassword")}
             type="password"
-            underline-none
             className="h-11 bg-secondary/20"
           />
           {errors.confirmPassword && (
@@ -74,10 +54,10 @@ export function PasswordEditForm() {
 
       <Button
         type="submit"
-        className="w-full h-12 font-bold mt-auto"
-        disabled={isSubmitting}
+        className="w-full h-12 mt-auto"
+        disabled={isPending} // 로딩 중 버튼 비활성화
       >
-        비밀번호 변경 저장
+        {isPending ? "변경 중..." : "비밀번호 변경 저장"}
       </Button>
     </form>
   )

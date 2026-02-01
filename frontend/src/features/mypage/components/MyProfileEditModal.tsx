@@ -2,7 +2,12 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { KeyRound, UserMinus } from "lucide-react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
-import { Dialog, DialogContent } from "@/shared/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { VerifyPasswordStep } from "./VerifyPasswordStep"
 import { PasswordEditForm } from "./PasswordEditForm"
@@ -31,6 +36,9 @@ export function ProfileEditModal({
       }}
     >
       <DialogContent className="sm:max-w-md p-0 border-none bg-card shadow-2xl">
+        <DialogHeader className="sr-only">
+          <DialogTitle>프로필 수정</DialogTitle>
+        </DialogHeader>
         <div className="p-8 h-135 flex flex-col">
           <AnimatePresence mode="wait" initial={false}>
             {step === "VERIFY" ? (
