@@ -127,25 +127,20 @@ public class MyPageController {
     // ==========================================
     @GetMapping("/brand/{brandId}/report")
     public ResponseEntity<byte[]> downloadReport(
-            @AuthenticationPrincipal Long userId, // 로그인 연동 후 주석 해제
-            @PathVariable Long brandId) { 
-        
-        log.info("리포트 다운로드 요청: BrandId={}", brandId);
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long brandId) {
 
-        // 1. Service 호출 -> PDF 생성 (byte 배열)
         byte[] pdfFile = myPageService.generateBrandReport(userId, brandId);
 
-        // 2. 파일명 설정 (예: Report_100_20260122.pdf)
-        String fileName = String.format("Report_%d_%s.pdf", 
-                brandId, java.time.LocalDate.now().toString().replace("-", ""));
+        String fileName = String.format("Report_%d_%s.pdf",
+                brandId,
+                java.time.LocalDate.now().toString().replace("-", "")
+        );
 
-        // 3. 응답 헤더 설정 (브라우저가 파일로 인식하게 함)
         return ResponseEntity.ok()
-                // 중요: 다운로드 창이 뜨게 하는 헤더
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                // 콘텐츠 타입: PDF
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + fileName)
                 .contentType(MediaType.APPLICATION_PDF)
-                // 내용물 (byte[])
                 .body(pdfFile);
     }
 }
