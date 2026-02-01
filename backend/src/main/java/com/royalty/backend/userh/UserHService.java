@@ -4,7 +4,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.royalty.backend.auth.exception.AuthException;
 import com.royalty.backend.auth.token.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,35 +19,28 @@ public class UserHService {
 
     /**
      * 🔐 비밀번호 변경
-     * - 기존 비밀번호 검증
-     * - 새 비밀번호로 교체
-     * - 모든 세션 로그아웃 처리
+     * - 새 비밀번호로 즉시 교체
+     * - 로그아웃 ❌ (세션 유지)
      */
     public void changePassword(Long userId, ChangePasswordRequestDTO dto) {
 
-        String currentPassword =
-                userHCommandMapper.findPasswordByUserId(userId);
+        String encodedNewPassword =
+                passwordEncoder.encode(dto.getNewPassword());
 
-        if (!passwordEncoder.matches(dto.getOldPassword(), currentPassword)) {
-            throw new AuthException("INVALID_PASSWORD");
-        }
-
-        userHCommandMapper.updatePassword(
-                userId,
-                passwordEncoder.encode(dto.getNewPassword())
-        );
-
-        // 🔥 비밀번호 변경 시 전체 세션 로그아웃
-        refreshTokenService.deleteByUserId(userId);
+        userHCommandMapper.updatePassword(userId, encodedNewPassword);
     }
 
     /**
      * 🗑 회원 탈퇴 (Hard Delete)
-     * - 사용자 데이터 즉시 삭제
-     * - 토큰 먼저 정리
+     * - 토큰 삭제 → 로그아웃 처리
+     * - 사용자 데이터 삭제
      */
     public void withdraw(Long userId) {
+
+        // 1️⃣ 로그아웃 처리 (Refresh Token 무효화)
         refreshTokenService.deleteByUserId(userId);
+
+        // 2️⃣ 사용자 삭제
         userHCommandMapper.deleteByUserId(userId);
     }
 }
