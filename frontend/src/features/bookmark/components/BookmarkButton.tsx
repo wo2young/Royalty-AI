@@ -16,6 +16,9 @@ export default function BookmarkButton({
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
+
+        if (isLoading) return
+
         onToggle()
       }}
       disabled={isLoading}
@@ -24,8 +27,8 @@ export default function BookmarkButton({
     >
       <Bookmark
         className={`w-5 h-5 transition-all ${
-          isBookmarked ? "fill-primary text-primary" : "text-gray-400"
-        } ${isLoading ? "animate-pulse" : ""}`}
+          isBookmarked ? "fill-primary text-primary" : "text-muted-foreground"
+        } ${isLoading ? "animate-pulse" : "hover:scale-110 active:scale-95"}`}
       />
     </button>
   )
