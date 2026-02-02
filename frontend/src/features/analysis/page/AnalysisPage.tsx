@@ -8,6 +8,7 @@ import AnalysisGeneralSelector from "../components/AnalysisGeneralSelector"
 import { FormProvider, useForm } from "react-hook-form"
 import { useAnalysisQueries } from "../api/analysis.queries"
 import type { AnalysisResult } from "../types"
+import { useAuth } from "@/shared/auth/AuthContext"
 
 export interface AnalysisFormValues {
   brandName: string
@@ -26,9 +27,10 @@ export default function TrademarkAnalysisPage() {
   const [activeTab, setActiveTab] = useState("both")
   const [analyzed, setAnalyzed] = useState(false)
   const [results, setResults] = useState<AnalysisResult[]>([])
+  const { user } = useAuth()
 
-  const { mutate: runAnalysis, isPending: analyzing } =
-    useAnalysisQueries.useRunAnalysis()
+  const { mutate: runAnalysis, isPending: analyzing } = useAnalysisQueries.useRunAnalysis()
+  const { mutate: saveBrand, isPending: isCreating } = useAnalysisQueries.useSaveMyBrand()
 
   const methods = useForm<AnalysisFormValues>({
     defaultValues: {
@@ -36,22 +38,57 @@ export default function TrademarkAnalysisPage() {
       category: "ALL",
       logoFile: null,
       brandId: null,
+      logoUrl: "",
     },
   })
 
+  const handleRegisterBrand = () => {
+    if (!user) {
+      alert("로그인이 필요한 기능입니다.")
+      return
+    }
+
+    const brandName = methods.getValues("brandName")
+    const category = methods.getValues("category")
+    const logoFile = methods.getValues("logoFile")
+    const logoUrl = methods.getValues("logoUrl")
+
+    if (!brandName) {
+      alert("브랜드 이름을 입력해주세요.")
+      return
+    }
+
+    saveBrand(
+      { brandName, category, logoFile, logoUrl },
+      {
+        onSuccess: (res: any) => {
+          // 백엔드가 brandId를 반환하도록 맞춘 전제
+          const returnedBrandId = res?.brandId ?? res?.data?.brandId ?? null
+
+          if (returnedBrandId) {
+            methods.setValue("brandId", returnedBrandId)
+          }
+
+          alert("내 브랜드로 등록되었습니다! (brandId가 저장됨)")
+        },
+        onError: (error) => {
+          console.error("브랜드 생성 실패:", error)
+          alert("브랜드 등록 중 오류가 발생했습니다.")
+        },
+      }
+    )
+  }
+
   const onSubmit = (data: AnalysisFormValues) => {
-    // 유효성 검사: 상호명이나 로고 파일 중 하나는 반드시 있어야 함
     if (!data.brandName.trim() && !data.logoFile && !data.brandId) {
       alert("상호명을 입력하거나 분석할 브랜드를 선택해주세요.")
       return
     }
 
-    // API 호출 (내부적으로 FormData로 변환되어 전송됨)
     runAnalysis(data, {
       onSuccess: (response) => {
-        setResults(response) // 결과 저장
-        setAnalyzed(true) // 결과 화면 활성화
-        console.log(data)
+        setResults(response)
+        setAnalyzed(true)
       },
       onError: (error) => {
         console.error("분석 실패:", error)
@@ -64,28 +101,23 @@ export default function TrademarkAnalysisPage() {
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 lg:px-6 py-8 md:py-12 max-w-5xl">
         <div className="mb-10">
-          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            상표 분석
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            유사 상표를 분석하여 등록 가능성을 확인하세요
-          </p>
+          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">상표 분석</h1>
+          <p className="text-lg text-muted-foreground">유사 상표를 분석하여 등록 가능성을 확인하세요</p>
         </div>
 
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <Card className="mb-10 shadow-sm overflow-hidden">
               <div className="p-4 md:px-8">
-                {/* 탭 영역 */}
                 <div className="relative flex w-full p-1 bg-secondary/60 rounded-xl mb-8">
                   {TABS.map((tab) => (
                     <button
                       key={tab.id}
-                      type="button" // submit 방지
+                      type="button"
                       onClick={() => {
                         setActiveTab(tab.id)
                         setAnalyzed(false)
-                        methods.reset() // 탭 전환 시 초기화
+                        methods.reset()
                       }}
                       className={cn(
                         "relative z-10 flex-1 py-2.5 text-sm font-medium transition-colors duration-200",
@@ -95,10 +127,7 @@ export default function TrademarkAnalysisPage() {
                       )}
                     >
                       {activeTab === tab.id && (
-                        <motion.div
-                          layoutId="active-pill"
-                          className="absolute inset-0 bg-primary rounded-lg shadow-sm"
-                        />
+                        <motion.div layoutId="active-pill" className="absolute inset-0 bg-primary rounded-lg shadow-sm" />
                       )}
                       <span className="relative z-20">{tab.label}</span>
                     </button>
@@ -117,6 +146,8 @@ export default function TrademarkAnalysisPage() {
                       <AnalysisGeneralSelector
                         analyzing={analyzing}
                         analyzed={analyzed}
+                        onRegister={handleRegisterBrand}
+                        isCreating={isCreating}
                       />
                     ) : (
                       <MyBrandSelector analyzing={analyzing} />
@@ -125,10 +156,10 @@ export default function TrademarkAnalysisPage() {
                 </AnimatePresence>
               </div>
             </Card>
+
+            {analyzed && <AnalysisResults results={results} />}
           </form>
         </FormProvider>
-
-        {analyzed && <AnalysisResults results={results} />}
       </main>
     </div>
   )

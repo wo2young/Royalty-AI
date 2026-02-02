@@ -9,24 +9,26 @@ import com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto;
 
 @Mapper
 public interface DhTradeMapper {
-    // XML의 <select id="searchSimilarTrademarks">와 이름 일치
-//    List<DhTrademarkSearchResponseDto> searchSimilarTrademarks(@Param("inputVector") float[] inputVector);
-//    
-//    // XML의 <insert id="saveMyBrand">와 이름 일치
-//    void saveMyBrand(DhTrademarkSearchResponseDto brandDto);
-//
-//	void insertBrand(DhTrademarkSearchResponseDto saveDto);
-//	
-//	void insertBrandLogo(DhTrademarkSearchResponseDto brandDto);
-//	
-//	String getApplicantByPatentId(int patentId);
 
-	// 이미 XML에 작성하신 id="getApplicantByPatentId"와 연결됩니다.
-    String getApplicantByPatentId(int patentId);
+    void insertBrand(DhTrademarkSearchResponseDto saveDto);
+    void updateBrand(DhTrademarkSearchResponseDto saveDto);
 
-    void insertBrand(DhTrademarkSearchResponseDto dto);
-    void saveMyBrand(DhTrademarkSearchResponseDto dto);
-    void insertBrandLogo(DhTrademarkSearchResponseDto dto);
+    void insertBrandLogo(DhTrademarkSearchResponseDto saveDto);
+    void updateBrandLogo(DhTrademarkSearchResponseDto saveDto);
 
+    void saveMyBrand(DhTrademarkSearchResponseDto saveDto);
 
+    // 신규: brand_analysis insert
+    void insertBrandAnalysis(DhTrademarkSearchResponseDto dto);
+
+    String getApplicantByPatentId(@Param("patentId") int patentId);
+
+    List<DhTrademarkSearchResponseDto> searchSimilarTrademarks(@Param("inputVector") float[] inputVector);
+
+    void updateBrandDescription(@Param("brandId") int brandId, @Param("aiSummary") String aiSummary);
 }
+
+/*
+[전체 정리]
+- A안 3단계 요구사항(brand_analysis insert)을 위해 insertBrandAnalysis 메서드 추가
+*/
