@@ -64,9 +64,7 @@ export default function BrandsPage() {
       {
         onSuccess: () => {
           setEditTarget(null)
-          // TODO: Toast알림
         },
-        onError: () => alert("브랜드 수정 중 오류가 발생했습니다."),
       }
     )
   }
@@ -88,10 +86,10 @@ export default function BrandsPage() {
   if (isError) return <div>데이터를 불러오지 못했습니다.</div>
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 lg:px-6 py-8 md:py-12">
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="container mx-auto px-4 lg:px-6 py-8 md:py-12 flex-1 flex flex-col">
         {/* 타이틀 */}
-        <div className="mb-8">
+        <div className="mb-8 flex-none">
           <Link
             to="/mypage"
             className="group mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
@@ -129,7 +127,7 @@ export default function BrandsPage() {
 
         {/* 나의 브랜드 리스트 */}
         {isLoading ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 flex-1">
             {[...Array(5)].map((_, i) => (
               <BrandSkeleton key={i} />
             ))}
@@ -144,6 +142,7 @@ export default function BrandsPage() {
             onDelete={(id, name) => setDeleteTarget({ id, name })}
             onEdit={handleEditClick}
             onToggleNotify={handleToggleNotify}
+            onClick={() => setIsAddModalOpen(true)}
           />
         )}
 
