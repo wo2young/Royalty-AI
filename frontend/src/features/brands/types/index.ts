@@ -20,16 +20,6 @@ export interface HistoryData {
   imagePath: string
 }
 
-/* 브랜드 AI 분석 */
-export interface BrandReport {
-  reportId: number
-  title: string
-  summary: string
-  riskScore: number // 0 ~ 100
-  suggestions: string[]
-  createdAt: string
-}
-
 interface MultilingualText {
   kr: string
   en: string
@@ -60,6 +50,16 @@ export interface BrandBIData {
   logoImagePath: string | null
 }
 
+export type RiskLevel = "낮음" | "보통" | "높음" | "매우 높음"
+
+/* 브랜드 AI 분석 데이터*/
+export interface AIAnalysisReport {
+  aiAnalysisSummary: string // 전체 분석 요약 정보
+  aiDetailedReport: string // 상세 분석 리포트 내용
+  aiSolution: string // 충돌 위험 최소화를 위한 솔루션
+  riskLevel: RiskLevel // 상표 충돌 위험도 (낮음, 보통 등)
+}
+
 /* 브랜드 상세 */
 export interface BrandDetail {
   brandId: number
@@ -70,7 +70,32 @@ export interface BrandDetail {
   notificationEnabled: boolean
   createdAt: string
   historyList: HistoryData[]
-  reportList: BrandReport[]
+  aiSummary: string
+  analysis_detail: string
+  parsedDetail?: BrandReport
+}
+
+export interface BrandReport {
+  title: string
+  riskScore: number
+  summary: string
+  suggestions: string[]
+  createdAt: string
+  detailedReport: string
+  riskLevel: RiskLevel
+}
+
+export interface AnalysisHistoryResponse {
+  history_id: string
+  brand_id: string
+  version: string | null
+  image_path: string
+  image_similarity: number
+  text_similarity: number
+  created_at: string
+  ai_summary: string
+  analysis_detail: string
+  patent_id: string
 }
 
 export const brandFormSchema = z.object({

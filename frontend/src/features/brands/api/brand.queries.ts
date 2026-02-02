@@ -3,6 +3,7 @@ import { brandApi } from "./brand.api"
 import { brandKeys } from "./brand.keys"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import type { AIAnalysisReport, BrandDetail } from "../types"
 
 export const useBrands = () => {
   return useQuery({
@@ -16,7 +17,17 @@ export const useBrandDetail = (brandId: number) => {
   return useQuery({
     queryKey: brandKeys.detail(brandId),
     queryFn: () => brandApi.fetchBrandById(brandId),
-    enabled: !!brandId,
+    select: (data: BrandDetail) => {
+      try {
+        return {
+          ...data,
+          parsedDetail: JSON.parse(data.analysis_detail) as AIAnalysisReport,
+        }
+      } catch (e) {
+        console.error("AI 데이터 파싱 실패", e)
+        return { ...data, parsedDetail: null }
+      }
+    },
   })
 }
 
