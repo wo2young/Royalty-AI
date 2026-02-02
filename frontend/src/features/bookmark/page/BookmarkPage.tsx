@@ -1,57 +1,33 @@
-"use client"
-
 import { ArrowLeft, Bookmark } from "lucide-react"
-import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { SearchBar } from "../../../shared/components/search-bar/SearchBar"
 import { BookmarkCard } from "../components/BookmarkCard"
 import { useBookmarks } from "../api/bookmark.queries"
 import { Pagination } from "@/shared/components/pagination/Pagination"
+import { useBrandFilter } from "@/shared/hook/useBrandFilter"
+
+const ITEMS_PER_PAGE = 12 // 한 페이지에 표시할 카드 개수
 
 export function BookmarksPage() {
-  const { data: BookmarkData, isLoading, isError } = useBookmarks()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("ALL")
-  const [currentPage, setCurrentPage] = useState(1)
-  const ITEMS_PER_PAGE = 12 // 한 페이지에 표시할 카드 개수
+  const { data: BookmarkData = [], isLoading, isError } = useBookmarks()
 
-  console.log(BookmarkData)
+  const {
+    searchQuery,
+    handleSearch,
+    selectedCategory,
+    handleCategory,
+    filteredData,
+    currentPage,
+    setCurrentPage,
+  } = useBrandFilter(BookmarkData)
 
-  const filteredBrands = useMemo(() => {
-    if (!BookmarkData) return []
+  const bookmarkedItems = filteredData.filter((item) => item.bookmarked)
 
-    return BookmarkData.filter((brand) => {
-      if (!brand.bookmarked) return false
-
-      const matchesSearch =
-        brand.trademarkName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        brand.category.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const matchesCategory =
-        selectedCategory === "ALL" ||
-        (selectedCategory === "IT" && brand.category === "IT") ||
-        (selectedCategory === "OTHERS" && brand.category !== "IT")
-
-      return matchesSearch && matchesCategory
-    })
-  }, [BookmarkData, searchQuery, selectedCategory])
-
-  const paginatedBrands = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    return filteredBrands.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-  }, [filteredBrands, currentPage])
-
-  const totalPages = Math.ceil(filteredBrands.length / ITEMS_PER_PAGE)
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query)
-    setCurrentPage(1) // 검색 시 페이지 리셋
-  }
-
-  const handleCategoryChange = (cat: string) => {
-    setSelectedCategory(cat)
-    setCurrentPage(1) // 카테고리 변경 시 페이지 리셋
-  }
+  const totalPages = Math.ceil(bookmarkedItems.length / ITEMS_PER_PAGE)
+  const paginatedBrands = bookmarkedItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+  )
 
   if (isLoading) {
     return (
@@ -95,7 +71,7 @@ export function BookmarksPage() {
             <div className="text-sm text-muted-foreground">
               총{" "}
               <span className="font-semibold text-foreground">
-                {filteredBrands.length}
+                {bookmarkedItems.length}
               </span>
               개의 북마크
             </div>
@@ -105,9 +81,9 @@ export function BookmarksPage() {
         {/* 검색, 필터 부분 */}
         <SearchBar
           searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
+          onSearchChange={handleSearch}
           category={selectedCategory}
-          onCategoryChange={handleCategoryChange}
+          onCategoryChange={handleCategory}
         />
 
         {/* 리스트 부분 */}
@@ -118,14 +94,14 @@ export function BookmarksPage() {
         </div>
 
         {/* 결과가 없을 때 */}
-        {filteredBrands.length === 0 && (
+        {bookmarkedItems.length === 0 && (
           <div className="text-center py-20 text-muted-foreground">
             검색 결과가 없습니다.
           </div>
         )}
 
         {/* 페이지네이션 컴포넌트 추가 */}
-        {filteredBrands.length > 0 && (
+        {bookmarkedItems.length > 0 && (
           <div className="mt-12">
             <Pagination
               currentPage={currentPage}

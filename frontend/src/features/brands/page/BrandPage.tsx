@@ -15,38 +15,34 @@ import { DeleteBrandModal } from "../components/modal/DeleteBrandModal"
 import type { Brand } from "../types"
 import { EditBrandModal } from "../components/modal/EditBrandModal"
 import { BrandSkeleton } from "../components/skeleons/BrandSkeleton"
+import { useBrandFilter } from "../../../shared/hook/useBrandFilter"
 
 const ITEMS_PER_PAGE = 5
 
 export default function BrandsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const { data: brands = [], isLoading, isError } = useBrands()
+  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
+  const { mutate: toggleNotify } = useToggleNotification()
+
+  const {
+    searchQuery,
+    handleSearch,
+    selectedCategory,
+    handleCategory,
+    filteredData,
+    currentPage,
+    setCurrentPage,
+  } = useBrandFilter(brands)
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Brand | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{
     id: number
     name: string
   } | null>(null)
-  const [selectedCategory, setSelectedCategory] = useState("ALL")
-  const [currentPage, setCurrentPage] = useState(1)
 
-  const { data: brands = [], isLoading, isError } = useBrands()
-  const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
-  const { mutate: toggleNotify } = useToggleNotification()
-
-  const filteredBrands = brands.filter((brand) => {
-    const matchesSearch =
-      brand.brandName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      brand.category.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory =
-      selectedCategory === "ALL" ||
-      (selectedCategory === "IT" && brand.category === "IT") ||
-      (selectedCategory === "OTHERS" && brand.category !== "IT")
-
-    return matchesSearch && matchesCategory
-  })
-
-  const totalPages = Math.ceil(filteredBrands.length / ITEMS_PER_PAGE)
-  const paginatedBrands = filteredBrands.slice(
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE)
+  const paginatedBrands = filteredData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
@@ -67,16 +63,6 @@ export default function BrandsPage() {
         },
       }
     )
-  }
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query)
-    setCurrentPage(1) // 검색 시 페이지 리셋
-  }
-
-  const handleCategoryChange = (cat: string) => {
-    setSelectedCategory(cat)
-    setCurrentPage(1) // 카테고리 변경 시 페이지 리셋
   }
 
   const handleToggleNotify = (brandId: number, enabled: boolean) => {
@@ -120,9 +106,9 @@ export default function BrandsPage() {
         {/* 검색 및 카테고리 필터 */}
         <SearchBar
           searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
+          onSearchChange={handleSearch}
           category={selectedCategory}
-          onCategoryChange={handleCategoryChange}
+          onCategoryChange={handleCategory}
         />
 
         {/* 나의 브랜드 리스트 */}
@@ -147,7 +133,7 @@ export default function BrandsPage() {
         )}
 
         {/* 페이지네이션 */}
-        {!isLoading && filteredBrands.length > 0 && (
+        {!isLoading && filteredData.length > 0 && (
           <div className="mt-12">
             <Pagination
               currentPage={currentPage}
@@ -173,7 +159,7 @@ export default function BrandsPage() {
           onOpenChange={(open) => !open && setEditTarget(null)}
           brand={editTarget}
           onEdit={handleEditSubmit}
-          isPending={isUpdatePending} // 처리 중 로딩 상태 전달
+          isPending={isUpdatePending}
         />
       )}
     </div>
