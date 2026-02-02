@@ -33,42 +33,42 @@
     </select>
 
     <insert id="insertBrand" useGeneratedKeys="true" keyProperty="brandId">
-	    INSERT INTO brand (
-	        user_id, 
-	        brand_name, 
-	        category, 
-	        description, 
-	        is_notification_enabled
-	    ) VALUES (
-	        #{userId}, 
-	        #{brandName}, 
-	        #{category}, 
-	        #{description},
-	        false
+        INSERT INTO brand (
+            user_id, 
+            brand_name, 
+            category, 
+            description, 
+            is_notification_enabled
+        ) VALUES (
+            #{userId}, 
+            #{brandName}, 
+            #{category}, 
+            #{description},
+            false
         )
-	</insert>
+    </insert>
 
     <insert id="insertBrandLogo">
         INSERT INTO brand_logo (brand_id, image_path)
         VALUES (#{brandId}, #{imagePath})
     </insert>
 
-	<update id="updateBrand" parameterType="com.royalty.backend.mypage.dto.BrandDTO">
-	    UPDATE brand
-	    <set>
-	        <if test="brandName != null">brand_name = #{brandName},</if>
-	        <if test="category != null">category = #{category},</if>
-	        <if test="description != null">description = #{description}</if>
-	    </set>
-	    WHERE brand_id = #{brandId} AND user_id = #{userId}
-	</update>
-	
-	<update id="updateBrandLogo">
-	    UPDATE brand_logo
-	    SET 
-	        image_path = #{imagePath}
-	    WHERE brand_id = #{brandId}
-	</update>
+    <update id="updateBrand" parameterType="com.royalty.backend.mypage.dto.BrandDTO">
+        UPDATE brand
+        <set>
+            <if test="brandName != null">brand_name = #{brandName},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="description != null">description = #{description}</if>
+        </set>
+        WHERE brand_id = #{brandId} AND user_id = #{userId}
+    </update>
+    
+    <update id="updateBrandLogo">
+        UPDATE brand_logo
+        SET 
+            image_path = #{imagePath}
+        WHERE brand_id = #{brandId}
+    </update>
 
     <update id="updateNotificationStatus">
         UPDATE brand
@@ -81,24 +81,20 @@
         WHERE brand_id = #{brandId} AND user_id = #{userId}
     </delete>
 
-	<select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
-	    SELECT 
-	        version, 
-	        image_path AS imagePath, 
-	        image_similarity AS imageSimilarity, 
-	        text_similarity AS textSimilarity, 
-	        created_at AS createdAt,
-	        ai_summary AS aiSummary,      analysis_detail AS analysisDetail, patent_id AS patentId         FROM brand_logo_history
-	    WHERE brand_id = #{brandId}
-	    ORDER BY created_at DESC
-	</select>
-
-<!--    <select id="selectBrandReports" resultType="com.royalty.backend.mypage.dto.ReportDTO">-->
-<!--        SELECT report_id, brand_id, file_path, created_at-->
-<!--        FROM report-->
-<!--        WHERE brand_id = #{brandId}-->
-<!--        ORDER BY created_at DESC-->
-<!--    </select>-->
+    <select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+        SELECT 
+            version, 
+            image_path AS imagePath, 
+            image_similarity AS imageSimilarity, 
+            text_similarity AS textSimilarity, 
+            created_at AS createdAt,
+            ai_summary AS aiSummary,      
+            analysis_detail AS analysisDetail, 
+            patent_id AS patentId         
+        FROM brand_logo_history
+        WHERE brand_id = #{brandId}
+        ORDER BY created_at DESC
+    </select>
 
     <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
         SELECT 
@@ -111,7 +107,7 @@
             p.applicant, 
             p.status, 
             b.created_at         AS createdAt,
-            b.is_bookmarked         AS isBookmarked
+            b.is_bookmarked      AS isBookmarked
         FROM bookmark b
         JOIN patent p ON b.patent_id = p.patent_id
         WHERE b.user_id = #{userId}
@@ -143,5 +139,16 @@
             NOW()
         )
     </insert>
+
+    <select id="selectBrandIdentityJson" resultType="string">
+        SELECT identity_payload 
+        FROM brand_identity 
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <insert id="insertReport">
+        INSERT INTO report (brand_id, file_path, created_at)
+        VALUES (#{brandId}, #{filePath}, NOW())
+    </insert>   
 
 </mapper>
