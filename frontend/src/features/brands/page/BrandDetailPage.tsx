@@ -24,6 +24,8 @@ export default function BrandDetailPage() {
   const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
   const { data: biData, isLoading: isBiLoading } = useBrandIdentity(brandId)
 
+  console.log(brandData)
+
   if (isLoading)
     return <div className="p-20 text-center">브랜드 정보를 불러오는 중...</div>
   if (isError || !brandData) {
@@ -53,7 +55,7 @@ export default function BrandDetailPage() {
 
   // 데이터 존재 여부 확인 (실제 API 연동 시 이 부분을 데이터 유무로 체크하세요)
   const hasHistory = formattedHistory.length > 0
-  const hasAI = (brandData?.reportList?.length ?? 0) > 0
+  const hasAI = (brandData?.historyList?.length ?? 0) > 0
   const hasBI = !!biData?.identityPayload
 
   const handleToggleNotify = (brandId: number, enabled: boolean) => {
@@ -99,7 +101,7 @@ export default function BrandDetailPage() {
             >
               {activeTab === "summary" && (
                 <BrandSummaryTab
-                  report={brandData.reportList?.[0] || null}
+                  report={brandData.parsedDetail}
                   historyData={formattedHistory}
                   identityPayload={biData?.identityPayload}
                   hasAI={hasAI}
@@ -116,7 +118,7 @@ export default function BrandDetailPage() {
               )}
 
               {activeTab === "ai" && (
-                <BrandAITab reportList={brandData?.reportList || []} />
+                <BrandAITab report={brandData.parsedDetail} />
               )}
 
               {activeTab === "bi" && (

@@ -18,6 +18,10 @@ export interface HistoryData {
   textSimilarity: number
   createdAt: string
   imagePath: string
+  aiAnalysisSummary?: string
+  aiDetailedReport?: string
+  aiSolution?: string
+  aiSummary?: string
 }
 
 interface MultilingualText {
@@ -70,8 +74,6 @@ export interface BrandDetail {
   notificationEnabled: boolean
   createdAt: string
   historyList: HistoryData[]
-  aiSummary: string
-  analysis_detail: string
   parsedDetail?: BrandReport
 }
 
@@ -82,7 +84,7 @@ export interface BrandReport {
   suggestions: string[]
   createdAt: string
   detailedReport: string
-  riskLevel: RiskLevel
+  riskLevel?: RiskLevel
 }
 
 export interface AnalysisHistoryResponse {

@@ -7,7 +7,7 @@ import type { HistoryData } from "../../types"
 import { BrandBIReportCard } from "./BrandBIReportCard"
 
 interface BrandSummaryTabProps {
-  report: BrandReport
+  report?: BrandReport
   historyData: HistoryData[]
   identityPayload?: BrandIdentityPayload
   hasAI: boolean
@@ -43,7 +43,7 @@ export function BrandSummaryTab({
           <BrandBIReportCard identityPayload={identityPayload} />
         </div>
       )}
-      {hasAI && <BrandAIReportCard report={report} />}
+      {hasAI && report && <BrandAIReportCard report={report} />}
       {hasHistory && <BrandHistoryChart data={historyData} />}
     </div>
   )
