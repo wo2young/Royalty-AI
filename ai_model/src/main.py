@@ -16,6 +16,11 @@ from db_search import DBSearchEngine
 from scheduler import TrademarkScheduler
 from dotenv import load_dotenv
 
+
+#인설트 임포트
+from datetime import date
+import traceback
+from fastapi.middleware.cors import CORSMiddleware
 # .env 로드
 load_dotenv()
 
@@ -28,6 +33,16 @@ class TestDataReq(BaseModel):
 
 app = FastAPI()
 
+# cors 설정(프론트연결)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Vite/React 주소
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    
+)
+print("🔥🔥🔥 THIS IS MY MAIN.PY 🔥🔥🔥")
 analyzer = None
 search_engine = None
 scheduler = None 
@@ -92,6 +107,91 @@ async def search_hybrid(
 # ========================================================
 # 2. [NEW] 알림 테스트용 데이터 강제 삽입 API
 # ========================================================
+
+@app.post("/api/v1/test/insert/image")
+async def insert_test_image(
+    trademark_name: str = Form(...),
+    applicant: str = Form(...),
+    application_number: str = Form(...),
+
+    # ✅ 추가
+    category: str = Form(...),
+    application_date: str = Form(...),  # 예: "2026-02-03"
+
+    file: UploadFile = File(...)
+):
+    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+
+    try:
+        print("✅ API 진입")
+        print("trademark_name:", trademark_name)
+        print("applicant:", applicant)
+        print("application_number:", application_number)
+        print("category:", category)
+        print("application_date:", application_date)
+        print("file:", file.filename, file.content_type)
+
+        # 1️⃣ 파일 저장
+        with open(unique_filename, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        print("✅ 파일 저장 완료, size =", os.path.getsize(unique_filename))
+
+        # 2️⃣ 벡터 생성
+        with open(unique_filename, "rb") as f:
+            image_vector = analyzer.get_image_vector(f)
+
+        print("✅ image_vector 생성 완료", image_vector.shape)
+
+        text_vector = analyzer.get_text_vector(trademark_name)
+        print("✅ text_vector 생성 완료")
+
+        # 3️⃣ DB INSERT
+        conn = psycopg2.connect(**search_engine.db_config)
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO patent (
+                application_number,
+                trademark_name,
+                applicant,
+                category,
+                application_date,
+                status,
+                text_vector,
+                image_vector,
+                image_url
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s::vector, %s::vector, %s)
+            RETURNING patent_id
+        """, (
+            application_number,
+            trademark_name,
+            applicant,
+            category,
+            application_date,
+            "출원",
+            text_vector.tolist(),
+            image_vector.tolist(),
+            f"/uploads/{unique_filename}"
+        ))
+
+        patent_id = cur.fetchone()[0]
+        conn.commit()
+
+        return {"status": "success", "patent_id": patent_id}
+
+    except Exception as e:
+        print("❌ INSERT ERROR 발생")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        if os.path.exists(unique_filename):
+            os.remove(unique_filename)
+
+ 
+#텍스트 쪽
 @app.post("/api/v1/test/insert")
 async def insert_test_data(data: TestDataReq):
     """
