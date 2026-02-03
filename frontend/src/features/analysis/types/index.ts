@@ -26,14 +26,14 @@ export interface AnalysisResult {
   aiSummary: string | null
 }
 
-// 3. AI 상세 분석 요청 (AnalysisResult 확장)
+// AI 상세 분석 요청 (AnalysisResult 확장)
 export interface AnalyzeDetailRequest extends AnalysisResult {
   brandName: string
   logoPath: string
   brandId: number
 }
 
-// 4. 내 브랜드 기본 저장 요청 (회원가입/수정 시)
+// 내 브랜드 기본 저장 요청 (회원가입/수정 시)
 export interface SaveMyBrandBasicRequest {
   brandName: string
   category: string
@@ -43,7 +43,7 @@ export interface SaveMyBrandBasicRequest {
   aiSummary?: string
 }
 
-// 5. 최종 분석 결과 저장 요청
+// 최종 분석 결과 저장 요청
 export interface SaveAnalysisRequest {
   brandId: number
   patentId: number
@@ -54,15 +54,15 @@ export interface SaveAnalysisRequest {
   aiSolution: string
 }
 
-// 6. AI 상세 분석 응답
+// AI 상세 분석 응답
 export interface AnalysisAIResponse extends AnalysisResult {
   brandName: string
   analysisDetail: string
 }
 
-// 7. UI 리포트 카드용
+// UI 리포트 카드용
 export interface BrandReport {
-  reportId: number
+  reportId?: number
   title: string
   riskScore: number
   summary: string

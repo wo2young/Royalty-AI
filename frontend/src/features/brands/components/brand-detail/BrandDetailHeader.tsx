@@ -1,10 +1,11 @@
-import { ArrowLeft, Bell, BellOff } from "lucide-react"
+import { ArrowLeft, Bell, BellOff, FileDown, Loader2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { EditBrandModal } from "../modal/EditBrandModal"
+import { useDownloadReport } from "../../api/brand.queries"
 
 interface BrandDetailHeaderProps {
   brand: {
@@ -29,6 +30,8 @@ export function BrandDetailHeader({
   onEditSubmit,
   isUpdatePending,
 }: BrandDetailHeaderProps) {
+  const { mutate: download, isPending } = useDownloadReport()
+
   const [showBadge, setShowBadge] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const isActive = brand.notificationEnabled
@@ -125,7 +128,19 @@ export function BrandDetailHeader({
             >
               정보 수정
             </Button>
-            <Button size="sm">리포트 다운로드</Button>
+            <Button
+              size="sm"
+              onClick={() => download(brand.brandId)}
+              disabled={isPending}
+              className="gap-2"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              {isPending ? "생성 중..." : "리포트 다운로드"}
+            </Button>
 
             {isEditOpen && (
               <EditBrandModal

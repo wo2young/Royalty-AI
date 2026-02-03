@@ -133,3 +133,14 @@ export const useAnalyzeIdentity = () => {
     },
   })
 }
+
+export const useDownloadReport = () => {
+  return useMutation({
+    mutationFn: (brandId: number) => brandApi.downloadReport(brandId),
+    onSuccess: () => {},
+    onError: (error) => {
+      console.error("Download Error:", error)
+      toast.error("리포트 다운로드 중 오류가 발생했습니다.")
+    },
+  })
+}
