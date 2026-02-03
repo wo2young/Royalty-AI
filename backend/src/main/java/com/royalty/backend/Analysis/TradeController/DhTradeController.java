@@ -40,7 +40,7 @@ public class DhTradeController {
         System.out.println("brandName: " + brandName);
         System.out.println("logoFile: " + (logoFile != null ? logoFile.getOriginalFilename() : "없음"));
 
-        return tradeService.search(brandName, logoFile);
+        return tradeService.search(brandName, logoFile, logoUrl);
     }
 
     // 2. AI 상세 분석 (분석-only: DB 저장 금지)

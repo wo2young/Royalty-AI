@@ -17,7 +17,7 @@ public interface DhTradeMapper {
     void updateBrandLogo(DhTrademarkSearchResponseDto saveDto);
 
     void saveMyBrand(DhTrademarkSearchResponseDto saveDto);
-
+    
     // 신규: brand_analysis insert
     void insertBrandAnalysis(DhTrademarkSearchResponseDto dto);
 
@@ -26,6 +26,8 @@ public interface DhTradeMapper {
     List<DhTrademarkSearchResponseDto> searchSimilarTrademarks(@Param("inputVector") float[] inputVector);
 
     void updateBrandDescription(@Param("brandId") int brandId, @Param("aiSummary") String aiSummary);
+    
+    Integer findMaxVersionByBrandId(int brandId);
 }
 
 /*

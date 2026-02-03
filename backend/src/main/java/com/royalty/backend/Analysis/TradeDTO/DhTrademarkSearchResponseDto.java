@@ -22,6 +22,7 @@ public class DhTrademarkSearchResponseDto {
     private String category;
     private String imageUrl;  // 타 상표 이미지 URL
     private String logoPath;  // 내 로고 이미지 경로
+    private int version;
 
     // 3. 유사도 및 점수
     private float textSimilarity;
