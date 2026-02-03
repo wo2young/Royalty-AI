@@ -74,7 +74,7 @@ export function BrandDetailHeader({
                   {brand.category}
                 </Badge>
                 <span className="text-xs text-muted-foreground">
-                  등록일: {brand.createdAt}
+                  등록일: {brand.createdAt.split("T")[0]}
                 </span>
               </div>
               <h1 className="text-3xl font-bold tracking-tight text-slate-900">
