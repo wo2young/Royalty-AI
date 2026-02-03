@@ -1,6 +1,7 @@
 package com.royalty.backend.Analysis.TradeService;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -36,36 +37,53 @@ public class DhTradeService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // [기능 1] 유사 상표 검색
-    public List<DhTrademarkSearchResponseDto> search(String keyword, MultipartFile logo) {
+    /**
+     * [기능 1] 유사 상표 검색 (수정됨: logoUrl 파라미터 추가 & 다운로드 로직 적용)
+     * - 파일이 없으면 logoUrl을 다운로드해서 AI로 전송 -> 이미지 유사도 0점 문제 해결
+     */
+    public List<DhTrademarkSearchResponseDto> search(String keyword, MultipartFile logo, String logoUrl) {
         String aiUrl = "http://localhost:8000/api/v1/search/hybrid";
+        
         boolean hasText = keyword != null && !keyword.isBlank();
-        boolean hasImage = logo != null && !logo.isEmpty();
+        boolean hasFile = logo != null && !logo.isEmpty();
+        boolean hasUrl = logoUrl != null && !logoUrl.isBlank();
 
-        if (!hasText && !hasImage) {
+        if (!hasText && !hasFile && !hasUrl) {
             System.out.println("검색어와 이미지가 모두 없습니다.");
             return new ArrayList<>();
         }
 
         try {
             HttpHeaders headers = new HttpHeaders();
-
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            
             if (hasText) body.add("query_text", keyword);
 
-            if (hasImage) {
+            // [핵심 해결 1] 이미지를 AI 서버에 보내는 로직 강화
+            if (hasFile) {
+                // 1. 파일이 직접 들어온 경우 (업로드)
                 body.add("file", new ByteArrayResource(logo.getBytes()) {
                     @Override
                     public String getFilename() {
                         return logo.getOriginalFilename() != null ? logo.getOriginalFilename() : "logo.png";
                     }
                 });
+            } else if (hasUrl) {
+                // 2. 파일은 없고 URL만 있는 경우 (내 브랜드 분석) -> 다운로드해서 보냄
+                byte[] imageBytes = downloadImageBytes(logoUrl); 
+                if (imageBytes != null) {
+                    body.add("file", new ByteArrayResource(imageBytes) {
+                        @Override
+                        public String getFilename() {
+                            return "s3_image.png"; // 가상의 파일명 부여
+                        }
+                    });
+                }
             }
 
             body.add("categories", "09,35,42");
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
             Map<String, Object> response = restTemplate.postForObject(aiUrl, requestEntity, Map.class);
 
             System.out.println("AI Server Response: " + response);
@@ -108,7 +126,8 @@ public class DhTradeService {
                 }
                 dto.setApplicant(applicant != null ? applicant : "-");
 
-                calculateScores(dto, m, hasText, hasImage);
+                // 점수 계산 (이미지 유무 플래그 갱신: 파일이 있거나 URL이 있으면 hasImage = true)
+                calculateScores(dto, m, hasText, (hasFile || hasUrl));
                 dtoList.add(dto);
             }
 
@@ -122,7 +141,7 @@ public class DhTradeService {
     }
 
     /**
-     * [기능 2] 내 브랜드 기본 저장 (Brand + Brand_Logo만 저장) + brandId 반환
+     * [기능 2] 내 브랜드 기본 저장
      */
     @Transactional
     public int saveMyBrandBasic(DhBrandSaveRequestDto dto, Long userId) throws IOException {
@@ -140,7 +159,7 @@ public class DhTradeService {
         }
 
         if (dto.getBrandId() == 0) {
-            tradeMapper.insertBrand(saveDto); // 생성된 brandId가 saveDto에 채워짐
+            tradeMapper.insertBrand(saveDto); 
         } else {
             saveDto.setBrandId(dto.getBrandId());
             tradeMapper.updateBrand(saveDto);
@@ -159,7 +178,8 @@ public class DhTradeService {
     }
 
     /**
-     * [기능 3] AI 정밀 분석 (분석-only: DB 저장 금지)
+     * [기능 3] AI 정밀 분석
+     * - 수정됨: 재계산 로직 삭제. search에서 계산된 '정답' 값을 GPT에게 강제 주입.
      */
     public DhTrademarkSearchResponseDto analyzeSingleResult(
             String keyword,
@@ -170,35 +190,46 @@ public class DhTradeService {
     ) {
         if (target == null) return null;
 
+        // search에서 계산된 '원본 정답' (예: 31.0)
+        float correctScore = target.getCombinedSimilarity();
+
+        // GPT에게 이 점수를 그대로 쓰라고 명령 (재계산 금지)
         String prompt = String.format(
-                "내 상표명: '%s'\n대상 상표: {ID: %d, 이름: '%s', 유사도: %.1f%%}\n" +
+                "내 상표명: '%s'\n" +
+                "대상 상표: {ID: %d, 이름: '%s', 유사도: %.1f%%}\n" +
+                "\n" +
                 "위 두 상표를 비교 분석하여 상표·법률 전문가 수준의 리포트를 작성해라.\n" +
-                "응답 포맷: {\"aiAnalysisSummary\": \"...\", \"aiDetailedReport\": \"...\", \"aiSolution\": \"...\", \"riskLevel\": \"...\"}",
-                keyword, target.getPatentId(), target.getTrademarkName(), target.getCombinedSimilarity()
+                "\n" +
+                "🔥🔥 **[절대 제약 사항]** 🔥🔥\n" +
+                "1. **유사도 수치 고정**: 분석 요약(aiAnalysisSummary) 작성 시, 내가 준 수치 **'%.1f%%'**를 그대로 인용해라. (AI가 재계산 금지)\n" +
+                "2. **판단 기준**: 너의 주관이 아닌, 위 유사도 수치를 기준으로 위험/안전을 판단해라.\n" +
+                "\n" +
+                "응답 포맷 (JSON): {\"aiAnalysisSummary\": \"(유사도 %.1f%% 인용 필수)...\", \"aiDetailedReport\": \"...\", \"aiSolution\": \"...\", \"riskLevel\": \"...\"}",
+                keyword,
+                target.getPatentId(),
+                target.getTrademarkName(),
+                correctScore,
+                correctScore,
+                correctScore
         );
 
         try {
             Map<String, Object> aiResult = gptClient.getAnalysisReport(prompt);
 
             target.setRiskLevel(DhTradeUtils.convertRiskLevel((String) aiResult.get("riskLevel")));
-
-            // aiSummary로 세팅하면 DTO에서 aiAnalysisSummary까지 같이 채워줌
             target.setAiSummary((String) aiResult.get("aiAnalysisSummary"));
-
             target.setAiDetailedReport((String) aiResult.get("aiDetailedReport"));
             target.setAiSolution(aiResult.get("aiSolution"));
-
-            // /save에서 그대로 저장할 상세 JSON
             target.setAnalysisDetail(objectMapper.writeValueAsString(aiResult));
 
-            // /save에서 필요한 식별 값 주입
+            // 식별값 주입
             target.setBrandId(brandId);
             target.setLogoPath(logoPath);
             target.setBrandName(keyword);
 
-            // 저장용 textSimilarity는 최종값으로 확정
-            float finalTextSimilarity = (target.getTextSimilarity() + target.getSoundSimilarity()) / 2.0f;
-            target.setTextSimilarity(finalTextSimilarity);
+            // [수정] search에서 나온 'CombinedSimilarity'(31점)를 DB 저장용 필드에 매핑
+            // 저장 시 이 최종 점수가 기록되도록 함.
+            target.setTextSimilarity(correctScore);
 
             return target;
 
@@ -210,17 +241,14 @@ public class DhTradeService {
     }
 
     /**
-     * [기능 4] 분석 결과 저장 (저장-only: /save에서만 호출)
-     * - brand_logo_history 저장
-     * - brand_analysis 저장
-     * - brand.description 업데이트
+     * [기능 4] 분석 결과 저장
+     * - 수정됨: 버전 관리 (Max + 1) 로직 추가
      */
     @Transactional
     public void saveAnalysisResult(DhTrademarkSearchResponseDto dto, Long userId) {
         if (dto == null) throw new IllegalArgumentException("저장할 데이터가 없습니다.");
         if (userId == null) throw new IllegalArgumentException("로그인이 필요합니다.");
         if (dto.getBrandId() <= 0) throw new IllegalArgumentException("brandId가 유효하지 않습니다. 브랜드 등록 후 저장하세요.");
-
         if (dto.getAiSummary() == null || dto.getAiSummary().isBlank()) {
             throw new IllegalArgumentException("aiSummary가 없습니다. 분석 후 저장하세요.");
         }
@@ -228,9 +256,16 @@ public class DhTradeService {
             throw new IllegalArgumentException("analysisDetail이 없습니다. 분석 후 저장하세요.");
         }
 
+        // [핵심 해결 2] 버전 업 로직 추가 (Mapper 메서드 필요)
+        Integer maxVersion = tradeMapper.findMaxVersionByBrandId(dto.getBrandId());
+        int nextVersion = (maxVersion == null) ? 1 : maxVersion + 1;
+        dto.setVersion(nextVersion);
+
+        System.out.println(">>> [Version Control] Brand ID: " + dto.getBrandId() + ", New Version: " + nextVersion);
+
         try {
-            tradeMapper.saveMyBrand(dto);          // brand_logo_history
-            tradeMapper.insertBrandAnalysis(dto);  // brand_analysis (신규)
+            tradeMapper.saveMyBrand(dto);          
+            tradeMapper.insertBrandAnalysis(dto); 
             tradeMapper.updateBrandDescription(dto.getBrandId(), dto.getAiSummary());
         } catch (Exception e) {
             System.err.println("분석 저장 중 에러: " + e.getMessage());
@@ -239,6 +274,19 @@ public class DhTradeService {
         }
     }
 
+    // -------------------------------------------------------
+    // [Helper] URL 이미지를 바이트로 다운로드 (네이티브 Java)
+    // -------------------------------------------------------
+    private byte[] downloadImageBytes(String imageUrl) {
+        try (java.io.InputStream in = new URL(imageUrl).openStream()) {
+            return in.readAllBytes();
+        } catch (Exception e) {
+            System.err.println("이미지 다운로드 실패: " + imageUrl);
+            return null;
+        }
+    }
+
+    // calculateScores 메서드 유지
     private void calculateScores(DhTrademarkSearchResponseDto dto, Map<String, Object> m, boolean hasText, boolean hasImage) {
         double tScore = 0.0, vScore = 0.0, sScore = 0.0;
 
@@ -279,11 +327,3 @@ public class DhTradeService {
         dto.setRiskLevel(combinedScore >= 85.0 ? "위험" : (combinedScore >= 60.0 ? "주의" : "안전"));
     }
 }
-
-/*
-[전체 정리]
-- saveMyBrandBasic: Brand/Brand_Logo만 저장하고 brandId를 반환하도록 변경
-- analyzeSingleResult: 분석-only로 변경 (Mapper 호출 제거)
-- saveAnalysisResult: 저장-only로 변경 (history + brand_analysis + description 업데이트)
-- 실무 중요: 분석과 저장을 분리하면 UX(저장 버튼 의미)와 데이터 정합성이 깨지지 않는다
-*/
