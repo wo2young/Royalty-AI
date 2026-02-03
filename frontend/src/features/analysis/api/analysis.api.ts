@@ -38,7 +38,11 @@ export const analysisApi = {
       formData.append("coreClasses", JSON.stringify(coreClasses))
     }
 
-    if (data.logoFile) formData.append("logoFile", data.logoFile)
+    if (data.logoFile) {
+      formData.append("logoFile", data.logoFile)
+    } else if (data.logoUrl) {
+      formData.append("logoUrl", data.logoUrl)
+    }
 
     const token = localStorage.getItem("accessToken")
     const response = await axios.post(
