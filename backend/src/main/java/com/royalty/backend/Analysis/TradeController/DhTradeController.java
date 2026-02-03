@@ -3,6 +3,7 @@ package com.royalty.backend.Analysis.TradeController;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.royalty.backend.Analysis.TradeDTO.DhBrandSaveRequestDto;
 import com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto;
 import com.royalty.backend.Analysis.TradeService.DhTradeService;
 
@@ -24,88 +26,94 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/analysis")
 public class DhTradeController {
-    
+
     private final DhTradeService tradeService;
-    
+
+    // 1. 유사 상표 검색
     @PostMapping("/run")
-    // 리턴 타입을 DTO 리스트로 변경하여 데이터 구조를 명확히 합니다.
     public List<DhTrademarkSearchResponseDto> runAnalysis(
             @RequestParam(value = "brandName", required = false) String brandName,
             @RequestParam(value = "logoUrl", required = false) String logoUrl,
-            @RequestPart(value = "logoFile", required = false) MultipartFile logoFile) {
-        
-        System.out.println("분석 요청 수신 - 키워드: " + brandName + ", 로고 유무: " + (logoFile != null));
-        System.out.println("====== 분석 요청 수신 ======");
-        System.out.println("1. 상호명(brandName): " + brandName);
-        System.out.println("2. 로고파일(logoFile) 존재 여부: " + (logoFile != null && !logoFile.isEmpty()));
-        System.out.println("3. 로고URL(logoUrl) 주소: " + logoUrl);
+            @RequestParam(value = "logoFile", required = false) MultipartFile logoFile
+    ) {
+        System.out.println(">>> 요청 수신됨");
+        System.out.println("brandName: " + brandName);
+        System.out.println("logoFile: " + (logoFile != null ? logoFile.getOriginalFilename() : "없음"));
 
-        // 서비스가 이제 DTO 리스트를 반환하므로 타입 불일치가 해결됩니다.
-        return tradeService.search(brandName, logoFile, logoUrl); 
+        return tradeService.search(brandName, logoFile);
     }
- // 2. AI 상세 분석 (6개 리스트를 받아 GPT가 1개 선정 및 분석)
-@PostMapping("/analyze")
-    public Map<String, Object> getAiDetailAnalysis(
+
+    // 2. AI 상세 분석 (분석-only: DB 저장 금지)
+    @PostMapping("/analyze")
+    public DhTrademarkSearchResponseDto getAiDetailAnalysis(
             @RequestParam("brandName") String brandName,
-            @AuthenticationPrincipal Long userId,     
+            @AuthenticationPrincipal Long userId,
             @RequestParam("logoPath") String logoPath,
             @RequestParam("brandId") int brandId,
-            @RequestBody DhTrademarkSearchResponseDto selectedTrademark) { 
-        
-        System.out.println("AI 상세 분석 시작 - 상표명: " + brandName);
-        
-        // 서비스에 정의된 메서드 이름(analyzeSingleResult)과 인자 5개에 맞춤
+            @RequestBody DhTrademarkSearchResponseDto selectedTrademark
+    ) {
+        if (userId == null) throw new RuntimeException("로그인이 필요합니다.");
+        if (selectedTrademark == null) throw new RuntimeException("분석 대상 상표 정보가 없습니다.");
+
+        // A안: /analyze에서는 저장하지 않고 분석 결과만 반환
         return tradeService.analyzeSingleResult(
-            brandName,          // 1. keyword (String)
-            selectedTrademark,  // 2. target (Dto)
-            userId,             // 3. userId (Long)
-            logoPath,           // 4. logoPath (String)
-            brandId             // 5. brandId (int)
+                brandName,
+                selectedTrademark,
+                userId,
+                logoPath,
+                brandId
         );
     }
-    @PostMapping("/save-basic")
+
+    // 3. 브랜드 기본 저장 (Brand + Brand_Logo만 저장) + brandId 반환
+    @PostMapping(value = "/save-basic", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> saveBrand(
-            @RequestParam String logoPath, 
-            @RequestParam int brandId,
-            @RequestParam Long  userId,
-            @RequestParam int patentId,
-            @RequestParam String searchedBrandName,
-            @RequestParam String aiSummary
-    		) { // <--- patentId 추가
+            @RequestPart("requestDto") DhBrandSaveRequestDto requestDto,
+            @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
+            @AuthenticationPrincipal Long userId
+    ) {
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("status", "error", "message", "로그인 필요"));
+        }
+
         try {
-            // 서비스 메서드에도 patentId를 넘기도록 수정 필요
-            tradeService.saveMyBrandBasic(logoPath, brandId, userId, patentId,aiSummary,searchedBrandName); 
-            return ResponseEntity.ok("내 브랜드 저장 성공!");
+            requestDto.setLogoFile(logoFile);
+
+            int brandId = tradeService.saveMyBrandBasic(requestDto, userId);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "status", "success",
+                            "message", "브랜드 등록 성공",
+                            "brandId", brandId
+                    )
+            );
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("저장 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("status", "error", "message", "서버 오류: " + e.getMessage()));
         }
     }
-    @PostMapping("/save-analysis")
-    public ResponseEntity<String> saveAnalysis(@RequestBody DhTrademarkSearchResponseDto historyDto) {
-        boolean isSaved = tradeService.saveAiAnalysis(historyDto);
-        if (isSaved) {
-            return ResponseEntity.ok("성공적으로 저장되었습니다.");
-        } else {
-            return ResponseEntity.status(500).body("저장에 실패했습니다.");
+
+    // 4. 분석 결과 저장 (저장-only: 버튼 눌렀을 때만 저장)
+    @PostMapping("/save")
+    public ResponseEntity<?> saveAnalysis(
+            @RequestBody DhTrademarkSearchResponseDto dto,
+            @AuthenticationPrincipal Long userId
+    ) {
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("status", "error", "message", "로그인 필요"));
         }
+
+        tradeService.saveAnalysisResult(dto, userId);
+
+        return ResponseEntity.ok(Map.of("status", "success", "message", "분석 결과 저장 완료"));
     }
-    
-    
-    
-    
-    
-    // test 데이터 강제 삽입 api 
-//    @PostMapping("/test/insert")
-//    public ResponseEntity<?> insertTestData(@RequestBody TestDataReqDto testData) {
-//        try {
-//            // 자바에서 파이썬 AI 서버(포트 8000)의 엔드포인트를 호출함
-//            return ResponseEntity.ok(tradeService.callPythonInsertTest(testData));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(500).body("테스트 데이터 삽입 실패: " + e.getMessage());
-//        }
-//    }
-    
-    
-    
-    
 }
+
+/*
+[전체 정리]
+- /analyze: 분석-only (DB 저장 금지)
+- /save-basic: brand + brand_logo만 저장하고 brandId를 응답으로 반환
+- /save: 저장-only (brand_logo_history + brand_analysis + brand.description 업데이트)
+- 실무 중요: /analyze에서 저장이 발생하면 사용자가 저장 버튼을 누르기 전에도 기록이 쌓여 UX/데이터가 꼬인다
+*/

@@ -1,15 +1,13 @@
+import { useToggleBookmark } from "@/features/bookmark/api/bookmark.queries"
 import type { Trademark } from "../types"
 import BookmarkButton from "@/features/bookmark/components/BookmarkButton"
 
 interface TrademarkTableProps {
   trademarks: Trademark[]
-  onToggleBookmark: (id: number, currentStatus: boolean) => void
 }
 
-export function TrademarkTable({
-  trademarks,
-  onToggleBookmark,
-}: TrademarkTableProps) {
+export function TrademarkTable({ trademarks }: TrademarkTableProps) {
+  const { mutate: toggleBookmark, isPending } = useToggleBookmark()
   return (
     <div className="w-full">
       {/* PC 뷰 */}
@@ -65,9 +63,13 @@ export function TrademarkTable({
                 </td>
                 <td className="py-3 px-4">
                   <BookmarkButton
-                    isBookmarked={trademark.bookmarked} // ✅ DB에서 계산되어 온 값 사용
+                    isBookmarked={trademark.bookmarked}
+                    isLoading={isPending}
                     onToggle={() =>
-                      onToggleBookmark(trademark.patentId, trademark.bookmarked)
+                      toggleBookmark({
+                        id: String(trademark.patentId),
+                        isBookmarked: trademark.bookmarked,
+                      })
                     }
                   />
                 </td>
@@ -85,9 +87,13 @@ export function TrademarkTable({
             className="relative border border-border rounded-lg p-3 bg-card flex flex-col items-center text-center gap-2"
           >
             <BookmarkButton
-              isBookmarked={trademark.bookmarked} // ✅ DB에서 계산되어 온 값 사용
+              isBookmarked={trademark.bookmarked}
+              isLoading={isPending}
               onToggle={() =>
-                onToggleBookmark(trademark.patentId, trademark.bookmarked)
+                toggleBookmark({
+                  id: String(trademark.patentId),
+                  isBookmarked: trademark.bookmarked,
+                })
               }
             />
             <div className="w-10 h-10 rounded-lg flex items-center justify-center font-medium bg-muted border border-border">

@@ -1,7 +1,10 @@
 package com.royalty.backend.mypage.dto;
 
-import lombok.Data;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Data;
 
 @Data
 public class BrandHistoryDTO {
@@ -12,6 +15,12 @@ public class BrandHistoryDTO {
     private LocalDateTime createdAt; // 변경일
     
     private String aiSummary;       // ai_summary (TEXT)
+    
+    @JsonIgnore
     private String analysisDetail;  // analysis_detail (TEXT)
     private Long patentId;          // patent_id (BIGINT)
+    
+    private String aiAnalysisSummary;
+    private String aiDetailedReport;
+    private String aiSolution;
 }

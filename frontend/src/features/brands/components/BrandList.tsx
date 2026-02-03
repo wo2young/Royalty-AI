@@ -1,12 +1,16 @@
 import { useNavigate } from "react-router-dom"
 import type { Brand } from "../types"
 import { BrandItem } from "./BrandItem"
+import { EmptyState } from "@/shared/components/EmptyState"
+import { Building2, Plus } from "lucide-react"
+import { Button } from "@/shared/components/ui/button"
 
 interface BrandListProps {
   brands: Brand[]
   onDelete: (id: number, name: string) => void
   onEdit: (id: number) => void
   onToggleNotify: (id: number, enabled: boolean) => void
+  onClick: () => void
 }
 
 export function BrandList({
@@ -14,6 +18,7 @@ export function BrandList({
   onDelete,
   onEdit,
   onToggleNotify,
+  onClick,
 }: BrandListProps) {
   const navigate = useNavigate()
 
@@ -23,9 +28,16 @@ export function BrandList({
 
   if (brands.length === 0) {
     return (
-      <div className="flex py-20 h-130 justify-center items-center border rounded-xl bg-muted/10">
-        <p className="text-muted-foreground">등록된 브랜드가 없습니다.</p>
-      </div>
+      <EmptyState
+        icon={<Building2 size={48} className="text-muted-foreground/40" />}
+        title="등록된 브랜드가 없습니다"
+        description="나만의 브랜드를 등록하고 로고와 상호를 체계적으로 관리해보세요."
+        action={
+          <Button onClick={onClick}>
+            <Plus className="w-4 h-4 mr-2" />첫 브랜드 등록하기
+          </Button>
+        }
+      />
     )
   }
 

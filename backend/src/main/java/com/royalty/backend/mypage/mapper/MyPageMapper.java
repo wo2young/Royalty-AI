@@ -67,5 +67,15 @@ public interface MyPageMapper {
     // 북마크 목록 조회 (페이징 없이 전체)
     List<BookmarkDTO> selectBookmarks(Long userId);
     
+    // ==========================================
+    // 4. PDF (report)
+    // ==========================================
+
+    // [추가] BI JSON 데이터 조회
+    String selectBrandIdentityJson(Long brandId);
+
+    // [추가] 리포트 생성 기록 저장
+    void insertReport(@Param("brandId") Long brandId, @Param("filePath") String filePath);
+    
 
 }

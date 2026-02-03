@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { bookmarkApi } from "./bookmark.api"
 import { bookmarkKeys } from "./bookmark.keys"
+import { trademarkKeys } from "@/features/trademark/api/trademark.keys"
+import { toast } from "sonner"
 
 // 북마크 목록 조회
 export const useBookmarks = () => {
@@ -29,15 +31,13 @@ export const useToggleBookmark = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bookmarkKeys.all })
       queryClient.invalidateQueries({
-        queryKey: ["trademarks"],
+        queryKey: trademarkKeys.all,
         exact: false,
       })
-
-      console.log("DB 반영 성공 및 화면 갱신 완료")
     },
     onError: (error) => {
       console.error("북마크 처리 중 오류 발생:", error)
-      alert("북마크 처리에 실패했습니다.")
+      toast.error("북마크 처리에 실패했습니다. 다시 시도해주세요.")
     },
   })
 }

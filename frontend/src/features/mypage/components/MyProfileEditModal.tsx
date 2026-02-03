@@ -1,127 +1,117 @@
-"use client"
-
 import { useState } from "react"
-import { motion } from "framer-motion"
-import { Mail, Trash2, ShieldAlert } from "lucide-react"
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
+import { motion, AnimatePresence } from "framer-motion"
+import { KeyRound, UserMinus } from "lucide-react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/shared/components/ui/dialog"
-
-interface ProfileEditModalProps {
-  isOpen: boolean
-  onClose: () => void
-  currentEmail: string
-}
+import { cn } from "@/lib/utils"
+import { VerifyPasswordStep } from "./VerifyPasswordStep"
+import { PasswordEditForm } from "./PasswordEditForm"
+import { WithdrawalSection } from "./WithdrawalSection"
 
 export function ProfileEditModal({
   isOpen,
   onClose,
-  currentEmail,
-}: ProfileEditModalProps) {
-  const [email, setEmail] = useState(currentEmail)
-  const [isDeleteMode, setIsDeleteMode] = useState(false)
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const [step, setStep] = useState<"VERIFY" | "EDIT_TAB">("VERIFY")
+  const [activeTab, setActiveTab] = useState("password")
+
+  const handleVerifySuccess = async () => {
+    setStep("EDIT_TAB")
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-110 p-0 overflow-hidden border-none bg-card shadow-2xl">
-        <div className="p-8 space-y-6">
-          <DialogHeader className="space-y-2">
-            <DialogTitle className="text-2xl font-bold tracking-tight">
-              계정 설정
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              개인 정보를 안전하게 관리하고 업데이트하세요.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-5">
-            <div className="space-y-2 group">
-              <Label
-                htmlFor="email"
-                className="text-sm font-medium group-focus-within:text-primary transition-colors"
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        setStep("VERIFY")
+        onClose()
+      }}
+    >
+      <DialogContent className="sm:max-w-md p-0 border-none bg-card shadow-2xl">
+        <DialogHeader className="sr-only">
+          <DialogTitle>프로필 수정</DialogTitle>
+        </DialogHeader>
+        <div className="p-8 h-135 flex flex-col">
+          <AnimatePresence mode="wait" initial={false}>
+            {step === "VERIFY" ? (
+              <VerifyPasswordStep key="verify" onVerify={handleVerifySuccess} />
+            ) : (
+              <motion.div
+                key="edit"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex flex-col flex-1"
               >
-                이메일 주소
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-11 bg-secondary/30 border-secondary focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-              </div>
-            </div>
+                <h2 className="text-2xl font-bold tracking-tight mb-6">
+                  계정 설정
+                </h2>
 
-            {/* 회원 탈퇴 섹션 */}
-            <div className="pt-4 border-t border-border/50">
-              {!isDeleteMode ? (
-                <button
-                  onClick={() => setIsDeleteMode(true)}
-                  className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1.5 transition-colors group"
+                <TabsPrimitive.Root
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="flex flex-col flex-1"
                 >
-                  <Trash2 className="w-3.5 h-3.5 group-hover:shake" />더 이상
-                  서비스를 이용하고 싶지 않으신가요?
-                </button>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 space-y-3"
-                >
-                  <div className="flex items-start gap-3">
-                    <ShieldAlert className="w-5 h-5 text-destructive mt-0.5" />
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-destructive">
-                        정말 탈퇴하시겠습니까?
-                      </p>
-                      <p className="text-xs text-destructive/70 leading-relaxed">
-                        탈퇴 시 모든 데이터와 혜택이 즉시 삭제되며 복구할 수
-                        없습니다.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-8 px-4 font-medium"
-                    >
-                      탈퇴 확정
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsDeleteMode(false)}
-                      className="h-8 px-4"
-                    >
-                      취소
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </div>
+                  <TabsPrimitive.List className="relative flex p-1 bg-secondary/50 rounded-xl border border-border/50 mb-6">
+                    {[
+                      { id: "password", label: "비밀번호", icon: KeyRound },
+                      { id: "withdraw", label: "회원 탈퇴", icon: UserMinus },
+                    ].map((tab) => (
+                      <TabsPrimitive.Trigger
+                        key={tab.id}
+                        value={tab.id}
+                        className={cn(
+                          "relative flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold transition-colors duration-200 outline-none z-10",
+                          activeTab === tab.id
+                            ? "text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <tab.icon className="w-4 h-4" />
+                        <span>{tab.label}</span>
+                        {activeTab === tab.id && (
+                          <motion.div
+                            layoutId="active-pill"
+                            className="absolute inset-0 bg-primary shadow-sm border border-border/40 rounded-lg -z-10"
+                            transition={{
+                              type: "spring",
+                              bounce: 0.2,
+                              duration: 0.4,
+                            }}
+                          />
+                        )}
+                      </TabsPrimitive.Trigger>
+                    ))}
+                  </TabsPrimitive.List>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 h-11 font-medium"
-            >
-              닫기
-            </Button>
-            <Button className="flex-1 h-11 font-medium shadow-lg shadow-primary/20">
-              변경사항 저장
-            </Button>
-          </div>
+                  <div className="flex-1 relative">
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        className="h-full"
+                      >
+                        {activeTab === "password" ? (
+                          <PasswordEditForm onClose={onClose} />
+                        ) : (
+                          <WithdrawalSection onCancel={onClose} />
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </TabsPrimitive.Root>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </DialogContent>
     </Dialog>
