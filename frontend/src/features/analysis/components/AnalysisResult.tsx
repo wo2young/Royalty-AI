@@ -62,7 +62,6 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
 
   const handleDetailAnalysis = (trademark: AnalysisResult) => {
     if (reportData) {
-      console.log(reportData)
       setReportData(null)
       return
     }
@@ -85,12 +84,13 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
           const formattedReport = {
             reportId: trademark.id,
             title: `${trademark.trademark_name} 상세 분석`,
-            riskScore: data.combinedSimilarity || 85,
-            summary: data.aiAnalysisSummary,
-            suggestions: data.aiSolution || [
+            applicant: trademark.applicant,
+            riskScore: data.riskScore ||  trademark.combinedSimilarity,
+            summary: data.summary,
+            suggestions: data.suggestions ||  [
               "유사 상표가 존재하므로 로고 디자인 수정을 권장합니다.",
             ],
-            createdAt: new Date().toISOString(),
+            createdAt: data.createdAt || new Date().toISOString(),
           }
           console.log("가공된 리포트 데이터:", formattedReport)
           setReportData(formattedReport)
