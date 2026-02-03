@@ -11,7 +11,7 @@ import { BookmarksPage } from "@/features/bookmark/page/BookmarkPage"
 import KakaoCallbackPage from "@/features/auth/page/KakaoCallbackPage"
 import RequireAuth from "@/shared/auth/RequireAuth"
 import { BrandDetailPage, BrandsPage } from "@/features/brands"
-
+import TestInsert from "@/features/TestH/TestInsert"
 export const router = createBrowserRouter([
   // ✅ 메인 레이아웃
   {
@@ -63,4 +63,9 @@ export const router = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPasswordPage />,
   },
+  // TEST 페이지
+  {
+    path: "/test/insert",
+    element: <TestInsert />,
+  }
 ])
