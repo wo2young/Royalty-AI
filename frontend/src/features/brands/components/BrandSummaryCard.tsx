@@ -9,6 +9,7 @@ import {
 } from "@/shared/components/ui/card"
 import { useBrands } from "../api/brand.queries"
 import { BrandSummarySkeleton } from "./skeleons/BrandSummarySkeleton"
+import { EmptyState } from "@/shared/components/EmptyState"
 
 export function BrandSummaryCard() {
   const { data: brands = [], isLoading, isError } = useBrands()
@@ -44,7 +45,7 @@ export function BrandSummaryCard() {
       <CardContent className="space-y-3">
         {isLoading ? (
           <BrandSummarySkeleton />
-        ) : (
+        ) : summaryData.length > 0 ? (
           summaryData.map((brand) => (
             <div
               key={brand.brandId}
@@ -83,6 +84,17 @@ export function BrandSummaryCard() {
               </div>
             </div>
           ))
+        ) : (
+          <EmptyState
+            icon={<Building2 size={40} />}
+            title="등록된 브랜드가 없습니다."
+            description="새로운 브랜드를 만들어 보세요"
+            action={
+              <Button onClick={() => navigate("/mypage/brand")}>
+                첫 브랜드 등록하기
+              </Button>
+            }
+          />
         )}
       </CardContent>
     </Card>

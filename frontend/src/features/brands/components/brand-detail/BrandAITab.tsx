@@ -4,12 +4,12 @@ import { TabEmptyState } from "./TabEmptyState"
 import type { BrandReport } from "../../types"
 
 interface BrandAITabProps {
-  reportList: BrandReport[]
+  report?: BrandReport
 }
 
-export function BrandAITab({ reportList }: BrandAITabProps) {
-  return reportList.length > 0 ? (
-    <BrandAIReportCard report={reportList[0]} />
+export function BrandAITab({ report }: BrandAITabProps) {
+  return report ? (
+    <BrandAIReportCard report={report} />
   ) : (
     <TabEmptyState
       icon={Brain}

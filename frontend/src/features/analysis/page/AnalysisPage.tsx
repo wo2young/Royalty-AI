@@ -7,16 +7,10 @@ import { AnalysisResults } from "../components/AnalysisResult"
 import AnalysisGeneralSelector from "../components/AnalysisGeneralSelector"
 import { FormProvider, useForm } from "react-hook-form"
 import { useAnalysisQueries } from "../api/analysis.queries"
-import type { AnalysisResult } from "../types"
+import type { Analysis, AnalysisResult } from "../types"
 import { useAuth } from "@/shared/auth/AuthContext"
 
-export interface AnalysisFormValues {
-  brandName: string
-  category: string
-  logoFile: File | null
-  logoUrl?: string
-  brandId?: number | null
-}
+export type AnalysisFormValues = Analysis
 
 const TABS = [
   { id: "both", label: "종합 분석" },
@@ -29,13 +23,15 @@ export default function TrademarkAnalysisPage() {
   const [results, setResults] = useState<AnalysisResult[]>([])
   const { user } = useAuth()
 
-  const { mutate: runAnalysis, isPending: analyzing } = useAnalysisQueries.useRunAnalysis()
-  const { mutate: saveBrand, isPending: isCreating } = useAnalysisQueries.useSaveMyBrand()
+  const { mutate: runAnalysis, isPending: analyzing } =
+    useAnalysisQueries.useRunAnalysis()
+  const { mutate: saveBrand, isPending: isCreating } =
+    useAnalysisQueries.useSaveMyBrand()
 
   const methods = useForm<AnalysisFormValues>({
     defaultValues: {
       brandName: "",
-      category: "ALL",
+      category: "전체",
       logoFile: null,
       brandId: null,
       logoUrl: "",
@@ -101,8 +97,12 @@ export default function TrademarkAnalysisPage() {
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 lg:px-6 py-8 md:py-12 max-w-5xl">
         <div className="mb-10">
-          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">상표 분석</h1>
-          <p className="text-lg text-muted-foreground">유사 상표를 분석하여 등록 가능성을 확인하세요</p>
+          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">
+            상표 분석
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            유사 상표를 분석하여 등록 가능성을 확인하세요
+          </p>
         </div>
 
         <FormProvider {...methods}>
@@ -127,7 +127,10 @@ export default function TrademarkAnalysisPage() {
                       )}
                     >
                       {activeTab === tab.id && (
-                        <motion.div layoutId="active-pill" className="absolute inset-0 bg-primary rounded-lg shadow-sm" />
+                        <motion.div
+                          layoutId="active-pill"
+                          className="absolute inset-0 bg-primary rounded-lg shadow-sm"
+                        />
                       )}
                       <span className="relative z-20">{tab.label}</span>
                     </button>

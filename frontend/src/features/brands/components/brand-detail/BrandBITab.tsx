@@ -30,7 +30,7 @@ export function BrandBITab({
           strokeWidth={1.5}
         />
         <p className="text-slate-500 font-medium">
-          AI가 브랜드를 분석 중입니다...
+          BI가 브랜드를 분석 중입니다...
         </p>
       </div>
     )
@@ -41,8 +41,8 @@ export function BrandBITab({
   ) : (
     <TabEmptyState
       icon={Brain}
-      title="AI 분석 리포트가 없습니다"
-      description="브랜드 로고와 네이밍을 AI가 정밀 분석하여 리스크를 예방해 드립니다."
+      title="BI 분석을 시작해 보세요"
+      description="등록하신 브랜드 로고와 상호명을 바탕으로 AI가 정밀 분석 리포트를 생성합니다"
       actionLabel="지금 분석 시작하기"
       onAction={handleAnalyze}
     />

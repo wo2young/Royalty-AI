@@ -2,11 +2,10 @@ import { AnimatePresence, motion, type Variants } from "framer-motion"
 import { Card } from "@/shared/components/ui/card"
 import { Button } from "@/shared/components/ui/button"
 import { Building2, Sparkles, Save } from "lucide-react"
-import type { AnalysisResult } from "../types"
+import type { AnalysisResult, BrandReport } from "../types"
 import { useAnalysisQueries } from "../api/analysis.queries"
 import { BrandAIReportCard } from "@/features/brands/components/brand-detail/BrandAIReportCard"
 import { useState } from "react"
-import type { BrandReport } from "@/features/brands/types"
 import { useAuth } from "@/shared/auth/AuthContext"
 import { useFormContext } from "react-hook-form"
 import type { AnalysisFormValues } from "../page/AnalysisPage"
@@ -17,7 +16,11 @@ const containerVariants = {
 }
 const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 100, damping: 15 },
+  },
 }
 
 interface AnalysisResultsProps {
@@ -26,7 +29,12 @@ interface AnalysisResultsProps {
 
 export function AnalysisResults({ results }: AnalysisResultsProps) {
   return (
-    <motion.div className="space-y-6" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       <div className="grid gap-3">
         {results.map((trademark) => (
           <AnalysisItem key={trademark.id} trademark={trademark} />
@@ -49,8 +57,10 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
   const myBrandName = watch("brandName") || ""
   const myLogoPath = watch("logoUrl") || "" // 파일 업로드면 S3 URL을 프론트가 몰라서 일단 ""/URL만 사용
 
-  const { mutate: analyzeDetail, isPending: isAnalyzing } = useAnalysisQueries.useAnalyzeDetail()
-  const { mutate: saveFinal, isPending: isSaving } = useAnalysisQueries.useSaveFinal()
+  const { mutate: analyzeDetail, isPending: isAnalyzing } =
+    useAnalysisQueries.useAnalyzeDetail()
+  const { mutate: saveFinal, isPending: isSaving } =
+    useAnalysisQueries.useSaveFinal()
 
   const handleDetailAnalysis = () => {
     if (reportData) {
@@ -76,6 +86,7 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
       {
         onSuccess: (data: any) => {
           // /save에 그대로 보낼 “DTO 원본” 저장
+
           setAnalysisPayload(data)
 
           setReportData({
@@ -84,7 +95,9 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
             riskScore: trademark.combinedSimilarity,
             // 백엔드 응답은 aiSummary/aiAnalysisSummary 둘 중 하나로 올 수 있음
             summary: data.aiAnalysisSummary || data.aiSummary || "",
-            suggestions: data.aiSolution ? [data.aiSolution] : ["유사 상표가 존재하므로 로고 디자인 수정을 권장합니다."],
+            suggestions: data.aiSolution
+              ? [data.aiSolution]
+              : ["유사 상표가 존재하므로 로고 디자인 수정을 권장합니다."],
             createdAt: new Date().toISOString(),
           })
         },
@@ -96,7 +109,11 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
   const handleSaveResult = () => {
     if (!user || !reportData) return
 
-    if (currentBrandId === null || currentBrandId === undefined || currentBrandId === 0) {
+    if (
+      currentBrandId === null ||
+      currentBrandId === undefined ||
+      currentBrandId === 0
+    ) {
       alert("먼저 '내 브랜드 등록하기'로 brandId를 만든 뒤 저장할 수 있습니다.")
       return
     }
@@ -106,7 +123,9 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
       return
     }
 
-    if (confirm(`'${trademark.trademark_name}' 분석 리포트를 저장하시겠습니까?`)) {
+    if (
+      confirm(`'${trademark.trademark_name}' 분석 리포트를 저장하시겠습니까?`)
+    ) {
       // brandId/logoPath는 혹시 빠졌을 수 있으니 한번 더 안전 주입
       const payloadToSave = {
         ...analysisPayload,
@@ -126,7 +145,11 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
         <div className="flex items-center gap-6">
           <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 border overflow-hidden">
             {trademark.imageUrl ? (
-              <img src={trademark.imageUrl} alt={trademark.trademark_name} className="object-cover w-full h-full" />
+              <img
+                src={trademark.imageUrl}
+                alt={trademark.trademark_name}
+                className="object-cover w-full h-full"
+              />
             ) : (
               <Building2 className="h-7 w-7 text-slate-400" />
             )}
@@ -135,8 +158,12 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-3">
-                <h4 className="text-base font-bold text-slate-900">{trademark.trademark_name}</h4>
-                <span className="text-xs font-bold text-indigo-600">{trademark.combinedSimilarity.toFixed(1)}% 일치</span>
+                <h4 className="text-base font-bold text-slate-900">
+                  {trademark.trademark_name}
+                </h4>
+                <span className="text-xs font-bold text-indigo-600">
+                  {trademark.combinedSimilarity.toFixed(1)}% 일치
+                </span>
               </div>
 
               <Button
@@ -146,13 +173,20 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
                 onClick={handleDetailAnalysis}
                 disabled={isAnalyzing}
               >
-                <Sparkles className={`h-3.5 w-3.5 ${isAnalyzing ? "animate-spin" : ""}`} />
-                {isAnalyzing ? "분석 중..." : reportData ? "결과 접기" : "AI 정밀 진단"}
+                <Sparkles
+                  className={`h-3.5 w-3.5 ${isAnalyzing ? "animate-spin" : ""}`}
+                />
+                {isAnalyzing
+                  ? "분석 중..."
+                  : reportData
+                    ? "결과 접기"
+                    : "AI 정밀 진단"}
               </Button>
             </div>
 
             <div className="text-sm text-slate-500">
-              <span className="font-medium text-slate-400">출원인:</span> {trademark.applicant}
+              <span className="font-medium text-slate-400">출원인:</span>{" "}
+              {trademark.applicant}
             </div>
           </div>
         </div>
@@ -173,10 +207,11 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
                   onClick={handleSaveResult}
                   disabled={isSaving}
                 >
-                  {isSaving ? "저장 중..." : (
+                  {isSaving ? (
+                    "저장 중..."
+                  ) : (
                     <>
-                      <Save className="h-4 w-4" />
-                      이 분석 리포트 저장하기
+                      <Save className="h-4 w-4" />이 분석 리포트 저장하기
                     </>
                   )}
                 </Button>

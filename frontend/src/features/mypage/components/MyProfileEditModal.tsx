@@ -101,7 +101,7 @@ export function ProfileEditModal({
                         className="h-full"
                       >
                         {activeTab === "password" ? (
-                          <PasswordEditForm />
+                          <PasswordEditForm onClose={onClose} />
                         ) : (
                           <WithdrawalSection onCancel={onClose} />
                         )}

@@ -6,6 +6,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select"
 import { CATEGORY_OPTIONS } from "./constants"
+import { cn } from "@/lib/utils"
 
 interface CategoryFilterProps {
   selectedId: string
@@ -20,7 +21,7 @@ export function CategoryFilter({
 }: CategoryFilterProps) {
   return (
     <Select value={selectedId} onValueChange={onSelect}>
-      <SelectTrigger className={`w-full sm:w-48 h-9 ${className}`}>
+      <SelectTrigger className={cn("w-full sm:w-48 h-9", className)}>
         <SelectValue placeholder="카테고리 선택" />
       </SelectTrigger>
       <SelectContent>
