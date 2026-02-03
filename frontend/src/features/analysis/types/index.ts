@@ -43,6 +43,15 @@ export interface SaveMyBrandBasicRequest {
   aiSummary?: string
 }
 
+// 브랜드 저장 응답
+export interface SaveBrandResponse {
+  brandId?: number
+  data?: {
+    brandId?: number
+  }
+  message?: string
+}
+
 // 최종 분석 결과 저장 요청
 export interface SaveAnalysisRequest {
   brandId: number
@@ -69,4 +78,13 @@ export interface BrandReport {
   suggestions: string[]
   createdAt: string
   detailedReport?: string
+}
+
+export interface DetailAnalysisResponse {
+  aiAnalysisSummary?: string
+  aiSummary?: string
+  aiSolution?: string
+  aiDetailedReport?: string
+  brandId?: number
+  logoPath?: string
 }

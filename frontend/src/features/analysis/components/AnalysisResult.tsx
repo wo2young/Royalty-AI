@@ -9,6 +9,7 @@ import { useState } from "react"
 import { useAuth } from "@/shared/auth/AuthContext"
 import { useFormContext } from "react-hook-form"
 import type { AnalysisFormValues } from "../page/AnalysisPage"
+import { toast } from "sonner"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -114,18 +115,11 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
       currentBrandId === undefined ||
       currentBrandId === 0
     ) {
-      alert("먼저 '내 브랜드 등록하기'로 brandId를 만든 뒤 저장할 수 있습니다.")
+      toast.error("먼저 '내 브랜드 등록하기'로 브랜드를 만들어주세요")
       return
     }
 
-    if (!analysisPayload) {
-      alert("저장할 분석 데이터가 없습니다. AI 정밀 진단을 먼저 실행하세요.")
-      return
-    }
-
-    if (
-      confirm(`'${trademark.trademark_name}' 분석 리포트를 저장하시겠습니까?`)
-    ) {
+    {
       // brandId/logoPath는 혹시 빠졌을 수 있으니 한번 더 안전 주입
       const payloadToSave = {
         ...analysisPayload,
