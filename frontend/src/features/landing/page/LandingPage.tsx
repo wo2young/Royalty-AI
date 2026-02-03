@@ -67,7 +67,7 @@ export default function LandingPage() {
       </section>
 
       {/* 핵심 분석 기능 */}
-      <section className="w-full py-24 bg-slate-50/50">
+      <section className="w-full py-24">
         <div className="container px-4 mx-auto">
           <motion.div className="text-center mb-16" {...fadeIn}>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
