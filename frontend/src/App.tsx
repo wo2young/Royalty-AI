@@ -10,7 +10,7 @@ function App() {
         richColors
         closeButton
         toastOptions={{
-          style: { borderRadius: "12px" }, // 팀장님 UI 스타일에 맞춘 라운딩
+          style: { borderRadius: "12px" },
         }}
       />
       <RouterProvider router={router} />

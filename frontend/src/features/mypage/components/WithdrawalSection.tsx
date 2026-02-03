@@ -62,7 +62,7 @@ export function WithdrawalSection({ onCancel }: { onCancel: () => void }) {
                 onClick={() => deleteAccount()}
                 className="bg-destructive hover:bg-destructive/90 rounded-xl"
               >
-                회원 탈퇴 확정
+                회원 탈퇴
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

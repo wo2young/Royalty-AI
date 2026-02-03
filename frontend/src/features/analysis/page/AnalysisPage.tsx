@@ -10,6 +10,7 @@ import { useAnalysisQueries } from "../api/analysis.queries"
 import type { Analysis, AnalysisResult, SaveBrandResponse } from "../types"
 import { useAuth } from "@/shared/auth/AuthContext"
 import { Button } from "@/shared/components/ui/button"
+import { toast } from "sonner"
 
 export type AnalysisFormValues = Analysis
 
@@ -22,6 +23,7 @@ export default function TrademarkAnalysisPage() {
   const [activeTab, setActiveTab] = useState("both")
   const [analyzed, setAnalyzed] = useState(false)
   const [results, setResults] = useState<AnalysisResult[]>([])
+
   const { user } = useAuth()
 
   const { mutate: runAnalysis, isPending: analyzing } =
@@ -50,11 +52,6 @@ export default function TrademarkAnalysisPage() {
     const logoFile = methods.getValues("logoFile")
     const logoUrl = methods.getValues("logoUrl")
 
-    if (!brandName) {
-      alert("브랜드 이름을 입력해주세요.")
-      return
-    }
-
     saveBrand(
       { brandName, category, logoFile, logoUrl },
       {
@@ -65,12 +62,11 @@ export default function TrademarkAnalysisPage() {
           if (returnedBrandId) {
             methods.setValue("brandId", returnedBrandId)
           }
-
-          alert("내 브랜드로 등록되었습니다! (brandId가 저장됨)")
+          toast.success("내 브랜드로 등록되었습니다!")
         },
         onError: (error) => {
           console.error("브랜드 생성 실패:", error)
-          alert("브랜드 등록 중 오류가 발생했습니다.")
+          toast.error("브랜드 등록 중 오류가 발생했습니다.")
         },
       }
     )
@@ -78,7 +74,7 @@ export default function TrademarkAnalysisPage() {
 
   const onSubmit = (data: AnalysisFormValues) => {
     if (!data.brandName.trim() && !data.logoFile && !data.brandId) {
-      alert("상호명을 입력하거나 분석할 브랜드를 선택해주세요.")
+      toast.error("상호명을 입력하거나 분석할 브랜드를 선택해주세요")
       return
     }
 
@@ -89,7 +85,7 @@ export default function TrademarkAnalysisPage() {
       },
       onError: (error) => {
         console.error("분석 실패:", error)
-        alert("분석 중 오류가 발생했습니다. 다시 시도해주세요.")
+        toast.error("분석 중 오류가 발생했습니다. 다시 시도해주세요")
       },
     })
   }

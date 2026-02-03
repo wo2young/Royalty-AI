@@ -9,6 +9,7 @@ import type {
 import { queryClient } from "@/shared/api/queryClient"
 import { brandKeys } from "@/features/brands/api/brand.keys"
 import { analysisKeys } from "./analysis.keys"
+import { toast } from "sonner"
 
 export const useAnalysisQueries = {
   // 유사 상표 검색
@@ -47,7 +48,7 @@ export const useAnalysisQueries = {
         // 분석 리스트 및 브랜드 정보 동기화
         queryClient.invalidateQueries({ queryKey: analysisKeys.lists() })
         queryClient.invalidateQueries({ queryKey: brandKeys.all })
-        alert("분석 결과가 성공적으로 저장되었습니다.")
+        toast.success("분석 결과가 성공적으로 저장되었습니다.")
       },
     })
   },
