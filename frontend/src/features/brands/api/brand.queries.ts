@@ -27,7 +27,10 @@ export const useBrandDetail = (brandId: number) => {
         parsedDetail: latest
           ? {
               title: latest.version || `${data.brandName} AI 분석`,
-              riskScore: latest.textSimilarity ?? 0,
+              riskScore: Math.round(
+                (latest.textSimilarity ?? 0) * 0.8 +
+                  (latest.imageSimilarity ?? 0) * 0.2
+              ),
               summary: latest.aiAnalysisSummary || latest.aiSummary || "",
               suggestions: latest.aiSolution ? [latest.aiSolution] : [],
               createdAt: latest.createdAt,
