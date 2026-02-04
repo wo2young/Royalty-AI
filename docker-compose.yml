@@ -1,13 +1,25 @@
 version: '3.8'
 
 services:
-  ai-model:
-    build: ./ai_model
-    container_name: royalty-ai
+  # ☕ 스프링 부트 (백엔드)
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env  # EC2의 .env 내용을 가져옴
+    volumes:
+      # EC2의 firebase 파일을 컨테이너 내부 /app 폴더로 연결
+      - ./firebase-service-account.json:/app/firebase-service-account.json
+    depends_on:
+      - ai-server
+    restart: always
+
+  # 🐍 AI 서버
+  ai-server:
+    build: ./Analysis
     ports:
       - "8000:8000"
-    restart: always
-    
-    # 여기에 적으면 .env 안의 모든 변수가 컨테이너로 전달됩니다.
     env_file:
-      - .env
+      - .env  # 같은 .env 사용
+    restart: always
