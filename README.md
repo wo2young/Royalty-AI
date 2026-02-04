@@ -5,10 +5,10 @@
 
 ## 🛠️ Tech Stack
 - **Frontend:** React
-- **Backend:** FastAPI
-- **DB:** PostgreSQL, Azure Blob Storage
-- **AI:** ResNet50 (Image), SBERT (Text)
-- **Infra:** Azure DevOps, Docker
+- **Backend:** Spring Boot, Python
+- **DB:** PostgreSQL, AWS RDS, AWS S3 
+- **AI:** MobileNetV3 (Image), Ko-SBERT (Text)
+- **Infra:** AWS, Docker
 
 ---
 
