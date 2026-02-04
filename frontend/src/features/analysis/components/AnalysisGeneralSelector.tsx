@@ -8,6 +8,7 @@ import { Controller, useFormContext } from "react-hook-form"
 import type { AnalysisFormValues } from "../page/AnalysisPage"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { useFileDrop } from "@/shared/hook/useFileDrop"
 
 interface GeneralSelectorProps {
   analyzing: boolean
@@ -28,6 +29,13 @@ export default function AnalysisGeneralSelector({
 
   const brandId = watch("brandId")
   const logoFile = watch("logoFile")
+
+  const { isDragging, dragEvents } = useFileDrop({
+    onFileDrop: (file) => {
+      setValue("logoFile", file)
+      setValue("brandId", null)
+    },
+  })
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -53,11 +61,17 @@ export default function AnalysisGeneralSelector({
         <Label>로고 이미지</Label>
         <div
           onClick={() => fileInputRef.current?.click()}
+          {...dragEvents} // 모든 드래그 이벤트를 한 번에 바인딩
           className={cn(
             "group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all py-8",
-            logoFile
-              ? "border-primary bg-primary/5"
-              : "border-slate-200 hover:border-primary hover:bg-slate-50"
+            // 드래그 중이거나 파일이 없을 때 기본 스타일
+            isDragging || !logoFile
+              ? "border-slate-200 hover:border-primary hover:bg-slate-50"
+              : "",
+            // 드래그 시 호버 효과 강제 활성화
+            isDragging && "border-primary bg-slate-50 shadow-inner",
+            // 파일 업로드 완료 상태
+            logoFile && !isDragging && "border-primary bg-primary/5"
           )}
         >
           {logoFile ? (
@@ -75,22 +89,35 @@ export default function AnalysisGeneralSelector({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-slate-400"
+                className="h-7 text-slate-400 hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation()
                   setValue("logoFile", null)
                 }}
               >
-                <X className="mr-1 h-3 w-3" /> 삭제
+                <X className="mr-1 h-3 w-3 " /> 삭제
               </Button>
             </div>
           ) : (
             <>
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 group-hover:bg-primary/10">
-                <Upload className="h-6 w-6 text-slate-400 group-hover:text-primary" />
+              <div
+                className={cn(
+                  "mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-colors group-hover:bg-primary/10",
+                  isDragging && "bg-primary/10"
+                )}
+              >
+                <Upload
+                  className={cn(
+                    "h-6 w-6 text-slate-400 transition-colors group-hover:text-primary",
+                    isDragging && "text-primary"
+                  )}
+                />
               </div>
               <p className="text-sm font-medium text-slate-600">
                 이미지 업로드 또는 드래그
+              </p>
+              <p className="text-sm font-medium text-slate-600">
+                PNG, JPG, SVG (최대 5MB)
               </p>
             </>
           )}
