@@ -1,6 +1,7 @@
 import { useToggleBookmark } from "@/features/bookmark/api/bookmark.queries"
 import type { Trademark } from "../types"
 import BookmarkButton from "@/features/bookmark/components/BookmarkButton"
+import { Building2 } from "lucide-react"
 
 interface TrademarkTableProps {
   trademarks: Trademark[]
@@ -43,9 +44,7 @@ export function TrademarkTable({ trademarks }: TrademarkTableProps) {
                       className="w-10 h-10 rounded-lg object-cover border border-border"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium bg-muted text-foreground border border-border">
-                      {trademark.trademarkName.charAt(0)}
-                    </div>
+                    <Building2 className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
                   )}
                 </td>
                 <td className="py-3 px-4">
@@ -96,8 +95,16 @@ export function TrademarkTable({ trademarks }: TrademarkTableProps) {
                 })
               }
             />
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center font-medium bg-muted border border-border">
-              {trademark.trademarkName.charAt(0)}
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center font-medium border border-border">
+              {trademark.imageUrl ? (
+                <img
+                  src={trademark.imageUrl}
+                  alt={trademark.trademarkName}
+                  className="w-10 h-10 rounded-lg object-cover border border-border"
+                />
+              ) : (
+                <Building2 className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+              )}
             </div>
             <div className="w-full">
               <h3 className="font-semibold text-xs truncate">

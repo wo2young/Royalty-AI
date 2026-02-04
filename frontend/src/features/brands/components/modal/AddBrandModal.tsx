@@ -27,9 +27,10 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select"
 import { brandFormSchema, type BrandFormValues } from "../../types"
-import { useState } from "react"
 import { Textarea } from "@/shared/components/ui/textarea"
 import { useCreateBrand } from "../../api/brand.queries"
+import { cn } from "@/lib/utils"
+import { useFileDrop } from "@/shared/hook/useFileDrop"
 
 interface AddBrandModalProps {
   open: boolean
@@ -38,7 +39,6 @@ interface AddBrandModalProps {
 
 export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
   const { mutate: createBrand, isPending } = useCreateBrand()
-  const [isDragging, setIsDragging] = useState(false)
 
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(brandFormSchema),
@@ -50,28 +50,17 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
     },
   })
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const handleDragLeave = () => setIsDragging(false)
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files?.[0]
-    if (file && file.type.startsWith("image/")) {
+  const { isDragging, dragEvents } = useFileDrop({
+    onFileDrop: (file) => {
       form.setValue("logoImage", file)
-    }
-  }
+    },
+  })
 
   // 실시간 미리보기를 위한 값 관찰
-  const watchedValues = useWatch({
+  const [brandName, category, logoImage] = useWatch({
     control: form.control,
     name: ["brandName", "category", "logoImage"],
   })
-  const [brandName, category, logoImage] = watchedValues
 
   const onSubmit = (data: BrandFormValues) => {
     const formData = new FormData()
@@ -85,15 +74,12 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
 
     createBrand(formData, {
       onSuccess: () => {
-        console.log(Object.fromEntries(formData))
         onOpenChange(false)
         form.reset()
-        //TODO: Toast 알림
       },
       onError: (error) => {
         console.error("등록 실패:", error)
         alert("브랜드 등록 중 오류가 발생했습니다.")
-        //TODO: Toast 알림
       },
     })
   }
@@ -102,7 +88,7 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-175 p-0 overflow-hidden">
         <div className="grid sm:grid-cols-[240px_1fr]">
-          {/* Preview (UI 유지) */}
+          {/* Preview 섹션 (UI 동일) */}
           <div className="bg-primary p-6 flex flex-col items-center justify-center text-primary-foreground">
             <div className="w-24 h-24 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-4 overflow-hidden">
               {logoImage ? (
@@ -123,7 +109,7 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
             </p>
           </div>
 
-          {/* Form */}
+          {/* Form 섹션 */}
           <div className="p-6">
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl">브랜드 추가</DialogTitle>
@@ -165,10 +151,10 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="전체">전체</SelectItem>
                           <SelectItem value="IT · 플랫폼">
                             IT · 플랫폼
                           </SelectItem>
+                          <SelectItem value="커머스">커머스</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -176,35 +162,35 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                   )}
                 />
 
-                {/* Logo Upload 필드 */}
+                {/* 3. Logo Upload 필드 (훅 적용) */}
                 <div className="space-y-2">
                   <FormLabel>로고 이미지</FormLabel>
                   <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors hover:border-primary hover:bg-primary/10 ${
+                    {...dragEvents}
+                    className={cn(
+                      "border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer hover:border-primary hover:bg-primary/5",
                       isDragging
-                        ? "border-primary bg-primary/10"
+                        ? "border-primary bg-primary/10 scale-[1.01]"
                         : "border-muted-foreground/20"
-                    }`}
+                    )}
                   >
-                    {form.watch("logoImage") ? (
+                    {logoImage ? (
                       <div className="flex items-center justify-between bg-secondary/50 p-2 rounded">
-                        <span className="text-sm truncate">
-                          {form.watch("logoImage")?.name}
+                        <span className="text-sm truncate max-w-45">
+                          {logoImage.name}
                         </span>
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
-                          className=" text-muted-foreground hover:text-destructive"
+                          className="h-7 text-muted-foreground hover:text-destructive"
                           onClick={() => form.setValue("logoImage", null)}
                         >
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
                     ) : (
-                      <label className="cursor-pointer">
+                      <label className="cursor-pointer block">
                         <input
                           type="file"
                           className="hidden"
@@ -225,6 +211,7 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                   </div>
                 </div>
 
+                {/* 설명 섹션 */}
                 <FormField
                   control={form.control}
                   name="description"
@@ -234,8 +221,8 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                       <FormControl>
                         <Textarea
                           placeholder="브랜드에 대한 설명을 입력하세요"
-                          rows={2} // 2줄 높이 설정
-                          className="resize-none" // 크기 조절 비활성화 (깔끔함)
+                          rows={2}
+                          className="resize-none"
                           {...field}
                         />
                       </FormControl>

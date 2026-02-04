@@ -1,5 +1,5 @@
 import { Button } from "@/shared/components/ui/button"
-import { Building2, Trash2, Edit2, Eye, Bell, BellOff } from "lucide-react"
+import { Building2, Trash2, Edit2, Eye } from "lucide-react"
 import type { Brand } from "../types"
 
 interface BrandItemProps {
@@ -7,20 +7,14 @@ interface BrandItemProps {
   onView?: (id: number) => void
   onEdit?: (id: number) => void
   onDelete?: (id: number) => void
-  onToggleNotify?: (id: number, active: boolean) => void
 }
 
-export function BrandItem({
-  brand,
-  onView,
-  onEdit,
-  onDelete,
-  onToggleNotify,
-}: BrandItemProps) {
+export function BrandItem({ brand, onView, onEdit, onDelete }: BrandItemProps) {
   const isActive = brand.notificationEnabled
 
   return (
     <div
+      onClick={() => onView?.(brand.brandId)}
       className={`relative flex items-center gap-4 p-5 rounded-xl border transition-all duration-300 cursor-pointer group ${
         isActive
           ? "border-indigo-500/50 bg-indigo-50/10 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
@@ -58,25 +52,6 @@ export function BrandItem({
 
       {/* 버튼 영역 */}
       <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleNotify?.(brand.brandId, !brand.notificationEnabled)
-          }}
-          className={`h-8 w-8 transition-colors ${
-            brand.notificationEnabled
-              ? "text-indigo-500 hover:text-indigo-600 bg-indigo-50"
-              : "text-muted-foreground hover:text-primary"
-          }`}
-        >
-          {brand.notificationEnabled ? (
-            <Bell className="w-4 h-4 fill-current animate-ring" />
-          ) : (
-            <BellOff className="w-4 h-4" />
-          )}
-        </Button>
         <Button
           variant="ghost"
           size="icon"

@@ -11,13 +11,15 @@ export function Header() {
   const { isLoggedIn } = useAuth()
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 relative">
+      <div className="mx-auto flex h-16 items-center justify-between px-6 md:px-12 relative">
         {/* 로고 영역 */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold tracking-tight text-primary">
-              Royalty-AI
-            </span>
+            <img
+              src="/royalty.png"
+              className="w-16 h-16 object-cover rounded-3xl"
+              alt="Service Preview"
+            />
           </Link>
         </div>
 

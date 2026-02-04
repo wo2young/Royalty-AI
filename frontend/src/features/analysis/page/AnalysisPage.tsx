@@ -77,6 +77,8 @@ export default function TrademarkAnalysisPage() {
       toast.error("상호명을 입력하거나 분석할 브랜드를 선택해주세요")
       return
     }
+    setAnalyzed(false)
+    setResults([])
 
     runAnalysis(data, {
       onSuccess: (response) => {
@@ -99,7 +101,7 @@ export default function TrademarkAnalysisPage() {
         )}
       >
         <div className="mb-10">
-          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">
+          <h1 className="text-balance text-3xl font-bold tracking-tight mb-3">
             상표 분석
           </h1>
           <p className="text-lg text-muted-foreground">
