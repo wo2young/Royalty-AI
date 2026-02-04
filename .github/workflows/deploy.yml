@@ -8,6 +8,7 @@ on:
     paths:
       - 'backend/**'         # 백엔드 코드 변경 시
       - 'ai_model/**'        # AI 모델 코드 변경 시 (폴더명 확인 필수!)
+      - 'frontend/**'       # [추가] 프론트엔드 변경 감지 필수
       - 'docker-compose.yml' # 설정 파일 변경 시
       - '.github/workflows/deploy.yml' # 이 파일 자체가 바뀔 때
 
