@@ -39,13 +39,32 @@ public class DetectionServiceImpl implements DetectionService {
         }
 
         // 2️. 감시 중인 브랜드 조회
-        List<BrandVO> brands = brandMapper.findEnabledBrands();
+        List<BrandVO> brands = brandMapper.findEnabledBrands()
+        		.stream()
+        		.limit(50)
+        		.toList();
+        		
         log.info("[DETECTION] 감시 ON 브랜드 수 = {}", brands.size());
 
         for (PatentVO patent : recentPatents) {
             log.info("[DETECTION] 특허 처리 시작 patentId={}", patent.getPatentId());
 
             for (BrandVO brand : brands) {
+            	
+            	// 중복 방지
+                int exists = detectionEventMapper.existsDetectionEvent(
+                	    brand.getBrandId(),
+                	    patent.getPatentId()
+                );
+
+                if (exists > 0) {
+                	log.info(
+                			"[DETECTION] 이미 감지됨 - brandId={}, patentId={}",
+                	        brand.getBrandId(),
+                	        patent.getPatentId()
+                			);
+                continue;
+                }
 
                 Double imageSimilarity = null;
                 Double textSimilarity = null;
@@ -116,21 +135,7 @@ public class DetectionServiceImpl implements DetectionService {
                     matchType = "TEXT";
                 }
 
-                
-                // 7. 중복 방지
-                int exists = detectionEventMapper.existsDetectionEvent(
-                	    brand.getBrandId(),
-                	    patent.getPatentId()
-                	);
-
-                	if (exists > 0) {
-                	    log.info(
-                	        "[DETECTION] 이미 감지됨 - brandId={}, patentId={}",
-                	        brand.getBrandId(),
-                	        patent.getPatentId()
-                	    );
-                	    continue;
-                	}
+               
 
 
                 // 8. DetectionEvent 저장

@@ -14,7 +14,7 @@ public class DetectionScheduler {
     private final DetectionService detectionService;
 
     //600초(10분) 마다 실힝(100,00ms)
-    @Scheduled(fixedDelay = 600_000)
+    @Scheduled(fixedDelay = 600_00)
     public void runDetectionJob() {
         log.info("[DETECTION] 감지 스케줄러 실행");
         detectionService.runDetection();
