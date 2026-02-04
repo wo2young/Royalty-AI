@@ -1,0 +1,44 @@
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY . .
+
+# ==========================================
+# 🔑 환경변수 주입 (Build-time Injection)
+# ==========================================
+# 1. Docker Compose에서 넘어온 값을 받음 (ARG)
+ARG VITE_KAKAO_CLIENT_ID
+ARG VITE_KAKAO_REDIRECT_URI
+ARG VITE_FIREBASE_API_KEY
+ARG VITE_FIREBASE_AUTH_DOMAIN
+ARG VITE_FIREBASE_PROJECT_ID
+ARG VITE_FIREBASE_STORAGE_BUCKET
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ARG VITE_FIREBASE_APP_ID
+ARG VITE_FIREBASE_VAPID_KEY
+
+# 2. 받은 값을 환경변수로 고정 (ENV)
+ENV VITE_KAKAO_CLIENT_ID=$VITE_KAKAO_CLIENT_ID
+ENV VITE_KAKAO_REDIRECT_URI=$VITE_KAKAO_REDIRECT_URI
+ENV VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY
+ENV VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN
+ENV VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID
+ENV VITE_FIREBASE_STORAGE_BUCKET=$VITE_FIREBASE_STORAGE_BUCKET
+ENV VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID
+ENV VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
+ENV VITE_FIREBASE_VAPID_KEY=$VITE_FIREBASE_VAPID_KEY
+
+# 빌드 실행 (이때 위 변수들이 코드에 포함됨)
+RUN npm run build
+
+# --- Nginx 실행 단계 ---
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Vite는 빌드 결과물이 보통 'dist' 폴더에 생깁니다. (CRA는 build)
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
