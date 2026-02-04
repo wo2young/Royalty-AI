@@ -33,7 +33,7 @@
         SELECT
             n.notification_id     AS notificationId,
             n.is_read             AS isRead,
-            n.created_at AT TIME ZONE 'UTC' AS createdAt,
+            n.created_at AS createdAt,
 
 
             b.brand_id            AS brandId,
