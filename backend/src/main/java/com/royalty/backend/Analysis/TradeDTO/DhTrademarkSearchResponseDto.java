@@ -64,4 +64,7 @@ public class DhTrademarkSearchResponseDto {
     public String getName() {
         return trademarkName;
     }
+    
+    private String textVector;  // 추가 (brand 테이블용)
+    private String imageVector; // 추가 (brand_logo 테이블용)
 }

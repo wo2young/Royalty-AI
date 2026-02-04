@@ -81,20 +81,26 @@
         WHERE brand_id = #{brandId} AND user_id = #{userId}
     </delete>
 
-    <select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
-        SELECT 
-            version, 
-            image_path AS imagePath, 
-            image_similarity AS imageSimilarity, 
-            text_similarity AS textSimilarity, 
-            created_at AS createdAt,
-            ai_summary AS aiSummary,      
-            analysis_detail AS analysisDetail, 
-            patent_id AS patentId         
-        FROM brand_logo_history
-        WHERE brand_id = #{brandId}
-        ORDER BY created_at DESC
-    </select>
+	<select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+	    SELECT 
+	        h.version, 
+	        h.image_path AS imagePath, 
+	        h.image_similarity AS imageSimilarity, 
+	        h.text_similarity AS textSimilarity, 
+	        h.created_at AS createdAt,
+	        h.ai_summary AS aiSummary,      
+	        h.analysis_detail AS analysisDetail, 
+	        h.patent_id AS patentId,
+	        
+	        -- [추가됨] 특허 테이블과 조인해서 상대방 이미지 URL 가져오기
+	        p.image_url AS targetImageUrl,
+	        p.trademark_name AS targetName
+	        
+	    FROM brand_logo_history h
+	    LEFT JOIN patent p ON h.patent_id = p.patent_id  -- patent_id로 연결
+	    WHERE h.brand_id = #{brandId}
+	    ORDER BY h.created_at DESC
+	</select>
 
     <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
         SELECT 

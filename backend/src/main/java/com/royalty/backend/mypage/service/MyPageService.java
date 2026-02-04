@@ -133,6 +133,7 @@ public class MyPageService {
     public byte[] generateBrandReport(Long userId, Long brandId) {
 
         // 1. 데이터 준비
+        // ★ 체크: getBrandDetail 내부에서 아까 수정한 Mapper(targetImageUrl 포함)를 호출하는지 확인!
         BrandDetailDTO brand = getBrandDetail(userId, brandId);
         List<BrandHistoryDTO> historyList = brand.getHistoryList();
         
@@ -140,20 +141,26 @@ public class MyPageService {
             throw new IllegalStateException("분석 데이터가 존재하지 않아 리포트를 생성할 수 없습니다.");
         }
 
-        // 2. 핵심 로직: 점수 계산
+        // 2. 핵심 로직: 최신 이력 추출 및 점수 계산
+        // (SQL에서 이미 정렬했다면 historyList.get(0)이 더 빠르지만, 안전하게 pickLatestHistory 사용도 좋습니다)
         BrandHistoryDTO latest = pickLatestHistory(historyList);
+        
+        // 🔥 [중요 수정] 여기서 JSON 파싱 메서드를 꼭 호출해야 DTO에 글자가 채워집니다!
+        fillAiFieldsFromAnalysisDetail(latest); 
+
         float imageSim = normalizeToPercent(latest.getImageSimilarity() != null ? latest.getImageSimilarity() : 0f);
         float textSim  = normalizeToPercent(latest.getTextSimilarity()  != null ? latest.getTextSimilarity()  : 0f);
         float maxSim = Math.max(imageSim, textSim);
         int probability = clampInt(Math.round(100 - maxSim), 0, 100);
 
-        // 3. ⭐ [NEW] BI 데이터 조회 및 파싱
+        // 3. BI 데이터 조회 및 파싱
         BrandBiData biData = getBiDataOrFallback(brandId, brand);
 
         // 4. PDF 생성 위임 (biData 전달)
+        // Generator가 latest.getTargetImageUrl()을 쓰므로, latest에 데이터가 있는지 확인 필수
         byte[] pdfBytes = brandReportGenerator.generate(brand, latest, historyList, userId, probability, biData);
 
-        // 5. ⭐ [NEW] 리포트 생성 기록 저장
+        // 5. 리포트 생성 기록 저장
         myPageMapper.insertReport(brandId, "GENERATED_ON_" + System.currentTimeMillis());
 
         return pdfBytes;
