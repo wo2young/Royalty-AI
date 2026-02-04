@@ -60,7 +60,7 @@ export default function LandingPage() {
               className="h-14 px-10 text-lg rounded-full"
               onClick={() => navigate("/trademarks")}
             >
-              기존 상표 둘러보기
+              특허청 상표보기
             </Button>
           </div>
         </motion.div>
