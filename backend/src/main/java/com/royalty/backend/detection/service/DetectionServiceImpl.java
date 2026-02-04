@@ -111,8 +111,8 @@ public class DetectionServiceImpl implements DetectionService {
                     riskLevel = textSimilarity;
                 }
                 
-                boolean imagePass = imageSimilarity != null && imageSimilarity >= 0.90;
-                boolean textPass  = textSimilarity  != null && textSimilarity  >= 0.90;
+                boolean imagePass = imageSimilarity != null && imageSimilarity >= 0.50;
+                boolean textPass  = textSimilarity  != null && textSimilarity  >= 0.50;
 
                 // 🔴 로고 OR 텍스트 중 하나라도 90% 이상이면 통과
                 if (!imagePass && !textPass) {
@@ -178,6 +178,15 @@ public class DetectionServiceImpl implements DetectionService {
                     matchType,
                     String.format("%.3f", riskLevel)
                 );
+                
+                log.error(
+                		  "[DEBUG] brandId={}, patentId={}, imageSim={}, textSim={}",
+                		  brand.getBrandId(),
+                		  patent.getPatentId(),
+                		  imageSimilarity,
+                		  textSimilarity
+                		);
+
             }
         }
     }
