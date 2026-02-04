@@ -93,26 +93,29 @@ public class SecurityConfig {
        CORS 설정
        ========================= */
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173"
-        ));
-
-        config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS"
-        ));
-
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+	public CorsConfigurationSource corsConfigurationSource() {
+	
+	CorsConfiguration config = new CorsConfiguration();
+	
+	// 👇 [수정] 배포된 EC2 주소를 리스트에 추가했습니다.
+	config.setAllowedOrigins(List.of(
+	        "http://localhost:3000",      // 로컬 개발용 (React)
+	        "http://localhost:5173",      // 로컬 개발용 (Vite)
+	        "http://43.202.167.232",      // [필수] EC2 프론트엔드 주소
+	        "http://43.202.167.232:80"    // [안전책] 80번 포트 명시
+	));
+	
+	config.setAllowedMethods(List.of(
+	        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+	));
+	
+	config.setAllowedHeaders(List.of("*"));
+	config.setAllowCredentials(true);
+	
+	UrlBasedCorsConfigurationSource source =
+	        new UrlBasedCorsConfigurationSource();
+	
+	source.registerCorsConfiguration("/**", config);
+	return source;
+	}
 }
