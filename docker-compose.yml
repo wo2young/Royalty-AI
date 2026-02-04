@@ -6,11 +6,15 @@ services:
     build: ./backend
     ports:
       - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FIREBASE_CONFIG_PATH=/app/firebase-key.json
+      - MYBATIS_MAPPER_LOCATIONS=classpath:mapper/**/*.xml
     env_file:
       - .env  # EC2의 .env 내용을 가져옴
     volumes:
       # EC2의 firebase 파일을 컨테이너 내부 /app 폴더로 연결
-      - ./firebase-service-account.json:/app/firebase-service-account.json
+      - ./firebase-service-account.json:/app/firebase-key.json
     depends_on:
       - ai-server
     restart: always

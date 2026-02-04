@@ -18,15 +18,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GptClient {
 
-    @Value("${openai.api.key}")
+    @Value("${OPENAI_API_KEY}") // 수정
     private String apiKey;
 
-    @Value("${openai.api.url}")
+    @Value("${OPENAI_API_URL}") // 수정
     private String apiUrl;
 
-    @Value("${openai.model}")
+    @Value("${OPENAI_MODEL}")   // 수정
     private String model;
-    
+
     @PostConstruct
     public void checkKey() {
         System.out.println("OPENAI KEY LOADED = " + apiKey.substring(0, 10));

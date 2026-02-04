@@ -18,7 +18,7 @@ public class DhGptClient {
     private final RestTemplate restTemplate = new RestTemplate(); // 빈으로 등록되어 있다면 주입받는 것을 권장
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${openai.api.key}") // application.properties에서 키 주입
+    @Value("${OPENAI_API_KEY}") // application.properties에서 키 주입
     private String apiKey;
 
     private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
