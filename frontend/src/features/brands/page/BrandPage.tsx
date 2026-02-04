@@ -12,10 +12,12 @@ import type { Brand } from "../types"
 import { EditBrandModal } from "../components/modal/EditBrandModal"
 import { BrandSkeleton } from "../components/skeleons/BrandSkeleton"
 import { useBrandFilter } from "../../../shared/hook/useBrandFilter"
+import { ConfirmAnalysisModal } from "../components/modal/ConfirmAnalysisModal"
 
 const ITEMS_PER_PAGE = 5
 
 export default function BrandsPage() {
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const { data: brands = [], isLoading, isError } = useBrands()
   const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
 
@@ -55,6 +57,7 @@ export default function BrandsPage() {
       {
         onSuccess: () => {
           setEditTarget(null)
+          setIsConfirmModalOpen(true)
         },
       }
     )
@@ -152,6 +155,11 @@ export default function BrandsPage() {
           isPending={isUpdatePending}
         />
       )}
+
+      <ConfirmAnalysisModal
+        open={isConfirmModalOpen}
+        onOpenChange={setIsConfirmModalOpen}
+      />
     </div>
   )
 }
