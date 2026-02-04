@@ -16,7 +16,7 @@ export function Header() {
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
             <img
-              src="./public/royalty.png"
+              src="/royalty.png"
               className="w-16 h-16 object-cover rounded-3xl"
               alt="Service Preview"
             />
