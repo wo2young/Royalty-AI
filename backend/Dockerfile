@@ -1,5 +1,5 @@
 # 1. Java 17 베이스 이미지
-FROM openjdk:17-jdk-slim
+FROM amazoncorretto:17
 
 # 2. 작업 폴더 설정
 WORKDIR /app
