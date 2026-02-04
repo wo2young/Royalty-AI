@@ -30,7 +30,7 @@
     <select id="findImageSimilarity" resultType="java.lang.Double">
         <![CDATA[
         SELECT
-            1 - (bl.image_vector <-> p.image_vector) AS similarity
+            1 - (bl.image_vector <-> p.image_vector) AS imageSimilarity
         FROM brand_logo bl
         JOIN patent p ON p.patent_id = #{patentId}
         WHERE bl.brand_id = #{brandId}
