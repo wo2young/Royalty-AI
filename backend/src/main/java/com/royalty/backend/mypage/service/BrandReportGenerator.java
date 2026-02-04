@@ -22,7 +22,7 @@ import java.util.List;
 @Component
 public class BrandReportGenerator {
 
-	/**
+    /**
      * PDF 생성 메인 메서드
      */
     public byte[] generate(BrandDetailDTO brand, BrandHistoryDTO latestHistory, 
@@ -53,18 +53,25 @@ public class BrandReportGenerator {
             // ==========================================
             // [Page 1] 표지 + AI 분석
             // ==========================================
-            addCoverInfo(document, bf, titleFont, bodyFont, brand, userId);
             
+            // 1. 표지 정보 (중복 제거 완료)
+            addCoverInfo(document, bf, titleFont, bodyFont, brand, userId);
             addEmptyLines(document, 3);
             
-            addAiAnalysisSection(document, bf, h1Font, h2Font, bodyFont, footerFont, textSim, imageSim);
+            // 2. AI 분석 결과 (이미지 비교 포함)
+            // 내 로고와 상대방(타겟) 로고 URL 준비
+            String myLogo = brand.getCurrentLogoPath();
+            String targetLogo = latestHistory.getTargetImageUrl(); // DTO에 추가된 필드 사용
+
+            addAiAnalysisSection(document, bf, h1Font, h2Font, bodyFont, footerFont, 
+                                 textSim, imageSim, myLogo, targetLogo);
 
             // ==========================================
-            // [Page 2] 변천사 그래프 + BI (간격 넓힘!)
+            // [Page 2] 변천사 그래프 + BI
             // ==========================================
             document.newPage();
 
-            // 1. 히스토리 섹션 텍스트
+            // 3. 히스토리 섹션 텍스트
             addTimelineText(document, h1Font, bodyFont);
             
             // 차트 위치 (상단 배치)
@@ -73,11 +80,10 @@ public class BrandReportGenerator {
             // 차트 그리기
             drawTimelineChart(writer.getDirectContent(), bf, document.left(), chartY, document.right() - document.left(), 180, historyList);
 
-            // [수정 포인트] 차트와 BI 사이 간격 대폭 추가 (15 -> 22)
-            // 이렇게 하면 3번 섹션이 훨씬 아래쪽에서 시작됩니다.
+            // 차트와 BI 사이 간격 (요청대로 넓게 설정)
             addEmptyLines(document, 22); 
             
-            // 2. BI 섹션 출력
+            // 4. BI 섹션 출력
             addBiSection(document, bf, h1Font, h2Font, bodyFont, footerFont, biData);
 
             document.close();
@@ -151,10 +157,11 @@ public class BrandReportGenerator {
     }
 
     // -----------------------------------------------------------
-    // 2. AI 분석 결과 (소제목 여백 추가됨)
+    // 2. AI 분석 결과 (이미지 비교 포함)
     // -----------------------------------------------------------
     private void addAiAnalysisSection(Document document, BaseFont bf, Font h1Font, Font h2Font, Font bodyFont, Font footerFont,
-                                      float textSim, float imageSim) throws DocumentException {
+                                      float textSim, float imageSim, 
+                                      String myLogoUrl, String targetLogoUrl) throws DocumentException {
 
         // 구분선
         LineSeparator line = new LineSeparator();
@@ -162,18 +169,44 @@ public class BrandReportGenerator {
         document.add(line);
         addEmptyLines(document, 1);
 
-        // [수정] 소제목과 줄 사이 간격 추가 (setSpacingAfter)
         Paragraph title = new Paragraph("1. 유사도 분석 결과", h1Font);
-        title.setSpacingAfter(8); 
+        title.setSpacingAfter(8);
         document.add(title);
         
-        // 얇은 줄 하나 더 그어서 강조 (선택 사항, 깔끔하게 하려면 생략 가능하지만 요청하신 '줄 사이 공간'을 위해 추가)
-        // document.add(new LineSeparator(0.5f, 100, Color.LIGHT_GRAY, Element.ALIGN_LEFT, -2));
-        // addEmptyLines(document, 1);
-
-        document.add(new Paragraph("기존 등록 상표들과의 텍스트 및 이미지 유사도를 분석한 수치입니다.", bodyFont));
+        document.add(new Paragraph("AI가 분석한 귀하의 상표와 가장 유사한 대상의 비교입니다.", bodyFont));
         addEmptyLines(document, 1);
 
+        // ============================================================
+        // [★ 핵심] 이미지 비교 테이블 (내 상표 vs 유사 상표)
+        // ============================================================
+        PdfPTable compareTable = new PdfPTable(3); // [내꺼] [VS] [상대꺼]
+        compareTable.setWidthPercentage(100);
+        compareTable.setWidths(new float[]{4.5f, 1f, 4.5f}); // 비율 설정
+        compareTable.setSpacingAfter(20);
+
+        // (1) 내 상표
+        PdfPCell myCell = createImageCell(myLogoUrl, "내 상표 (My Brand)", bodyFont);
+        
+        // (2) VS 텍스트
+        PdfPCell vsCell = new PdfPCell();
+        vsCell.setBorder(Rectangle.NO_BORDER);
+        vsCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        vsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        Paragraph vsP = new Paragraph("VS", new Font(bf, 14, Font.BOLD, Color.LIGHT_GRAY));
+        vsP.setAlignment(Element.ALIGN_CENTER);
+        vsCell.addElement(vsP);
+
+        // (3) 상대방 상표
+        PdfPCell targetCell = createImageCell(targetLogoUrl, "유사 대상 (Target)", bodyFont);
+
+        compareTable.addCell(myCell);
+        compareTable.addCell(vsCell);
+        compareTable.addCell(targetCell);
+
+        document.add(compareTable);
+        // ============================================================
+
+        // 기존 점수 테이블
         PdfPTable scoreTable = new PdfPTable(2);
         scoreTable.setWidthPercentage(100);
         scoreTable.setSpacingBefore(10);
@@ -184,6 +217,7 @@ public class BrandReportGenerator {
         
         document.add(scoreTable);
 
+        // 상세 지표 그래프
         document.add(new Paragraph("상세 지표 (낮을수록 안전)", h2Font));
         addEmptyLines(document, 1);
         
@@ -196,10 +230,47 @@ public class BrandReportGenerator {
     }
 
     // -----------------------------------------------------------
-    // 3. 타임라인 (Timeline) - 텍스트 부분만 (소제목 여백 추가됨)
+    // [Helper] 이미지 셀 생성 (중복 제거용)
+    // -----------------------------------------------------------
+    private PdfPCell createImageCell(String imageUrl, String label, Font font) {
+        PdfPCell cell = new PdfPCell();
+        cell.setBorder(Rectangle.BOX);
+        cell.setBorderColor(new Color(226, 232, 240)); // 연한 회색
+        cell.setPadding(10);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setFixedHeight(140); // 높이 고정
+
+        try {
+            if (imageUrl != null && !imageUrl.isBlank()) {
+                byte[] imgBytes = downloadUrlBytes(imageUrl, 3000, 5000);
+                Image img = Image.getInstance(imgBytes);
+                img.scaleToFit(120, 100); // 리사이징
+                img.setAlignment(Element.ALIGN_CENTER);
+                cell.addElement(img);
+            } else {
+                Paragraph p = new Paragraph("(이미지 없음)", font);
+                p.setAlignment(Element.ALIGN_CENTER);
+                cell.addElement(p);
+            }
+        } catch (Exception e) {
+            Paragraph p = new Paragraph("이미지 로드 실패", font);
+            p.setAlignment(Element.ALIGN_CENTER);
+            cell.addElement(p);
+        }
+
+        Paragraph title = new Paragraph(label, font);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingBefore(5);
+        cell.addElement(title);
+
+        return cell;
+    }
+
+    // -----------------------------------------------------------
+    // 3. 타임라인 (Timeline)
     // -----------------------------------------------------------
     private void addTimelineText(Document document, Font h1Font, Font bodyFont) throws DocumentException {
-        // [수정] 소제목과 줄 사이 간격 추가
         Paragraph title = new Paragraph("2. 히스토리 (유사도 변화)", h1Font);
         title.setSpacingAfter(8); 
         document.add(title);
@@ -213,12 +284,11 @@ public class BrandReportGenerator {
     }
 
     // -----------------------------------------------------------
-    // 4. BI (Brand Identity) - 통합됨 (소제목 여백 추가됨)
+    // 4. BI (Brand Identity)
     // -----------------------------------------------------------
     private void addBiSection(Document document, BaseFont bf, Font h1Font, Font h2Font, Font bodyFont, Font footerFont, 
                            BrandBiData bi) throws DocumentException {
                            
-        // [수정] 소제목과 줄 사이 간격 추가
         Paragraph title = new Paragraph("3. 브랜드 아이덴티티 (B.I)", h1Font);
         title.setSpacingAfter(8);
         document.add(title);

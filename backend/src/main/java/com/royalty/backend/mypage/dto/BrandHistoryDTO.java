@@ -23,4 +23,7 @@ public class BrandHistoryDTO {
     private String aiAnalysisSummary;
     private String aiDetailedReport;
     private String aiSolution;
+    
+ // [추가] 상대방(타겟) 상표 이미지 URL
+    private String targetImageUrl;
 }

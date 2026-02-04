@@ -16,8 +16,9 @@
         	patent_id   AS patentId,
         	trademark_name AS trademarkName
     	FROM patent
-    	WHERE created_at >= NOW() - INTERVAL '${minutes} minutes'
+    	WHERE created_at >= (NOW() AT TIME ZONE 'UTC') - INTERVAL '${minutes} minutes'
     	ORDER BY created_at DESC
+    	LIMIT 20
 	</select>
 
 </mapper>
