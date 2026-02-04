@@ -26,16 +26,15 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
+          timeout: 40s
+          command_timeout: 30m  # [수정됨] 타임아웃을 30분으로 연장
           script: |
             # 1. 프로젝트 폴더가 없으면 생성하고 이동
-            # -p 옵션: 상위 디렉토리까지 생성하며, 이미 존재하면 에러 없이 넘어감
             mkdir -p /home/ubuntu/Royalty-AI
             cd /home/ubuntu/Royalty-AI
 
             # 2. 깃허브에서 최신 코드 가져오기
-            # .git 폴더가 없으면(첫 배포면) Clone, 있으면 Pull
             if [ ! -d ".git" ]; then
-              # [주의] 뒤에 점(.)을 찍어야 현재 폴더에 파일이 풀립니다.
               git clone https://github.com/wo2young/Royalty-AI.git .
             else
               git pull origin main
