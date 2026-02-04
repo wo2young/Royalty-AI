@@ -182,7 +182,7 @@ export default function TrademarkAnalysisPage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <div className="space-y-4">
+                    <div className="space-y-4 translate-y-0 lg:-translate-y-12">
                       <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold">
                           분석 결과 ({results.length})
