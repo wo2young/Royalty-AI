@@ -11,6 +11,7 @@ import type { Analysis, AnalysisResult, SaveBrandResponse } from "../types"
 import { useAuth } from "@/shared/auth/AuthContext"
 import { Button } from "@/shared/components/ui/button"
 import { toast } from "sonner"
+import { useLocation } from "react-router-dom"
 
 export type AnalysisFormValues = Analysis
 
@@ -20,7 +21,11 @@ const TABS = [
 ]
 
 export default function TrademarkAnalysisPage() {
-  const [activeTab, setActiveTab] = useState("both")
+  const location = useLocation()
+
+  const [activeTab, setActiveTab] = useState(
+    location.state?.activeTab || "both"
+  )
   const [analyzed, setAnalyzed] = useState(false)
   const [results, setResults] = useState<AnalysisResult[]>([])
 
@@ -182,7 +187,7 @@ export default function TrademarkAnalysisPage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <div className="space-y-4">
+                    <div className="space-y-4 translate-y-0 lg:-translate-y-12">
                       <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold">
                           분석 결과 ({results.length})

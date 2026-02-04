@@ -10,7 +10,7 @@ function App() {
         richColors
         closeButton
         toastOptions={{
-          style: { borderRadius: "12px" },
+          style: { borderRadius: "12px", marginTop: "50px" },
         }}
       />
       <RouterProvider router={router} />

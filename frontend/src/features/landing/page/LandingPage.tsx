@@ -194,7 +194,7 @@ export default function LandingPage() {
             {...fadeIn}
           >
             <img
-              src="/preview.jpg"
+              src="/public/preview.jpg"
               className="w-full h-full object-cover p-1 rounded-3xl"
               alt="Service Preview"
             />
