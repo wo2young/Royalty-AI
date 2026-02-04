@@ -3,7 +3,7 @@ import type { AxiosError, InternalAxiosRequestConfig } from "axios"
 import { authStorage } from "@/shared/auth/authStorage"
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

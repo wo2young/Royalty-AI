@@ -1,0 +1,43 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+    # 👇 [핵심 변경] 아래 파일/폴더가 변경될 때만 AWS 배포가 실행됩니다.
+    paths:
+      - 'backend/**'         # 백엔드 코드 변경 시
+      - 'ai_model/**'        # AI 모델 코드 변경 시 (폴더명 확인 필수!)
+      - 'docker-compose.yml' # 설정 파일 변경 시
+      - '.github/workflows/deploy.yml' # 이 파일 자체가 바뀔 때
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # 1. 프로젝트 폴더로 이동
+            cd /home/ubuntu/Royalty-AI
+
+            # 2. 깃허브에서 최신 코드 당겨오기
+            # [수정] 아래 주소를 우영 님의 실제 레포지토리 주소로 바꿔야 합니다!
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/wo2young/Royalty-AI.git .
+            else
+              git pull origin main
+            fi
+
+            # 3. 도커로 배포 다시 하기
+            sudo docker compose down
+            sudo docker compose up -d --build
+            sudo docker image prune -f
