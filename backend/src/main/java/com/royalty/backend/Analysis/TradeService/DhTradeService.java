@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.royalty.backend.Analysis.TradeDTO.DhBrandSaveRequestDto;
 import com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto;
 import com.royalty.backend.Analysis.TradeMapper.DhTradeMapper;
+import com.royalty.backend.mypage.dto.BrandHistoryDTO;
 import com.royalty.backend.mypage.service.S3Service;
 
 import lombok.RequiredArgsConstructor;
@@ -141,7 +142,8 @@ public class DhTradeService {
     }
 
     /**
-     * [기능 2] 내 브랜드 기본 저장
+     * [기능 2] 내 브랜드 기본 저장 (수정됨: 벡터 생성 및 저장 로직 추가)
+     * - AI 서버에 요청하여 text_vector, image_vector를 추출 후 함께 저장
      */
     @Transactional
     public int saveMyBrandBasic(DhBrandSaveRequestDto dto, Long userId) throws IOException {
@@ -151,6 +153,7 @@ public class DhTradeService {
         saveDto.setCategory(dto.getCategory());
         saveDto.setAiSummary(dto.getAiSummary());
 
+        // 1. 로고 이미지 경로 설정 (파일 업로드 or URL 사용)
         if (dto.getLogoFile() != null && !dto.getLogoFile().isEmpty()) {
             String s3Url = s3Service.upload(dto.getLogoFile());
             saveDto.setLogoPath(s3Url);
@@ -158,8 +161,26 @@ public class DhTradeService {
             saveDto.setLogoPath(dto.getLogoPath());
         }
 
+        // ---------------------------------------------------------------
+        // [핵심 추가] 2. 저장 전에 AI 서버에서 벡터(Embedding) 추출하기
+        // ---------------------------------------------------------------
+        try {
+            // 브랜드 이름과 이미지(파일 or URL)를 넘겨서 벡터를 받아옴
+            Map<String, String> vectors = getVectorsFromAi(dto.getBrandName(), dto.getLogoFile(), saveDto.getLogoPath());
+            
+            if (vectors != null) {
+                saveDto.setTextVector(vectors.get("text_vector"));   // brand 테이블용
+                saveDto.setImageVector(vectors.get("image_vector")); // brand_logo 테이블용
+                System.out.println(">>> [Vector] 벡터 생성 성공");
+            }
+        } catch (Exception e) {
+            System.err.println(">>> [Vector Error] 벡터 생성 실패 (저장은 계속 진행): " + e.getMessage());
+            // 벡터 실패해도 저장은 되어야 한다면 catch만 하고 진행
+        }
+
+        // 3. DB 저장 (Mapper XML에서 #{textVector}, #{imageVector}를 매핑해줘야 함)
         if (dto.getBrandId() == 0) {
-            tradeMapper.insertBrand(saveDto); 
+            tradeMapper.insertBrand(saveDto); // brand 테이블 저장 (text_vector 포함)
         } else {
             saveDto.setBrandId(dto.getBrandId());
             tradeMapper.updateBrand(saveDto);
@@ -167,7 +188,7 @@ public class DhTradeService {
 
         if (saveDto.getLogoPath() != null && !saveDto.getLogoPath().isBlank()) {
             if (dto.getBrandId() == 0) {
-                tradeMapper.insertBrandLogo(saveDto);
+                tradeMapper.insertBrandLogo(saveDto); // brand_logo 테이블 저장 (image_vector 포함)
             } else {
                 tradeMapper.updateBrandLogo(saveDto);
             }
@@ -241,14 +262,45 @@ public class DhTradeService {
     }
 
     /**
-     * [기능 4] 분석 결과 저장
-     * - 수정됨: 버전 관리 (Max + 1) 로직 추가
+     * [기능 4] 분석 결과 저장 (수정됨: 중복 저장 방지 로직 추가)
      */
     @Transactional
     public void saveAnalysisResult(DhTrademarkSearchResponseDto dto, Long userId) {
         if (dto == null) throw new IllegalArgumentException("저장할 데이터가 없습니다.");
         if (userId == null) throw new IllegalArgumentException("로그인이 필요합니다.");
-        if (dto.getBrandId() <= 0) throw new IllegalArgumentException("brandId가 유효하지 않습니다. 브랜드 등록 후 저장하세요.");
+        if (dto.getBrandId() <= 0) throw new IllegalArgumentException("brandId가 유효하지 않습니다.");
+
+        // =================================================================
+        // 🛑 [NEW] 중복 저장 방지 (이름과 이미지가 모두 같으면 저장 스킵)
+        // =================================================================
+        
+        // 1. 현재 DB에 저장된 브랜드 이름 가져오기
+        // (주의: BrandMapper에 selectBrandDetail 같은 메서드가 있어야 함. 없으면 간단한 조회 쿼리 필요)
+        String currentBrandName = tradeMapper.getBrandNameById(dto.getBrandId()); 
+        
+        // 2. 가장 최신 히스토리(이미지) 가져오기
+        List<BrandHistoryDTO> historyList = tradeMapper.selectBrandHistory(dto.getBrandId());
+        
+        if (currentBrandName != null && !historyList.isEmpty()) {
+            BrandHistoryDTO latest = historyList.get(0); // 0번이 최신 (Order by DESC)
+
+            // 비교 (Null Safe)
+            boolean isNameSame = currentBrandName.equals(dto.getTrademarkName());
+            
+            // 이미지 비교: 둘 다 null이거나, 주소가 같으면 같다고 판단
+            String newLogo = dto.getLogoPath();
+            String oldLogo = latest.getImagePath();
+            boolean isImageSame = (newLogo == null && oldLogo == null) || 
+                                  (newLogo != null && newLogo.equals(oldLogo));
+
+            if (isNameSame && isImageSame) {
+                System.out.println(">>> [Skip] 변경 사항(이름/이미지)이 없어 저장을 건너뜁니다.");
+                return; // ★ 여기서 함수 강제 종료 (저장 안 함)
+            }
+        }
+        // =================================================================
+
+
         if (dto.getAiSummary() == null || dto.getAiSummary().isBlank()) {
             throw new IllegalArgumentException("aiSummary가 없습니다. 분석 후 저장하세요.");
         }
@@ -256,7 +308,7 @@ public class DhTradeService {
             throw new IllegalArgumentException("analysisDetail이 없습니다. 분석 후 저장하세요.");
         }
 
-        // [핵심 해결 2] 버전 업 로직 추가 (Mapper 메서드 필요)
+        // 버전 업 로직 (기존 유지)
         Integer maxVersion = tradeMapper.findMaxVersionByBrandId(dto.getBrandId());
         int nextVersion = (maxVersion == null) ? 1 : maxVersion + 1;
         dto.setVersion(nextVersion);
@@ -271,6 +323,64 @@ public class DhTradeService {
             System.err.println("분석 저장 중 에러: " + e.getMessage());
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    // -------------------------------------------------------
+    // [New Helper] AI 서버에 요청하여 벡터값 추출
+    // -------------------------------------------------------
+    private Map<String, String> getVectorsFromAi(String text, MultipartFile file, String url) {
+        // AI 서버의 벡터 생성 전용 엔드포인트 (확인 필요: 없으면 만들어달라고 해야 함)
+        // 만약 search 엔드포인트가 벡터도 같이 준다면 그걸 써도 됨.
+        // 여기서는 "/api/v1/vectorize" 라는 엔드포인트가 있다고 가정함.
+        String aiVectorUrl = "http://localhost:8000/api/v1/vectorize"; 
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+            if (text != null && !text.isBlank()) {
+                body.add("text", text);
+            }
+
+            // 이미지 처리 (파일 우선, 없으면 URL 다운로드)
+            if (file != null && !file.isEmpty()) {
+                body.add("file", new ByteArrayResource(file.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return file.getOriginalFilename();
+                    }
+                });
+            } else if (url != null && !url.isBlank()) {
+                byte[] imgBytes = downloadImageBytes(url);
+                if (imgBytes != null) {
+                    body.add("file", new ByteArrayResource(imgBytes) {
+                        @Override
+                        public String getFilename() {
+                            return "s3_image.png";
+                        }
+                    });
+                }
+            }
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            
+            // 응답 받기 (JSON 형태: {"text_vector": [...], "image_vector": [...]})
+            Map<String, Object> response = restTemplate.postForObject(aiVectorUrl, requestEntity, Map.class);
+
+            if (response == null || !"success".equals(response.get("status"))) {
+                return null;
+            }
+
+            // 결과를 String(JSON)으로 변환해서 리턴
+            String textVecStr = objectMapper.writeValueAsString(response.get("text_vector"));
+            String imgVecStr = objectMapper.writeValueAsString(response.get("image_vector"));
+
+            return Map.of("text_vector", textVecStr, "image_vector", imgVecStr);
+
+        } catch (Exception e) {
+            System.err.println("벡터 추출 중 에러: " + e.getMessage());
+            return null;
         }
     }
 

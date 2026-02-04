@@ -9,13 +9,13 @@
             user_id,
             brand_name,
             category,
-            description
-        ) VALUES (
+            description,
+            text_vector  ) VALUES (
             #{userId},
             #{trademarkName},
             #{category},
-            #{aiSummary}
-        )
+            #{aiSummary},
+            #{textVector}::vector  )
     </insert>
 
     <update id="updateBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
@@ -23,19 +23,19 @@
         SET
             brand_name = #{trademarkName},
             category = #{category},
-            description = #{aiSummary}
-        WHERE brand_id = #{brandId}
+            description = #{aiSummary},
+            text_vector = #{textVector}::vector  WHERE brand_id = #{brandId}
     </update>
 
     <insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
         INSERT INTO brand_logo (
             brand_id,
             image_path,
-            created_at
+            image_vector,  created_at
         ) VALUES (
             #{brandId},
             #{logoPath},
-            CURRENT_TIMESTAMP
+            #{imageVector}::vector,  CURRENT_TIMESTAMP
         )
     </insert>
 
@@ -43,7 +43,7 @@
         UPDATE brand_logo
         SET
             image_path = #{logoPath},
-            created_at = CURRENT_TIMESTAMP
+            image_vector = #{imageVector}::vector,  created_at = CURRENT_TIMESTAMP
         WHERE brand_id = #{brandId}
     </update>
 
@@ -55,8 +55,8 @@
             ai_summary,
             analysis_detail,
             text_similarity,
-            image_similarity
-        ) VALUES (
+            image_similarity,
+            version  ) VALUES (
             #{brandId},
             #{logoPath},
             <choose>
@@ -66,8 +66,8 @@
             #{aiSummary},
             #{analysisDetail},
             #{textSimilarity},
-            #{imageSimilarity}
-        )
+            #{imageSimilarity},
+            #{version}  )
     </insert>
 
     <update id="updateBrandDescription">
@@ -111,10 +111,33 @@
     </select>
     
     <select id="findMaxVersionByBrandId" resultType="Integer">
-	    SELECT MAX(version)
-	    FROM brand_logo_history
-	    WHERE brand_id = #{brandId}
+        SELECT MAX(version)
+        FROM brand_logo_history
+        WHERE brand_id = #{brandId}
+    </select>
+    
+    <select id="getBrandNameById" resultType="string">
+	    SELECT brand_name FROM brand WHERE brand_id = #{brandId}
 	</select>
+	
+	<select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+	    SELECT 
+	        h.version, 
+	        h.image_path AS imagePath, 
+	        h.image_similarity AS imageSimilarity, 
+	        h.text_similarity AS textSimilarity, 
+	        h.created_at AS createdAt,
+	        h.ai_summary AS aiSummary,      
+	        h.analysis_detail AS analysisDetail, 
+	        h.patent_id AS patentId,
+	        p.image_url AS targetImageUrl,
+	        p.trademark_name AS targetName
+	        
+	    FROM brand_logo_history h
+	    LEFT JOIN patent p ON h.patent_id = p.patent_id
+	    WHERE h.brand_id = #{brandId}
+	    ORDER BY h.created_at DESC  
+    </select>
 
 </mapper>
 

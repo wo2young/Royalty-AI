@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto;
+import com.royalty.backend.mypage.dto.BrandHistoryDTO;
 
 @Mapper
 public interface DhTradeMapper {
@@ -28,6 +29,10 @@ public interface DhTradeMapper {
     void updateBrandDescription(@Param("brandId") int brandId, @Param("aiSummary") String aiSummary);
     
     Integer findMaxVersionByBrandId(int brandId);
+    
+    String getBrandNameById(int brandId);
+    
+    List<BrandHistoryDTO> selectBrandHistory(int brandId);
 }
 
 /*
