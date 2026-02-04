@@ -99,7 +99,7 @@ export default function TrademarkAnalysisPage() {
         )}
       >
         <div className="mb-10">
-          <h1 className="text-balance text-4xl md:text-5xl font-bold tracking-tight mb-3">
+          <h1 className="text-balance text-3xl font-bold tracking-tight mb-3">
             상표 분석
           </h1>
           <p className="text-lg text-muted-foreground">
