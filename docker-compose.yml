@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ☕ 스프링 부트 (백엔드)
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env  # EC2의 .env 내용을 가져옴
+    volumes:
+      # EC2의 firebase 파일을 컨테이너 내부 /app 폴더로 연결
+      - ./firebase-service-account.json:/app/firebase-service-account.json
+    depends_on:
+      - ai-server
+    restart: always
+
+  # 🐍 AI 서버
+  ai-server:
+    build: ./ai_model
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env  # 같은 .env 사용
+    restart: always
+
+
+    # 🖥️ 프론트엔드 (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # EC2의 .env에 있는 값을 Dockerfile로 전달
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_KAKAO_CLIENT_ID: ${VITE_KAKAO_CLIENT_ID}
+        VITE_KAKAO_REDIRECT_URI: ${VITE_KAKAO_REDIRECT_URI}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID}
+        VITE_FIREBASE_VAPID_KEY: ${VITE_FIREBASE_VAPID_KEY}
+    ports:
+      - "80:80"  # 웹 브라우저 기본 포트(80)로 접속
+    restart: always

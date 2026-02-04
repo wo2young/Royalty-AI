@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.mypage.mapper.MyPageMapper">
+
+    <select id="selectMyBrands" resultType="com.royalty.backend.mypage.dto.BrandDTO">
+        SELECT 
+            b.brand_id                AS brandId, 
+            b.brand_name              AS brandName, 
+            b.category,
+            b.is_notification_enabled AS isNotificationEnabled,
+            b.created_at              AS createdAt,
+            l.image_path              AS logoPath
+        FROM brand b
+        LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="selectBrandDetail" resultType="com.royalty.backend.mypage.dto.BrandDetailDTO">
+        SELECT 
+            b.brand_id, 
+            b.brand_name, 
+            b.category,
+            b.description,
+            b.is_notification_enabled,
+            b.created_at,
+            l.image_path AS currentLogoPath
+        FROM brand b
+        LEFT JOIN brand_logo l ON b.brand_id = l.brand_id
+        WHERE b.brand_id = #{brandId} AND b.user_id = #{userId}
+    </select>
+
+    <insert id="insertBrand" useGeneratedKeys="true" keyProperty="brandId">
+        INSERT INTO brand (
+            user_id, 
+            brand_name, 
+            category, 
+            description, 
+            is_notification_enabled
+        ) VALUES (
+            #{userId}, 
+            #{brandName}, 
+            #{category}, 
+            #{description},
+            false
+        )
+    </insert>
+
+    <insert id="insertBrandLogo">
+        INSERT INTO brand_logo (brand_id, image_path)
+        VALUES (#{brandId}, #{imagePath})
+    </insert>
+
+    <update id="updateBrand" parameterType="com.royalty.backend.mypage.dto.BrandDTO">
+        UPDATE brand
+        <set>
+            <if test="brandName != null">brand_name = #{brandName},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="description != null">description = #{description}</if>
+        </set>
+        WHERE brand_id = #{brandId} AND user_id = #{userId}
+    </update>
+    
+    <update id="updateBrandLogo">
+        UPDATE brand_logo
+        SET 
+            image_path = #{imagePath}
+        WHERE brand_id = #{brandId}
+    </update>
+
+    <update id="updateNotificationStatus">
+        UPDATE brand
+        SET is_notification_enabled = #{isEnabled}
+        WHERE brand_id = #{brandId} AND user_id = #{userId}
+    </update>
+
+    <delete id="deleteBrand">
+        DELETE FROM brand 
+        WHERE brand_id = #{brandId} AND user_id = #{userId}
+    </delete>
+
+	<select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+	    SELECT 
+	        h.version, 
+	        h.image_path AS imagePath, 
+	        h.image_similarity AS imageSimilarity, 
+	        h.text_similarity AS textSimilarity, 
+	        h.created_at AS createdAt,
+	        h.ai_summary AS aiSummary,      
+	        h.analysis_detail AS analysisDetail, 
+	        h.patent_id AS patentId,
+	        
+	        -- [추가됨] 특허 테이블과 조인해서 상대방 이미지 URL 가져오기
+	        p.image_url AS targetImageUrl,
+	        p.trademark_name AS targetName
+	        
+	    FROM brand_logo_history h
+	    LEFT JOIN patent p ON h.patent_id = p.patent_id  -- patent_id로 연결
+	    WHERE h.brand_id = #{brandId}
+	    ORDER BY h.created_at DESC
+	</select>
+
+    <select id="selectBookmarks" resultType="com.royalty.backend.mypage.dto.BookmarkDTO">
+        SELECT 
+            b.bookmark_id        AS bookmarkId, 
+            p.patent_id          AS patentId, 
+            p.trademark_name     AS trademarkName, 
+            p.image_url          AS imageUrl, 
+            p.application_number AS applicationNumber, 
+            p.category, 
+            p.applicant, 
+            p.status, 
+            b.created_at         AS createdAt,
+            b.is_bookmarked      AS isBookmarked
+        FROM bookmark b
+        JOIN patent p ON b.patent_id = p.patent_id
+        WHERE b.user_id = #{userId}
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="countBrandLogo" resultType="int">
+        SELECT COUNT(*)
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <select id="selectCurrentLogoPath" resultType="string">
+        SELECT image_path
+        FROM brand_logo
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <insert id="insertBrandHistory">
+        INSERT INTO brand_logo_history (
+            brand_id, 
+            image_path, 
+            version, 
+            created_at
+        ) VALUES (
+            #{brandId}, 
+            #{imagePath}, 
+            #{description}, 
+            NOW()
+        )
+    </insert>
+
+    <select id="selectBrandIdentityJson" resultType="string">
+        SELECT identity_payload 
+        FROM brand_identity 
+        WHERE brand_id = #{brandId}
+    </select>
+
+    <insert id="insertReport">
+        INSERT INTO report (brand_id, file_path, created_at)
+        VALUES (#{brandId}, #{filePath}, NOW())
+    </insert>   
+
+</mapper>

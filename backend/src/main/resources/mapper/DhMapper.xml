@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.Analysis.TradeMapper.DhTradeMapper">
+
+    <insert id="insertBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto"
+            useGeneratedKeys="true" keyProperty="brandId" keyColumn="brand_id">
+        INSERT INTO brand (
+            user_id,
+            brand_name,
+            category,
+            description,
+            text_vector  ) VALUES (
+            #{userId},
+            #{trademarkName},
+            #{category},
+            #{aiSummary},
+            #{textVector}::vector  )
+    </insert>
+
+    <update id="updateBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        UPDATE brand
+        SET
+            brand_name = #{trademarkName},
+            category = #{category},
+            description = #{aiSummary},
+            text_vector = #{textVector}::vector  WHERE brand_id = #{brandId}
+    </update>
+
+    <insert id="insertBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        INSERT INTO brand_logo (
+            brand_id,
+            image_path,
+            image_vector,  created_at
+        ) VALUES (
+            #{brandId},
+            #{logoPath},
+            #{imageVector}::vector,  CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateBrandLogo" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        UPDATE brand_logo
+        SET
+            image_path = #{logoPath},
+            image_vector = #{imageVector}::vector,  created_at = CURRENT_TIMESTAMP
+        WHERE brand_id = #{brandId}
+    </update>
+
+    <insert id="saveMyBrand" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        INSERT INTO brand_logo_history (
+            brand_id,
+            image_path,
+            patent_id,
+            ai_summary,
+            analysis_detail,
+            text_similarity,
+            image_similarity,
+            version  ) VALUES (
+            #{brandId},
+            #{logoPath},
+            <choose>
+                <when test="patentId == 0">NULL</when>
+                <otherwise>#{patentId}</otherwise>
+            </choose>,
+            #{aiSummary},
+            #{analysisDetail},
+            #{textSimilarity},
+            #{imageSimilarity},
+            #{version}  )
+    </insert>
+
+    <update id="updateBrandDescription">
+        UPDATE brand
+        SET description = #{aiSummary}
+        WHERE brand_id = #{brandId}
+    </update>
+
+    <!-- 신규: brand_analysis insert -->
+    <insert id="insertBrandAnalysis" parameterType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        INSERT INTO brand_analysis (
+            brand_id,
+            image_score,
+            text_score,
+            risk_level,
+            created_at
+        ) VALUES (
+            #{brandId},
+            #{imageSimilarity},
+            #{textSimilarity},
+            #{riskLevel},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <select id="getApplicantByPatentId" resultType="string">
+        SELECT applicant FROM patent WHERE patent_id = #{patentId}
+    </select>
+
+    <select id="searchSimilarTrademarks" resultType="com.royalty.backend.Analysis.TradeDTO.DhTrademarkSearchResponseDto">
+        SELECT
+            patent_id AS patentId,
+            trademark_name AS trademarkName,
+            applicant AS applicant,
+            category,
+            registered_date AS registeredDate,
+            (1 - (text_vector <![CDATA[ <=> ]]> #{inputVector}::vector)) * 100 AS textSimilarity
+        FROM patent
+        ORDER BY text_vector <![CDATA[ <=> ]]> #{inputVector}::vector ASC
+        LIMIT 10
+    </select>
+    
+    <select id="findMaxVersionByBrandId" resultType="Integer">
+        SELECT MAX(version)
+        FROM brand_logo_history
+        WHERE brand_id = #{brandId}
+    </select>
+    
+    <select id="getBrandNameById" resultType="string">
+	    SELECT brand_name FROM brand WHERE brand_id = #{brandId}
+	</select>
+	
+	<select id="selectBrandHistory" resultType="com.royalty.backend.mypage.dto.BrandHistoryDTO">
+	    SELECT 
+	        h.version, 
+	        h.image_path AS imagePath, 
+	        h.image_similarity AS imageSimilarity, 
+	        h.text_similarity AS textSimilarity, 
+	        h.created_at AS createdAt,
+	        h.ai_summary AS aiSummary,      
+	        h.analysis_detail AS analysisDetail, 
+	        h.patent_id AS patentId,
+	        p.image_url AS targetImageUrl,
+	        p.trademark_name AS targetName
+	        
+	    FROM brand_logo_history h
+	    LEFT JOIN patent p ON h.patent_id = p.patent_id
+	    WHERE h.brand_id = #{brandId}
+	    ORDER BY h.created_at DESC  
+    </select>
+
+</mapper>
+
+<!--
+[전체 정리]
+- insertBrandAnalysis 추가: /save에서 brand_analysis 테이블에 점수와 risk_level 저장
+- /analyze에서 저장하지 않으므로, brand_logo_history/brand_analysis는 /save에서만 생성됨
+-->

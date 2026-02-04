@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.royalty.backend.detection.mapper.PatentMapper">
+
+    <select id="countRecentPatents" resultType="int">
+        SELECT COUNT(*)
+        FROM patent
+        WHERE created_at >= NOW() - INTERVAL '${minutes} minutes'
+    </select>
+    
+    <select id="findRecentPatents" resultType="com.royalty.backend.detection.domain.PatentVO">
+    	SELECT
+        	patent_id   AS patentId,
+        	trademark_name AS trademarkName
+    	FROM patent
+    	WHERE created_at >= (NOW() AT TIME ZONE 'UTC') - INTERVAL '${minutes} minutes'
+    	ORDER BY created_at DESC
+    	LIMIT 20
+	</select>
+
+</mapper>

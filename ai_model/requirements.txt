@@ -1,0 +1,23 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+pillow
+numpy
+psycopg2-binary
+requests
+fastapi
+uvicorn
+pydantic
+sentence-transformers
+python-multipart
+scikit-learn
+apscheduler
+python-Levenshtein
+jamo
+dotenv
+
+# 아래 2개 추가를 추천합니다!
+python-multipart
+xmltodict
+boto3
+

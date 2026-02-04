@@ -1,0 +1,122 @@
+import { useToggleBookmark } from "@/features/bookmark/api/bookmark.queries"
+import type { Trademark } from "../types"
+import BookmarkButton from "@/features/bookmark/components/BookmarkButton"
+import { Building2 } from "lucide-react"
+
+interface TrademarkTableProps {
+  trademarks: Trademark[]
+}
+
+export function TrademarkTable({ trademarks }: TrademarkTableProps) {
+  const { mutate: toggleBookmark, isPending } = useToggleBookmark()
+  return (
+    <div className="w-full">
+      {/* PC 뷰 */}
+      <div className="hidden md:block border border-border rounded-lg overflow-hidden bg-background">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-muted/50 border-b border-border">
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">
+                로고
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm">
+                상표명 / 출원번호
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-48">
+                출원인
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground text-sm w-18">
+                북마크
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {trademarks.map((trademark) => (
+              <tr
+                key={trademark.patentId}
+                className="border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors"
+              >
+                <td className="py-3 px-4">
+                  {trademark.imageUrl ? (
+                    <img
+                      src={trademark.imageUrl}
+                      alt={trademark.trademarkName}
+                      className="w-10 h-10 rounded-lg object-cover border border-border"
+                    />
+                  ) : (
+                    <Building2 className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                  )}
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex flex-col">
+                    <span className="text-primary hover:underline cursor-pointer font-medium text-sm">
+                      {trademark.trademarkName}
+                    </span>
+                    <span className="text-xs text-muted-foreground mt-1">
+                      {trademark.applicationNumber}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 px-4 text-muted-foreground text-sm">
+                  {trademark.applicant}
+                </td>
+                <td className="py-3 px-4">
+                  <BookmarkButton
+                    isBookmarked={trademark.bookmarked}
+                    isLoading={isPending}
+                    onToggle={() =>
+                      toggleBookmark({
+                        id: String(trademark.patentId),
+                        isBookmarked: trademark.bookmarked,
+                      })
+                    }
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 모바일 뷰 */}
+      <div className="grid grid-cols-2 gap-3 md:hidden">
+        {trademarks.map((trademark) => (
+          <div
+            key={trademark.patentId}
+            className="relative border border-border rounded-lg p-3 bg-card flex flex-col items-center text-center gap-2"
+          >
+            <BookmarkButton
+              isBookmarked={trademark.bookmarked}
+              isLoading={isPending}
+              onToggle={() =>
+                toggleBookmark({
+                  id: String(trademark.patentId),
+                  isBookmarked: trademark.bookmarked,
+                })
+              }
+            />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center font-medium border border-border">
+              {trademark.imageUrl ? (
+                <img
+                  src={trademark.imageUrl}
+                  alt={trademark.trademarkName}
+                  className="w-10 h-10 rounded-lg object-cover border border-border"
+                />
+              ) : (
+                <Building2 className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+              )}
+            </div>
+            <div className="w-full">
+              <h3 className="font-semibold text-xs truncate">
+                {trademark.trademarkName}
+              </h3>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {trademark.applicant}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
