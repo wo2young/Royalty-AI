@@ -13,18 +13,18 @@ import {
   useUpdateBrand,
 } from "../api/brand.queries"
 import { BrandBITab } from "../components/brand-detail/BrandBITab"
+import { ConfirmAnalysisModal } from "../components/modal/ConfirmAnalysisModal"
 
 export default function BrandDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState("history")
-  const { mutate: toggleNotify } = useToggleNotification()
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const brandId = Number(id)
 
+  const { mutate: toggleNotify } = useToggleNotification()
   const { data: brandData, isLoading, isError } = useBrandDetail(Number(id))
   const { mutate: updateBrand, isPending: isUpdatePending } = useUpdateBrand()
   const { data: biData, isLoading: isBiLoading } = useBrandIdentity(brandId)
-
-  console.log(brandData)
 
   if (isLoading)
     return <div className="p-20 text-center">브랜드 정보를 불러오는 중...</div>
@@ -67,7 +67,7 @@ export default function BrandDetailPage() {
       { brandId, formData },
       {
         onSuccess: () => {
-          console.log("수정 완료")
+          setIsConfirmModalOpen(true)
         },
         onError: () => alert("수정 중 오류가 발생했습니다."),
       }
@@ -132,6 +132,11 @@ export default function BrandDetailPage() {
           </AnimatePresence>
         </div>
       </main>
+
+      <ConfirmAnalysisModal
+        open={isConfirmModalOpen}
+        onOpenChange={setIsConfirmModalOpen}
+      />
     </div>
   )
 }

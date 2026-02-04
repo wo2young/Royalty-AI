@@ -151,10 +151,11 @@ export function AddBrandModal({ open, onOpenChange }: AddBrandModalProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="전체">전체</SelectItem>
                           <SelectItem value="IT · 플랫폼">
                             IT · 플랫폼
                           </SelectItem>
-                          <SelectItem value="커머스">커머스</SelectItem>
+                          <SelectItem value="기타">기타</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

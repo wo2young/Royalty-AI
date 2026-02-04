@@ -205,7 +205,8 @@ function AnalysisItem({ trademark }: { trademark: AnalysisResult }) {
                     "저장 중..."
                   ) : (
                     <>
-                      <Save className="h-4 w-4" />이 분석 리포트 저장하기
+                      <Save className="h-4 w-4" />
+                      분석 리포트 저장하기
                     </>
                   )}
                 </Button>

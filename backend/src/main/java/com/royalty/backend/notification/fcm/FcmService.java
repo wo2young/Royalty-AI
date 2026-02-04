@@ -19,15 +19,29 @@ public class FcmService {
             String body
     ) {
         try {
-            Message message = Message.builder()
-                    .setToken(fcmToken)
-                    .setNotification(
-                            Notification.builder()
-                                    .setTitle(title)
-                                    .setBody(body)
-                                    .build()
-                    )
-                    .build();
+        	Message message = Message.builder()
+        		    .setToken(fcmToken)
+
+        		    // ✅ data 메시지 (지연 방지 핵심)
+        		    .putData("title", title)
+        		    .putData("body", body)
+
+        		    // ✅ Web Push 강제 즉시 전달
+        		    .setWebpushConfig(
+        		        com.google.firebase.messaging.WebpushConfig.builder()
+        		            .putHeader("Urgency", "high")
+        		            .build()
+        		    )
+
+        		    // ✅ Android도 HIGH priority
+        		    .setAndroidConfig(
+        		        com.google.firebase.messaging.AndroidConfig.builder()
+        		            .setPriority(com.google.firebase.messaging.AndroidConfig.Priority.HIGH)
+        		            .build()
+        		    )
+
+        		    .build();
+
 
             String response = FirebaseMessaging.getInstance().send(message);
             log.info("[FCM] 전송 성공 response={}", response);
