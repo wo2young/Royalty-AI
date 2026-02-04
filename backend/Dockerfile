@@ -1,5 +1,5 @@
 # 1. Java 17 베이스 이미지
-FROM amazoncorretto:17
+FROM eclipse-temurin:17-jdk
 
 # 2. 작업 폴더 설정
 WORKDIR /app
