@@ -164,7 +164,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Bookmark & List Section */}
+      {/* 북마크 리스트 섹션 */}
       <section className="w-full py-20">
         <div className="container px-4 mx-auto flex flex-col md:flex-row items-center gap-12">
           <motion.div className="flex-1" {...fadeIn}>
@@ -177,10 +177,10 @@ export default function LandingPage() {
             </h2>
             <ul className="space-y-4">
               {[
-                "관심 있는 상표 실시간 북마크 기능",
+                "관심 있는 상표 북마크 기능",
                 "북마크 전용 페이지에서 모아보기",
                 "카테고리별 상표 리스트 필터링",
-                "AI 기반 추천 상표 리스트 제공",
+                "특허청 상표 리스트 제공",
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-primary" />
@@ -190,13 +190,14 @@ export default function LandingPage() {
             </ul>
           </motion.div>
           <motion.div
-            className="flex-1 w-full bg-slate-200 aspect-video rounded-3xl overflow-hidden shadow-2xl relative"
+            className="flex-1 w-full aspect-video rounded-3xl overflow-hidden shadow-2xl relative"
             {...fadeIn}
           >
-            {/* 여기에 서비스 실제 화면 캡쳐 이미지나 일러스트를 배치하면 좋습니다 */}
-            <div className="absolute inset-0 flex items-center justify-center text-slate-400 italic">
-              Trademark List Preview Image
-            </div>
+            <img
+              src="./public/preview.jpg"
+              className="w-full h-full object-cover p-1 rounded-3xl"
+              alt="Service Preview"
+            />
           </motion.div>
         </div>
       </section>
