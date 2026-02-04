@@ -77,8 +77,6 @@ export default function TrademarkAnalysisPage() {
       toast.error("상호명을 입력하거나 분석할 브랜드를 선택해주세요")
       return
     }
-    setAnalyzed(false)
-    setResults([])
 
     runAnalysis(data, {
       onSuccess: (response) => {
