@@ -10,6 +10,11 @@ COPY . .
 # 🔑 환경변수 주입 (Build-time Injection)
 # ==========================================
 # 1. Docker Compose에서 넘어온 값을 받음 (ARG)
+
+# 👇 [추가] 가장 중요한 API URL이 빠져있었습니다!
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 ARG VITE_KAKAO_CLIENT_ID
 ARG VITE_KAKAO_REDIRECT_URI
 ARG VITE_FIREBASE_API_KEY

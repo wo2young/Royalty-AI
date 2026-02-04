@@ -15,4 +15,4 @@ RUN ./mvnw clean package -DskipTests
 
 # 6. 실행 (파일명이 뭐든 target 폴더 안의 jar를 실행)
 # [꿀팁] 버전을 매번 수정하기 귀찮으니 *.jar로 찾아서 실행합니다.
-CMD ["java", "-jar", "target/royalty-backend-0.0.1-SNAPSHOT.jar"]
+CMD ["sh", "-c", "java -jar target/*.jar"]

@@ -17,7 +17,7 @@ services:
 
   # 🐍 AI 서버
   ai-server:
-    build: ./Analysis
+    build: ./ai_model
     ports:
       - "8000:8000"
     env_file:
