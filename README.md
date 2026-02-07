@@ -1,4 +1,4 @@
-# 🦁 Royalty - AI 기반 상표 분석 플랫폼
+# Royalty - AI 기반 상표 분석 플랫폼
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
@@ -17,7 +17,7 @@
 
 ---
 
-## 📋 목차
+## 목차
 
 - [배포 주소](#-배포-주소)
 - [프로젝트 소개](#-프로젝트-소개)
@@ -32,7 +32,7 @@
 
 ---
 
-## 🎯 프로젝트 소개
+## 프로젝트 소개
 
 **Royalty**는 AI 기술을 활용하여 상표의 유사도를 분석하고, 브랜드 아이덴티티를 생성하는 플랫폼입니다.
 MobileNet과 Ko-SBERT 모델을 사용한 벡터 기반 검색으로 기존 상표 데이터베이스와의 유사도를 분석하며,
@@ -40,48 +40,48 @@ OpenAI API를 통해 상세한 브랜드 분석 리포트를 제공합니다.
 
 ### 핵심 가치
 
-- 🔍 **정확한 유사도 분석**: 이미지와 텍스트를 벡터화하여 정밀한 상표 유사도 검색
-- 🤖 **AI 기반 인사이트**: OpenAI를 활용한 상표 분석 및 브랜드 아이덴티티 생성
-- 🔔 **실시간 알림**: 유사 상표 출원 시 실시간 알림 제공
-- 📊 **데이터 시각화**: 상표 변천사 및 분석 결과를 직관적으로 시각화
+- **정확한 유사도 분석**: 이미지와 텍스트를 벡터화하여 정밀한 상표 유사도 검색
+- **AI 기반 인사이트**: OpenAI를 활용한 상표 분석 및 브랜드 아이덴티티 생성
+- **실시간 알림**: 유사 상표 출원 시 실시간 알림 제공
+- **데이터 시각화**: 상표 변천사 및 분석 결과를 직관적으로 시각화
 
 ---
 
-## ✨ 주요 기능
+## 주요 기능
 
-### 1. 🔎 상표 분석 (Hybrid Search)
+### 1. 상표 분석 (Hybrid Search)
 
 - **이미지 벡터화**: MobileNet을 사용한 로고 이미지 특징 추출
 - **텍스트 벡터화**: Ko-SBERT를 사용한 상표명 임베딩
 - **하이브리드 검색**: 이미지와 텍스트를 결합한 정밀 유사도 분석
 - **AI 상세 분석**: OpenAI 기반 대응 전략 및 위험도 분석
 
-### 2. 📜 상표 리스트
+### 2. 상표 리스트
 
 - 등록된 상표 검색 및 필터링
 - 카테고리별 상표 분류
 - 상세 정보 조회
 
-### 3. 👤 마이페이지
+### 3. 마이페이지
 
 - **나의 브랜드 관리**: 등록한 브랜드 관리 및 모니터링
 - **북마크**: 관심 상표 저장 및 관리
 - **상표 변천사**: Recharts를 활용한 브랜드 분석 이력 시각화
 - **AI 분석 저장**: 과거 분석 결과 조회
 
-### 4. 🎨 종합 분석
+### 4. 종합 분석
 
 - 상호명과 로고를 기반으로 한 브랜드 아이덴티티 생성
 - 종합 분석 리포트
 - PDF 형식 다운로드 지원
 
-### 5. 🔔 실시간 알림
+### 5. 실시간 알림
 
 - Firebase Cloud Messaging을 통한 푸시 알림
 - 유사 상표 출원 시 자동 알림
 - 알림 설정 관리
 
-### 6. 🔐 인증 및 회원 관리
+### 6. 인증 및 회원 관리
 
 - 이메일 인증 (Google)
 - 카카오 소셜 로그인
@@ -204,7 +204,7 @@ OpenAI API를 통해 상세한 브랜드 분석 리포트를 제공합니다.
 
 ---
 
-## 🚀 시작하기
+## 시작하기
 
 ### 필수 요구사항
 
@@ -350,11 +350,11 @@ ai-server/
 
 ---
 
-## 📡 API 문서
+## API 문서
 
 ### Backend API Endpoints
 
-#### 🔐 인증 (AUTH)
+#### 인증 (AUTH)
 
 ```http
 POST   /api/auth/signup          # 회원가입
@@ -366,7 +366,7 @@ PUT    /api/userh/password       # 비밀번호 변경
 DELETE /api/userh/me             # 회원 탈퇴
 ```
 
-#### 🔍 분석 (ANALYSIS)
+#### 분석 (ANALYSIS)
 
 ```http
 POST   /analysis/run             # 분석 실행 (로고 + 상호명 유사도 검사)
@@ -375,21 +375,21 @@ POST   /api/analysis/save-basic  # 내 브랜드 저장
 GET    /analysis/report/{brandId} # PDF 리포트 다운로드
 ```
 
-#### 🎨 브랜드 아이덴티티 (IDENTITY)
+#### 브랜드 아이덴티티 (IDENTITY)
 
 ```http
 GET    /api/identity/{brandId}           # 현재 BI 조회
 POST   /api/identity/{brandId}/analyze   # BI 분석 버튼 (입력 변경 시 BI 생성/갱신)
 ```
 
-#### 📜 상표 탐색 (TRADEMARK)
+#### 상표 탐색 (TRADEMARK)
 
 ```http
 GET    /trademark/list           # 상표 리스트 조회 (필터/정렬/카테고리)
 GET    /trademark/{id}           # 상표 상세 조회
 ```
 
-#### ⭐ 북마크 (BOOKMARK)
+#### 북마크 (BOOKMARK)
 
 ```http
 POST   /trademark/{id}/bookmark  # 상표 북마크 추가
@@ -397,7 +397,7 @@ DELETE /trademark/{id}/bookmark  # 상표 북마크 제거
 GET    /mypage/bookmark          # 내가 북마크한 상표 목록
 ```
 
-#### 🏢 내 브랜드 (MY BRAND)
+#### 내 브랜드 (MY BRAND)
 
 ```http
 GET    /mypage                              # 마이페이지
@@ -408,7 +408,7 @@ GET    /mypage/brand/{brandId}              # 브랜드 상세 조회
 PATCH  /mypage/brand/{brandId}/notification # 알림 설정
 ```
 
-#### 🔔 알림 (NOTIFICATION)
+#### 알림 (NOTIFICATION)
 
 ```http
 GET    /users/notification        # 내 알림 목록 조회
@@ -416,13 +416,13 @@ POST   /users/notification/read   # 개별 알림 읽음 처리
 POST   /users/notification/token  # FCM 토큰 등록/갱신
 ```
 
-#### 📄 리포트 (REPORT)
+#### 리포트 (REPORT)
 
 ```http
 GET    /mypage/brand/{brandId}/report # 리포트 PDF 다운로드
 ```
 
-#### 📁 파일 업로드 (FILE)
+#### 파일 업로드 (FILE)
 
 ```http
 POST   /file/upload/logo          # 로고 이미지 업로드
@@ -494,7 +494,7 @@ Parameters:
 
 ---
 
-## ❓ FAQ
+## FAQ
 
 ### Q1. 로그인이 안 되고 '존재하지 않는 사용자'라고 표시됩니다.
 
@@ -519,14 +519,6 @@ docker-compose up -d --build
 
 ---
 
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ### 코드 스타일
 
 - **Frontend**: Prettier + ESLint 설정 준수
@@ -541,7 +533,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-## 👥 팀원
+## 팀원
 
 ### Frontend
 
@@ -561,10 +553,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - 김우영
 
 ---
-
-## 📞 문의
-
-프로젝트 관련 문의사항은 이슈를 생성해주세요.
 
 ---
 
