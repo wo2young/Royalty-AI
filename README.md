@@ -494,31 +494,6 @@ Parameters:
 
 ---
 
-## FAQ
-
-### Q1. 로그인이 안 되고 '존재하지 않는 사용자'라고 표시됩니다.
-
-**A.** DB가 AWS RDS로 이전되면서 기존 로컬 데이터가 초기화되었습니다. 새로 회원가입을 진행해주세요.
-
-### Q2. AI 검색이 작동하지 않습니다.
-
-**A.** Docker 컨테이너가 최신 설정으로 실행되고 있는지 확인하세요:
-
-```bash
-docker-compose down
-docker-compose up -d --build
-```
-
-### Q3. 벡터 검색이 느립니다.
-
-**A.** PostgreSQL의 pgvector 인덱스가 제대로 생성되어 있는지 확인하세요. 데이터가 많을 경우 IVFFlat 인덱스 생성을 권장합니다.
-
-### Q4. S3 이미지 업로드가 실패합니다.
-
-**A.** AWS 자격 증명이 올바르게 설정되었는지 확인하세요. `.env` 파일의 `AWS_ACCESS_KEY_ID`와 `AWS_SECRET_ACCESS_KEY`를 점검하세요.
-
----
-
 ### 코드 스타일
 
 - **Frontend**: Prettier + ESLint 설정 준수
